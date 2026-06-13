@@ -108,6 +108,7 @@
         dom.quizModeExam = document.getElementById('quizModeExam');
         dom.quizModeWeak = document.getElementById('quizModeWeak');
         dom.quizModeKahoot = document.getElementById('quizModeKahoot');
+        dom.kahootCardSubtitle = document.getElementById('kahootCardSubtitle');
     }
 
     // ---- Persistence ----
@@ -214,8 +215,12 @@
                 state.progress[m.id] = {
                     sectionsCompleted: [],
                     quizScores: [],
+                    recapCompleted: false,
                     lastAccessed: null
                 };
+            } else if (state.progress[m.id].recapCompleted === undefined) {
+                // migrate older saved state
+                state.progress[m.id].recapCompleted = false;
             }
         });
 
@@ -577,6 +582,12 @@
         dom.quizActive.classList.add('hidden');
         dom.quizResults.classList.add('hidden');
         dom.reviewSection.classList.add('hidden');
+
+        // Refresh Moodle-Recap completion counter on the Kahoot card
+        if (dom.kahootCardSubtitle) {
+            const { totalRecaps, doneRecaps } = recapStats();
+            dom.kahootCardSubtitle.textContent = `${doneRecaps} / ${totalRecaps} Recaps abgeschlossen`;
+        }
     }
 
     function startQuiz(mode, moduleId) {
@@ -626,6 +637,15 @@
                 showToast('Keine Kahoot-Fragen geladen.', 'info');
                 return;
             }
+        } else if (mode === 'kahootModule') {
+            const kahoot = state.kahootQuestions.find(k => k.moduleId === moduleId);
+            if (kahoot && kahoot.questions) {
+                questions = shuffleArray(kahoot.questions.map(q => ({ ...q, moduleId, isKahoot: true })));
+            }
+            if (questions.length === 0) {
+                showToast('Für dieses Modul gibt es keinen Recap.', 'info');
+                return;
+            }
         }
 
         if (questions.length === 0) {
@@ -644,7 +664,11 @@
             answered: false
         };
 
+        // Make sure the quiz view itself is visible (e.g. when launched from
+        // the "Modul-Quiz starten" button inside the Learn view).
+        switchView('quiz');
         dom.quizSelection.classList.add('hidden');
+        dom.quizModuleSelect.classList.add('hidden');
         dom.quizActive.classList.remove('hidden');
         dom.quizResults.classList.add('hidden');
 
@@ -822,6 +846,18 @@
                 state.progress[quiz.moduleId].quizScores = [];
             }
             state.progress[quiz.moduleId].quizScores.push(pct);
+        }
+
+        // Mark Moodle/Kahoot recap as completed
+        if (quiz.mode === 'kahootModule' && quiz.moduleId && state.progress[quiz.moduleId]) {
+            state.progress[quiz.moduleId].recapCompleted = true;
+        } else if (quiz.mode === 'kahoot') {
+            // "Alle Recaps" durchgespielt -> alle Module mit Recap als erledigt markieren
+            state.kahootQuestions.forEach(k => {
+                if (k.questions && k.questions.length && state.progress[k.moduleId]) {
+                    state.progress[k.moduleId].recapCompleted = true;
+                }
+            });
         }
 
         saveState();
@@ -1106,12 +1142,15 @@
         // Quiz modes
         dom.quizModeModule.addEventListener('click', () => {
             dom.quizModuleSelect.classList.remove('hidden');
-            renderQuizModuleSelect();
+            renderQuizModuleSelect('module');
         });
 
         dom.quizModeExam.addEventListener('click', () => startQuiz('exam'));
         dom.quizModeWeak.addEventListener('click', () => startQuiz('weak'));
-        dom.quizModeKahoot.addEventListener('click', () => startQuiz('kahoot'));
+        dom.quizModeKahoot.addEventListener('click', () => {
+            dom.quizModuleSelect.classList.remove('hidden');
+            renderQuizModuleSelect('kahoot');
+        });
 
         // Quiz controls
         dom.quizSubmit.addEventListener('click', submitAnswer);
@@ -1156,22 +1195,58 @@
         });
     }
 
-    function renderQuizModuleSelect() {
+    // Count of completed Moodle/Kahoot recaps and how many exist.
+    function recapStats() {
+        let totalRecaps = 0, doneRecaps = 0;
+        state.modules.forEach(m => {
+            const kahoot = state.kahootQuestions.find(k => k.moduleId === m.id);
+            if (kahoot && kahoot.questions && kahoot.questions.length) {
+                totalRecaps++;
+                if (state.progress[m.id] && state.progress[m.id].recapCompleted) doneRecaps++;
+            }
+        });
+        return { totalRecaps, doneRecaps };
+    }
+
+    function renderQuizModuleSelect(mode) {
+        mode = mode || 'module';
+        const heading = document.getElementById('quizModuleSelectTitle');
+
+        if (mode === 'kahoot') {
+            const { totalRecaps, doneRecaps } = recapStats();
+            if (heading) heading.textContent = `Moodle-Recap wählen – ${doneRecaps} / ${totalRecaps} abgeschlossen`;
+        } else {
+            if (heading) heading.textContent = 'Modul auswählen';
+        }
+
         dom.quizModuleGrid.innerHTML = '';
         state.modules.forEach(m => {
             const qCount = (m.quiz ? m.quiz.length : 0);
             const kahoot = state.kahootQuestions.find(k => k.moduleId === m.id);
             const kCount = kahoot ? kahoot.questions.length : 0;
-            const total = qCount + kCount;
-            if (total === 0) return;
 
             const btn = document.createElement('button');
             btn.className = 'quiz-module-btn';
-            btn.innerHTML = `
-                <strong>${escapeHtml(m.title)}</strong><br>
-                <small style="color: var(--text-tertiary);">${total} Fragen</small>
-            `;
-            btn.addEventListener('click', () => startQuiz('module', m.id));
+
+            if (mode === 'kahoot') {
+                if (kCount === 0) return; // module has no recap
+                const done = state.progress[m.id] && state.progress[m.id].recapCompleted;
+                btn.classList.toggle('recap-done', !!done);
+                btn.innerHTML = `
+                    <span class="recap-status">${done ? '✓' : '○'}</span>
+                    <strong>${escapeHtml(m.title)}</strong><br>
+                    <small style="color: var(--text-tertiary);">${kCount} Recap-Fragen${done ? ' · abgeschlossen' : ''}</small>
+                `;
+                btn.addEventListener('click', () => startQuiz('kahootModule', m.id));
+            } else {
+                const total = qCount + kCount;
+                if (total === 0) return;
+                btn.innerHTML = `
+                    <strong>${escapeHtml(m.title)}</strong><br>
+                    <small style="color: var(--text-tertiary);">${total} Fragen</small>
+                `;
+                btn.addEventListener('click', () => startQuiz('module', m.id));
+            }
             dom.quizModuleGrid.appendChild(btn);
         });
     }
