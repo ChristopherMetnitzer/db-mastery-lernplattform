@@ -1,0 +1,33 @@
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editors / IDEs
+.vscode/
+.idea/
+*.swp
+*~
+
+# Python (PDF extraction tooling)
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Logs / temp
+*.log
+/tmp/
+
+# Extracted source material (regenerated from the original PDFs; not for redistribution)
+extracted/
+extracted_modules/
+*.original.md
+
+# Raw lecture-text extracts + internal build artifacts (copyright; not shipped)
+module7_main.txt
+module8_main.txt
+m7_exercise_*.txt
+extract_pdfs.py
+AUTHORING_SPEC.md
+EXAM_TOPICS.md

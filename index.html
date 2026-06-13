@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Interaktive Lernplattform für die Datenbanken-Vorlesung. Lerne alle Module, Core Competencies und bereite dich optimal auf die Prüfung vor.">
+    <title>DB Mastery – Datenbanken Lernplattform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Ambient Background -->
+    <div class="ambient-bg">
+        <div class="ambient-orb ambient-orb-1"></div>
+        <div class="ambient-orb ambient-orb-2"></div>
+        <div class="ambient-orb ambient-orb-3"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="main-nav" id="mainNav">
+        <div class="nav-brand">
+            <div class="nav-logo">
+                <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                    <rect x="2" y="6" width="24" height="4" rx="2" fill="url(#grad1)"/>
+                    <rect x="2" y="12" width="24" height="4" rx="2" fill="url(#grad2)"/>
+                    <rect x="2" y="18" width="24" height="4" rx="2" fill="url(#grad3)"/>
+                    <circle cx="22" cy="8" r="2.5" fill="#60a5fa"/>
+                    <circle cx="22" cy="14" r="2.5" fill="#a78bfa"/>
+                    <circle cx="22" cy="20" r="2.5" fill="#f472b6"/>
+                    <defs>
+                        <linearGradient id="grad1" x1="2" y1="8" x2="26" y2="8"><stop stop-color="#3b82f6"/><stop offset="1" stop-color="#60a5fa"/></linearGradient>
+                        <linearGradient id="grad2" x1="2" y1="14" x2="26" y2="14"><stop stop-color="#8b5cf6"/><stop offset="1" stop-color="#a78bfa"/></linearGradient>
+                        <linearGradient id="grad3" x1="2" y1="20" x2="26" y2="20"><stop stop-color="#ec4899"/><stop offset="1" stop-color="#f472b6"/></linearGradient>
+                    </defs>
+                </svg>
+            </div>
+            <span class="nav-title">DB Mastery</span>
+        </div>
+        <div class="nav-links">
+            <button class="nav-link active" data-view="dashboard" id="navDashboard">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                Dashboard
+            </button>
+            <button class="nav-link" data-view="learn" id="navLearn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                Lernen
+            </button>
+            <button class="nav-link" data-view="quiz" id="navQuiz">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                Prüfung
+            </button>
+            <button class="nav-link" data-view="progress" id="navProgress">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                Fortschritt
+            </button>
+        </div>
+        <div class="nav-actions">
+            <button class="theme-toggle" id="themeToggle" aria-label="Theme wechseln">
+                <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="main-content" id="mainContent">
+        <!-- Dashboard View -->
+        <section class="view active" id="dashboardView">
+            <div class="dashboard-header">
+                <div class="welcome-section">
+                    <h1 class="welcome-title">Willkommen bei <span class="gradient-text">DB Mastery</span></h1>
+                    <p class="welcome-subtitle">Deine interaktive Lernplattform für die Datenbanken-Prüfung. Lerne systematisch, teste dein Wissen und erziele eine 1,0.</p>
+                </div>
+                <div class="stats-row" id="statsRow">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="--accent: #3b82f6;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="statModules">10</span>
+                            <span class="stat-label">Module</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="--accent: #8b5cf6;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="statCompleted">0%</span>
+                            <span class="stat-label">Abgeschlossen</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="--accent: #ec4899;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="statQuizScore">–</span>
+                            <span class="stat-label">Quiz-Ø</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="--accent: #10b981;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="statStreak">0</span>
+                            <span class="stat-label">Tage-Streak</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Module Grid -->
+            <div class="section-header">
+                <h2>Module</h2>
+                <p>Wähle ein Modul zum Lernen oder Testen</p>
+            </div>
+            <div class="module-grid" id="moduleGrid">
+                <!-- Dynamically populated -->
+            </div>
+        </section>
+
+        <!-- Learn View -->
+        <section class="view" id="learnView">
+            <div class="learn-layout">
+                <aside class="learn-sidebar" id="learnSidebar">
+                    <div class="sidebar-header">
+                        <button class="back-btn" id="backToDashboard">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+                            Zurück
+                        </button>
+                        <h3 class="sidebar-title" id="sidebarModuleTitle">Module</h3>
+                    </div>
+                    <div class="sidebar-sections" id="sidebarSections">
+                        <!-- Dynamically populated -->
+                    </div>
+                    <div class="sidebar-footer">
+                        <button class="btn btn-primary btn-quiz" id="startModuleQuiz">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                            Modul-Quiz starten
+                        </button>
+                    </div>
+                </aside>
+                <div class="learn-content" id="learnContent">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Quiz View -->
+        <section class="view" id="quizView">
+            <div class="quiz-container" id="quizContainer">
+                <!-- Quiz Selection -->
+                <div class="quiz-selection" id="quizSelection">
+                    <div class="quiz-selection-header">
+                        <h2>Prüfungsvorbereitung</h2>
+                        <p>Wähle einen Modus um dein Wissen zu testen</p>
+                    </div>
+                    <div class="quiz-modes">
+                        <button class="quiz-mode-card" id="quizModeModule">
+                            <div class="quiz-mode-icon" style="--accent: #3b82f6;">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                            </div>
+                            <h3>Modul-Quiz</h3>
+                            <p>Teste ein einzelnes Modul gezielt</p>
+                        </button>
+                        <button class="quiz-mode-card" id="quizModeExam">
+                            <div class="quiz-mode-icon" style="--accent: #8b5cf6;">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                            </div>
+                            <h3>Prüfungssimulation</h3>
+                            <p>Alle Module, zufällige Reihenfolge, mit Timer</p>
+                        </button>
+                        <button class="quiz-mode-card" id="quizModeWeak">
+                            <div class="quiz-mode-icon" style="--accent: #f59e0b;">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                            </div>
+                            <h3>Schwachstellen</h3>
+                            <p>Fokus auf falsch beantwortete Fragen</p>
+                        </button>
+                        <button class="quiz-mode-card" id="quizModeKahoot">
+                            <div class="quiz-mode-icon" style="--accent: #ec4899;">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                            </div>
+                            <h3>Kahoot Recaps</h3>
+                            <p>Original Kahoot-Fragen aus der Vorlesung</p>
+                        </button>
+                    </div>
+                    <!-- Module selector for module quiz -->
+                    <div class="quiz-module-select hidden" id="quizModuleSelect">
+                        <h3>Modul auswählen</h3>
+                        <div class="quiz-module-grid" id="quizModuleGrid">
+                            <!-- Dynamically populated -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Quiz -->
+                <div class="quiz-active hidden" id="quizActive">
+                    <div class="quiz-header">
+                        <div class="quiz-progress-bar">
+                            <div class="quiz-progress-fill" id="quizProgressFill"></div>
+                        </div>
+                        <div class="quiz-meta">
+                            <span class="quiz-counter" id="quizCounter">Frage 1 / 10</span>
+                            <span class="quiz-timer" id="quizTimer">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                <span id="quizTimerValue">--:--</span>
+                            </span>
+                            <button class="quiz-exit" id="quizExit">Beenden</button>
+                        </div>
+                    </div>
+                    <div class="quiz-question-area">
+                        <div class="quiz-question-card" id="quizQuestionCard">
+                            <div class="quiz-question-type" id="quizQuestionType">Multiple Choice</div>
+                            <h3 class="quiz-question-text" id="quizQuestionText"></h3>
+                            <div class="quiz-options" id="quizOptions">
+                                <!-- Dynamically populated -->
+                            </div>
+                            <div class="quiz-explanation hidden" id="quizExplanation">
+                                <div class="explanation-icon"></div>
+                                <p id="quizExplanationText"></p>
+                            </div>
+                            <div class="quiz-actions">
+                                <button class="btn btn-primary hidden" id="quizSubmit">Antwort prüfen</button>
+                                <button class="btn btn-primary hidden" id="quizNext">Nächste Frage</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quiz Results -->
+                <div class="quiz-results hidden" id="quizResults">
+                    <div class="results-card">
+                        <div class="results-score-circle">
+                            <svg viewBox="0 0 120 120">
+                                <circle cx="60" cy="60" r="54" fill="none" stroke="var(--surface-3)" stroke-width="8"/>
+                                <circle cx="60" cy="60" r="54" fill="none" stroke="url(#resultGrad)" stroke-width="8" stroke-linecap="round" stroke-dasharray="339.3" stroke-dashoffset="339.3" id="resultCircle" transform="rotate(-90 60 60)"/>
+                                <defs><linearGradient id="resultGrad"><stop stop-color="#3b82f6"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs>
+                            </svg>
+                            <span class="results-score-value" id="resultScoreValue">0%</span>
+                        </div>
+                        <h2 class="results-title" id="resultTitle">Ergebnis</h2>
+                        <p class="results-subtitle" id="resultSubtitle"></p>
+                        <div class="results-stats">
+                            <div class="result-stat correct">
+                                <span class="result-stat-value" id="resultCorrect">0</span>
+                                <span class="result-stat-label">Richtig</span>
+                            </div>
+                            <div class="result-stat wrong">
+                                <span class="result-stat-value" id="resultWrong">0</span>
+                                <span class="result-stat-label">Falsch</span>
+                            </div>
+                            <div class="result-stat total">
+                                <span class="result-stat-value" id="resultTotal">0</span>
+                                <span class="result-stat-label">Gesamt</span>
+                            </div>
+                        </div>
+                        <div class="results-actions">
+                            <button class="btn btn-primary" id="resultRetry">Wiederholen</button>
+                            <button class="btn btn-secondary" id="resultReview">Antworten ansehen</button>
+                            <button class="btn btn-secondary" id="resultBack">Zurück</button>
+                        </div>
+                    </div>
+                    <!-- Review Section -->
+                    <div class="review-section hidden" id="reviewSection">
+                        <h3>Antworten-Übersicht</h3>
+                        <div class="review-list" id="reviewList">
+                            <!-- Dynamically populated -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Progress View -->
+        <section class="view" id="progressView">
+            <div class="progress-container">
+                <div class="progress-header">
+                    <h2>Dein Lernfortschritt</h2>
+                    <p>Verfolge deinen Weg zur 1,0</p>
+                </div>
+                <div class="progress-overview" id="progressOverview">
+                    <div class="progress-chart-card">
+                        <h3>Gesamtfortschritt</h3>
+                        <div class="overall-progress-ring">
+                            <svg viewBox="0 0 160 160">
+                                <circle cx="80" cy="80" r="70" fill="none" stroke="var(--surface-3)" stroke-width="10"/>
+                                <circle cx="80" cy="80" r="70" fill="none" stroke="url(#progressGrad)" stroke-width="10" stroke-linecap="round" stroke-dasharray="439.8" stroke-dashoffset="439.8" id="overallProgressCircle" transform="rotate(-90 80 80)"/>
+                                <defs><linearGradient id="progressGrad"><stop stop-color="#3b82f6"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs>
+                            </svg>
+                            <div class="progress-ring-text">
+                                <span class="progress-ring-value" id="overallProgressValue">0%</span>
+                                <span class="progress-ring-label">Gesamt</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="progress-chart-card">
+                        <h3>Prüfungsbereitschaft</h3>
+                        <div class="readiness-meter" id="readinessMeter">
+                            <div class="readiness-bar">
+                                <div class="readiness-fill" id="readinessFill"></div>
+                            </div>
+                            <div class="readiness-labels">
+                                <span>Anfänger</span>
+                                <span>Grundlagen</span>
+                                <span>Fortgeschritten</span>
+                                <span>Prüfungsbereit</span>
+                            </div>
+                            <p class="readiness-tip" id="readinessTip">Beginne mit dem Lernen, um deinen Fortschritt zu sehen.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="progress-modules" id="progressModules">
+                    <h3>Module im Detail</h3>
+                    <div class="progress-module-list" id="progressModuleList">
+                        <!-- Dynamically populated -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>

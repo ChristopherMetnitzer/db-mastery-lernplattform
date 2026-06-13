@@ -1,0 +1,458 @@
+{
+  "modules": [
+    {
+      "id": "module-9",
+      "title": "Database Connectivity & Web Technologies",
+      "description": "Wie Applikationen über standardisierte Connectivity-APIs (ODBC, JDBC, OLE-DB, ADO.NET) und Web-to-Database-Middleware mit Datenbanken kommunizieren - inklusive Client/Server-Schichten, zustandsloser Web-Architektur und XML/JSON-Datenaustausch.",
+      "coreCompetencies": [
+        "Den Zweck und die drei Schichten standardisierter Database-Connectivity-Software (Data / Middle / Top Layer) im Client/Server-Konzept erklären",
+        "Die Connectivity-APIs ODBC, DAO, RDO, OLE-DB, ADO.NET und JDBC nach Funktion, Hersteller und Einsatzgebiet unterscheiden (Exam Q27)",
+        "Eine Connectivity-Architektur anhand ihrer Schichten/Treiber als ODBC, OLE-DB, ADO.NET oder JDBC identifizieren (Exam Q28)",
+        "Native SQL Connectivity gegen Universal Data Access (UDA) abwägen und Vendor Lock-In begründen",
+        "Die zustandslose Web-to-Database-Architektur (Browser -> Web Server -> Middleware -> DBMS) und die Rolle von CGI vs. API beschreiben",
+        "Die Funktionen eines Web Application Servers (Session-Management, Connection Pooling, Sicherheit) benennen",
+        "XML (DTD, XSD, XSLT) und JSON als plattformübergreifende Austauschformate analysieren und gegeneinander abgrenzen",
+        "Das Prinzip von Disconnected Data Sets (ADO.NET DataSet) zur Skalierung von Web-Applikationen anwenden"
+      ],
+      "sections": [
+        {
+          "title": "Warum Connectivity? Datenbank trifft Web",
+          "content": "## Database vs. Web\n\nEine Datenbank ist das zentrale Repository für geschäftskritische Daten. Wettbewerbsfähig ist ein Unternehmen aber nur, wenn diese Daten *jederzeit, überall und in verschiedenen Formaten* verfügbar sind. Das Internet hat den Geschäftsbetrieb fundamental verändert: Transaktionen, Buchungen und Auskünfte laufen heute online.\n\n**Database Connectivity** bezeichnet die Mechanismen, mit denen Anwendungsprogramme eine Verbindung zu Daten-Repositories aufbauen und mit ihnen kommunizieren. Das DBMS agiert dabei als *Intermediär* zwischen den rohen Daten und den Applikationen.\n\nWichtige Rahmenbedingungen:\n- Connectivity-Software unterstützt **SQL** als standardisierte Datenmanipulationssprache.\n- Sie arbeitet in einer **Client/Server-Architektur**, die Aufgaben auf mehrere Schichten verteilt.\n- Daten können lokal oder verteilt (distributed) gespeichert sein.\n- **Cloud-Services** und **Database-as-a-Service (DBaaS)** ermöglichen schnelle Skalierung und kosteneffizientes Deployment.\n\nDie **Interconnectivity** zwischen Applikationen wird stark durch **XML** erleichtert - der Lingua Franca des plattformübergreifenden Datenaustauschs.",
+          "keyTerms": [
+            { "term": "Database Connectivity", "definition": "Mechanismen, mit denen Anwendungsprogramme eine Verbindung zu Daten-Repositories herstellen und kommunizieren - typischerweise via SQL über eine Client/Server-Architektur." },
+            { "term": "Database-as-a-Service (DBaaS)", "definition": "Cloud-basiertes Modell, bei dem die Datenbank als Dienst bezogen wird, was schnelles Deployment und Skalierbarkeit ohne eigene Infrastruktur erlaubt." }
+          ]
+        },
+        {
+          "title": "Die 3 Schichten der Connectivity-Software (Client/Server)",
+          "content": "## Layers of Database Connectivity Software\n\nIm Client/Server-Konzept wird die Applikation in **verbundene Schichten (Layers)** zerlegt. Die Connectivity-Software besteht aus genau **drei Schichten** - ein beliebter Kahoot/Prüfungs-Klassiker:\n\n```diagram:Connectivity Software - 3 Schichten (Client/Server)\n┌──────────────────────────────────────────────┐\n│  TOP LAYER                                     │\n│  Schnittstelle zu externen Apps via APIs       │\n├──────────────────────────────────────────────┤\n│  MIDDLE LAYER                                  │\n│  Verwaltet Connectivity + Datentransformation  │\n├──────────────────────────────────────────────┤\n│  DATA LAYER                                    │\n│  Schnittstelle zum Daten-Repository (DBMS)     │\n└──────────────────────────────────────────────┘\n```\n\n- **Data Layer:** Schnittstelle zum eigentlichen Daten-Repository (Oracle, SQL Server, MySQL, NoSQL ...).\n- **Middle Layer:** Verwaltet die Connectivity und die *Datentransformation* (z.B. vom nativen Format in ein einheitliches Recordset).\n- **Top Layer:** Stellt über **APIs** die Schnittstelle zu externen Applikationen bereit.\n\n**Prüfungsfalle:** Die korrekte Antwort lautet **Data, Middle, Top** - NICHT 'Data, Connectivity, Top' oder 'Data, Transformation, Application'. Die Connectivity-Software (Middleware) ist die Schnittstelle zwischen Anwendungsprogramm und Datenbank; sie ersetzt das DBMS *nicht*.",
+          "keyTerms": [
+            { "term": "Data / Middle / Top Layer", "definition": "Die drei Schichten der Database-Connectivity-Software: Data Layer (Repository-Zugriff), Middle Layer (Connectivity + Transformation), Top Layer (API für externe Apps)." },
+            { "term": "Middleware", "definition": "Software, die als Schnittstelle zwischen Anwendungsprogramm und Datenbank fungiert; unterstützt mehrere Datenquellen gleichzeitig. Sie ersetzt das DBMS nicht." }
+          ],
+          "examples": [
+            "Kahoot: 'Which layers comprise the Database Connectivity Software?' -> Data, Middle, Top.",
+            "Kahoot: 'What is the main role of middleware?' -> To act as an interface between an application program and a database."
+          ]
+        },
+        {
+          "title": "Native SQL Connectivity & der Weg zu UDA",
+          "content": "## Native SQL Connectivity\n\nDatenbankhersteller liefern für ihre eigenen Datenbanken **Native SQL Connectivity**-Treiber. Diese sind:\n- für ein spezifisches DBMS optimiert und unterstützen *alle* dessen Features,\n- für jeden Hersteller **einzigartig (unique)** und untereinander inkompatibel.\n\n*Beispiel:* Oracle RDBMS benötigt die Installation und Konfiguration von **Oracle SQL*Net** auf den Client-Rechnern.\n\n**Problem (Vendor Lock-In):** Eine Applikation, die mit Oracle *und* SQL Server *und* DB2 sprechen soll, müsste mehrere völlig verschiedene, proprietäre APIs pflegen. Die Wartung vieler nativer Schnittstellen ist für Programmierer kaum handhabbar.\n\nDaraus entstand der Bedarf nach **Universal Connectivity**. Die meisten DBMS-Produkte unterstützen daher zusätzlich Standards - **ODBC** ist die häufigste Alternative.\n\n**Universal Data Access (UDA):** Microsofts Architektur (ODBC, OLE-DB, ADO.NET), die Zugriff auf *jede* Datenquelle über ein gemeinsames Interface erlaubt. Die Schnittstellen bauen evolutionär aufeinander auf und bieten zunehmend mehr Funktionalität, Flexibilität und Support.",
+          "keyTerms": [
+            { "term": "Native SQL Connectivity", "definition": "Vom DBMS-Hersteller bereitgestellter, herstellerspezifischer Treiber (z.B. Oracle SQL*Net), optimiert für maximale Performance und Feature-Unterstützung, aber nicht portabel." },
+            { "term": "Universal Data Access (UDA)", "definition": "Microsofts Connectivity-Architektur (ODBC, OLE-DB, ADO.NET), die Zugriff auf beliebige Datenquellen über eine gemeinsame Schnittstelle ermöglicht." },
+            { "term": "Vendor Lock-In", "definition": "Abhängigkeit von einem Hersteller, weil dessen native API nicht zu anderen DBMS passt - der Hauptnachteil von Native Connectivity." }
+          ]
+        },
+        {
+          "title": "Connectivity-APIs im Überblick (ODBC, DAO, RDO, OLE-DB, ADO.NET, JDBC)",
+          "content": "## Die Standard-Schnittstellen (Exam Q27)\n\nDie zentrale Prüfungstabelle - *welche* API ist *was*, von *wem*, *wofür*:\n\n| API | Hersteller | Basis / Was es ist | Daten-Zugriff |\n|-----|-----------|--------------------|---------------|\n| **Native SQL** | DBMS-Vendor | Proprietärer Treiber (z.B. SQL*Net) | Nur eigenes DBMS, max. Performance |\n| **ODBC** | Microsoft | SQL Access Group **CLI**-Standard, C-basierte API | Relationale SQL-Quellen (Windows) |\n| **DAO** | Microsoft | Objektorientierte API für Desktop-DBs (Jet-Engine) | MS Access, FileMaker |\n| **RDO** | Microsoft | High-Level OO-API auf DAO+ODBC | Remote-Server (SQL Server, Oracle, DB2) |\n| **OLE-DB** | Microsoft | Auf **COM** basiert, objektorientiert | Relationale **und** nicht-relationale Daten |\n| **ADO.NET** | Microsoft | Datenkomponente des .NET-Frameworks | Disconnected, internetoptimiert |\n| **JDBC** | Sun/**Oracle** | API für **Java**-Applikationen | Relationale DBs, Tabellen, Spreadsheets, Textdateien |\n\n**Merke (Exam Q27):** ODBC, ADO.NET und JDBC sind Connectivity-Technologien - **OLAP ist KEINE** (Online Analytical Processing ist eine Analyse-Technik). ODBC, OLE-DB und ADO.NET gehören zu Microsofts UDA; JDBC ist die Java-Welt.",
+          "keyTerms": [
+            { "term": "ODBC (Open Database Connectivity)", "definition": "Microsofts Umsetzung des SQL Access Group Call Level Interface (CLI)-Standards; erlaubt Windows-Apps via Standard-API und SQL den Zugriff auf relationale Datenquellen." },
+            { "term": "OLE-DB", "definition": "Object Linking and Embedding for Database; COM-basiert, greift im Gegensatz zu ODBC auch auf nicht-relationale Daten zu." },
+            { "term": "OLAP-Falle", "definition": "OLAP (Online Analytical Processing) ist KEINE Connectivity-Technologie, sondern eine Analyse-/Reporting-Technik - ein beliebter Distraktor in Q27." }
+          ],
+          "examples": [
+            "Q27 'Which of the following are database connectivity technologies?' -> ODBC, ADO.NET, JDBC (NICHT OLAP).",
+            "Kahoot: 'Which interface was developed for Java applications?' -> JDBC."
+          ]
+        },
+        {
+          "title": "ODBC im Detail: API, Driver Manager & DSN",
+          "content": "## Die ODBC-Architektur\n\nODBC besteht aus drei Komponenten - das ist die Architektur, nach der Q28 fragen kann:\n\n```diagram:ODBC-Architektur (Exam Q28)\n┌─────────────┐   ┌──────────────┐   ┌──────────────┐   ┌────────┐\n│ Application │──>│ ODBC API     │──>│ ODBC Driver  │──>│  DBMS  │\n│  (Windows)  │   │              │   │   Manager    │   │ Oracle │\n└─────────────┘   └──────────────┘   └──────┬───────┘   └────────┘\n                                            │ lädt\n                                     ┌──────▼───────┐\n                                     │ ODBC-Treiber │ (DB-spezifisch)\n                                     └──────────────┘\n```\n\n- **ODBC API:** Erlaubt Programmierern, Kommandos abzusetzen und Parameter zu übergeben.\n- **Driver Manager:** Nimmt die Calls entgegen und *routet* sie an die passende Datenquelle / den passenden Treiber.\n- **ODBC-Treiber:** DB-spezifisch; übersetzt in den nativen Dialekt.\n\nDie Verbindung wird über einen **Data Source Name (DSN)** definiert, der Treiber, Name und Parameter festlegt. Es gibt **User-DSN** und **System-DSN**. ODBC kennt drei **Compliance-Levels** (Core, Level-1, Level-2) mit steigender Funktionalität. Code wird als **DLL** dynamisch in Windows eingebunden.\n\n**Limitation:** ODBC war ursprünglich auf relationale Daten ausgerichtet - daher der Bedarf an OLE-DB für nicht-relationale Quellen.",
+          "keyTerms": [
+            { "term": "ODBC Driver Manager", "definition": "Komponente, die ODBC-Calls der Applikation entgegennimmt und an den passenden DB-spezifischen Treiber/die richtige Datenquelle routet." },
+            { "term": "Data Source Name (DSN)", "definition": "Konfigurationseintrag, der den ODBC-Treiber, den Namen und die Verbindungsparameter einer Datenquelle festlegt (User- oder System-DSN)." }
+          ],
+          "examples": [
+            "Kahoot: 'ODBC was designed to allow Windows applications to access relational data sources through a standard API.' -> Richtig.",
+            "Kahoot: 'Which technologies do Windows applications commonly utilize for local and remote relational data sources?' -> ODBC, DAO and RDO."
+          ]
+        },
+        {
+          "title": "OLE-DB, ADO & ADO.NET (Disconnected Data Sets)",
+          "content": "## Von OLE-DB zu ADO.NET\n\n**OLE-DB** wurde von Microsoft entwickelt, um relationale *und* nicht-relationale Daten zu unterstützen (COM-basiert). Es kennt zwei Rollen:\n- **Consumers:** fordern Daten an und nutzen sie (End-User-App).\n- **Providers:** verwalten die Verbindung und liefern Daten. Unterschieden in **Data Providers** (liefern Daten) und **Service Providers** (Zusatzdienste wie Cursor-, Transaktions-, Query-, Indexing-Management).\nOLE-DB arbeitet *modular* (man bindet nur ein, was man braucht), unterstützt aber **keine** Scriptsprachen wie ASP/ActiveX. Diese Lücke füllt **ADO (ActiveX Data Objects)** als High-Level-Interface auf OLE-DB/DAO/RDO.\n\n**ADO.NET** ist die Datenzugriffskomponente des .NET-Frameworks. Kernbegriff ist das **DataSet** - eine *disconnected*, im RAM gehaltene Repräsentation der Datenbank mit Tabellen, Spalten, Zeilen, Beziehungen und Constraints. Es wird intern als **XML** gespeichert.\n\n**Disconnected Environment:** ADO.NET lädt einen Snapshot, *trennt die Verbindung sofort*, der Nutzer editiert lokal, und später synchronisiert der **DataAdapter** die Änderungen mit einer kurzen Neuverbindung zurück. Perfekt für request/reply-basierte Internet-Systeme. Standard-Provider sind **OLE-DB** und **SQL Server**; auch ODBC-DBs werden via OLE-DB-Provider unterstützt.",
+          "keyTerms": [
+            { "term": "DataSet (ADO.NET)", "definition": "Disconnected, memory-residente Abbildung der Datenbank (Tabellen, Spalten, Zeilen, Beziehungen, Constraints), intern als XML gespeichert." },
+            { "term": "DataAdapter", "definition": "ADO.NET-Objekt, das das DataSet verwaltet und die spätere Synchronisation mit der persistenten Datenquelle übernimmt." },
+            { "term": "Consumer / Provider (OLE-DB)", "definition": "Consumer fordern Daten an; Provider stellen sie bereit (Data Provider = Daten, Service Provider = Zusatzdienste wie Cursor/Transaktionen)." }
+          ],
+          "examples": [
+            "ADO.NET-Hauptobjekte: Connection, Command, DataReader (read-only, schnell), DataAdapter, DataSet, DataTable.",
+            "Disconnected: DataSet im RAM -> Verbindung getrennt -> lokale Edits -> DataAdapter schreibt Deltas zurück."
+          ]
+        },
+        {
+          "title": "JDBC: Connectivity für Java",
+          "content": "## Java Database Connectivity\n\n**JDBC** ist die API, mit der **Java**-Applikationen mit verschiedenen Datenquellen interagieren. Entwickelt von **Sun Microsystems (heute Oracle)**.\n\nEigenschaften:\n- Zugriff auf relationale Datenbanken, tabellarische Datenquellen, Spreadsheets und Textdateien.\n- Programmierer nutzen ihre **SQL-Kenntnisse** weiter.\n- Unterstützt sowohl **direkten** Zugriff auf DB-Server als auch Zugriff über Middleware.\n- Die JDBC-Architektur ähnelt der von ODBC/OLE/ADO.NET und kann sogar **über einen ODBC-Treiber** auf Datenbanken zugreifen (JDBC-ODBC-Bridge).\n\n**Web-fokussierte Stärke:** Auf der **Client-Seite ist keine Konfiguration nötig** - der JDBC-Treiber wird automatisch als Teil eines Java-Applets heruntergeladen und installiert. Applikationen verbinden sich oft per einfacher **URL-Invocation**.\n\nJDBC ist groß im Datenanalyse-Markt und unterstützt High-Performance-APIs über große Cluster vernetzter Datenspeicher.\n\n**Prüfungsfallen:** JDBC ist *kein* Webserver und wurde *nicht nur* für Webbrowser entwickelt. Korrekt: JDBC wird von Java-Apps genutzt UND kann auf relationale Datenbanken zugreifen.",
+          "keyTerms": [
+            { "term": "JDBC (Java Database Connectivity)", "definition": "Von Sun/Oracle entwickelte API, mit der Java-Applikationen via SQL auf relationale Datenbanken und andere tabellarische Datenquellen zugreifen." },
+            { "term": "JDBC-ODBC-Bridge", "definition": "Mechanismus, über den JDBC eine Datenbank via ODBC-Treiber ansprechen kann - die Architektur ähnelt ODBC/OLE/ADO.NET." }
+          ],
+          "examples": [
+            "Kahoot 'Which two statements about JDBC are correct?' -> JDBC is used by Java applications & JDBC can access relational databases.",
+            "Falsch: 'JDBC is a web server' / 'JDBC was developed only for web browsers'."
+          ]
+        },
+        {
+          "title": "Web-to-Database-Middleware & der Request-Reply-Ablauf",
+          "content": "## Vom Browser zur Datenbank\n\nDer **Web Server** ist der zentrale Hub für Internet-Dienste. Er erzeugt **dynamische Webpages** und braucht **Server-Side Extensions** (Web-to-Database-Middleware, auch *database server-side extension program*), um Datenbank-Requests zu verstehen.\n\n```diagram:Web-to-Database Data Flow (Request-Reply)\n┌─────────┐  HTTP-Request  ┌────────────┐   Script   ┌──────────────┐   SQL   ┌──────┐\n│ Browser │───────────────>│ Web Server │──────────>│  Web-to-DB   │───────>│ DBMS │\n│ (Client)│<───────────────│            │<──────────│  Middleware  │<───────│      │\n└─────────┘   HTML-Page    └────────────┘  HTML-Page └──────────────┘ Result └──────┘\n```\n\nDer 8-Schritte-Ablauf:\n1. Browser sendet Page-Request an Web Server.\n2. Web Server reicht ihn an die Web-to-DB-Middleware weiter.\n3. Web Server stellt die Scriptsprache für die DB-Interaktion bereit.\n4. Middleware liest, validiert und führt das Script aus, verbindet sich mit der DB.\n5. DB-Server führt die Query aus und gibt das Ergebnis zurück.\n6. Middleware baut das Result-Set zu einer **HTML-Seite** zusammen.\n7. Web Server sendet die HTML-Seite an den Browser.\n8. Browser zeigt die Seite an.\n\nEnge Integration zwischen Web Server und Middleware ist entscheidend; ein gut definiertes Web-Server-Interface ist Voraussetzung.",
+          "keyTerms": [
+            { "term": "Web-to-Database Middleware", "definition": "Server-Side-Extension-Programm, das Datenbank-Requests aus dem Web verarbeitet, Daten abruft und sie als HTML an den Web Server zurückgibt." },
+            { "term": "Server-Side Extension", "definition": "Programm, das die Fähigkeiten des Web Servers erweitert, damit dieser spezielle (z.B. Datenbank-)Requests verarbeiten kann." }
+          ]
+        },
+        {
+          "title": "Web Server Interfaces: CGI vs. API & der zustandslose Browser",
+          "content": "## CGI vs. API - und warum HTTP stateless ist\n\nDie Middleware kann auf zwei Wegen an den Web Server angebunden werden:\n\n```compare\nCGI (Common Gateway Interface)\n- Script-Dateien (Perl, C#, Visual Basic)\n- Script verbindet zur DB, holt Daten, wandelt in HTML\n- NACHTEIL: externes Programm startet PRO Request neu\n- Ressourcen-Flaschenhals, langsam (interpretiert)\n===\nAPI (Application Programming Interface)\n- Shared code / DLLs, resident im Speicher\n- Dieselbe API bedient ALLE Requests, geteilte DB-Verbindung\n- VORTEIL: schneller, kein externer Prozess pro Request\n- NACHTEIL: API-Fehler kann Web Server abstürzen lassen (gemeinsamer Speicher); OS-/Server-spezifisch\n```\n\n**Der Web Browser ist ein zustandsloses (stateless) System:** Der Web Server kennt den Status der Clients nicht. Es gibt keine offene Leitung - die Interaktion folgt einem kurzen **Request-Reply-Modell**. Sobald die Seite empfangen ist, endet die Kommunikation; der Browser cached das HTML lokal, der Server weiß nichts von weiteren Nutzeraktionen.\n\n**Folge:** Der Browser agiert wie ein 'dumb terminal' (nur Anzeige + Formulareingabe, keine eigene Berechnung). Echte Validierung/Logik braucht **Client-Side Extensions** (Plug-ins, Java/JavaScript, ActiveX/VBScript) oder serverseitige Web Application Server.",
+          "keyTerms": [
+            { "term": "Stateless (zustandslos)", "definition": "Das HTTP-Modell: Der Web Server speichert keinen Verbindungszustand zum Client; jede Interaktion ist ein kurzes, eigenständiges Request-Reply." },
+            { "term": "CGI", "definition": "Common Gateway Interface - Script-basierte Anbindung, bei der pro Request ein eigenes externes Programm startet (Ressourcen-Flaschenhals)." },
+            { "term": "Client-Side Extensions", "definition": "Browser-Erweiterungen (Plug-ins, Java/JavaScript, ActiveX/VBScript), die Validierung und Interaktivität auf der Client-Seite ermöglichen und so Serverlast sparen." }
+          ]
+        },
+        {
+          "title": "Web Application Server & Connection Pooling",
+          "content": "## Der Application Server als Skalierungs-Motor\n\nEin **Web Application Server** ist eine Middleware-Anwendung, die den Web Server um Dienste erweitert (Datenbanken, Verzeichnisse, Suchmaschinen) und eine konsistente Laufzeitumgebung bietet. Beispiele: **ColdFusion (Adobe)**, **WebSphere (IBM)**, **WebLogic (Oracle)**.\n\nFunktionen:\n- Integrierte Entwicklungsumgebung und Computational Languages für Business-Logik\n- **Session-Management** und persistente Applikationsvariablen (löst das Stateless-Problem)\n- **Sicherheit/Authentifizierung** via User-IDs und Passwörter\n- Automatische HTML-Generierung (mit Java, JavaScript, VBScript, ASP ...)\n- Performance- und Fault-Tolerant-Features, Transaktionsmanagement\n- Durchsetzung von referentieller Integrität und Business Rules\n\n**Connection Pooling** ist die Schlüsseltechnik zur Skalierung: Die Middleware hält eine kleine Menge offener DB-Verbindungen bereit und teilt sie effizient unter vielen zustandslosen HTTP-Requests. So bedienen z.B. 50 Verbindungen Tausende parallele Nutzer - weil jeder Request die Verbindung nur Millisekunden braucht. Kombiniert mit *Disconnected Data Sets* schont das die DB-Ressourcen massiv.",
+          "keyTerms": [
+            { "term": "Web Application Server", "definition": "Middleware (z.B. ColdFusion, WebSphere, WebLogic), die Web Server um Session-Management, Sicherheit, Business-Logik und DB-Zugriff erweitert." },
+            { "term": "Connection Pooling", "definition": "Wiederverwendung eines kleinen Satzes offener DB-Verbindungen über viele Requests hinweg, um den Overhead ständiger Neuverbindungen zu vermeiden." }
+          ]
+        },
+        {
+          "title": "Datenaustausch: XML, DTD/XSD, XSLT und JSON",
+          "content": "## Strukturierter, plattformübergreifender Austausch\n\n**XML (eXtensible Markup Language)** ist eine vom **W3C (1998)** standardisierte Meta-Sprache zur Repräsentation strukturierter Daten. Eigenschaften: Textdateien, *case-sensitive*, müssen **well-formed** sein (korrekt geschachtelte Tags), eigene Tags definierbar, Kommentare via `<!-- -->`. XML beschreibt **Daten** - HTML beschreibt die **Darstellung**; sie ergänzen sich (XHTML).\n\nValidierung der Struktur:\n\n```compare\nDTD (Document Type Definition)\n- .dtd-Datei, definiert Struktur/Syntax\n- Symbole: + = Pflicht/Wiederholung, ? = optional\n- Partner tauschen DTDs für B2B aus\n- KEINE strikten Datentypen\n===\nXSD (XML Schema)\n- .xsd-Datei, XML-ähnliche Syntax\n- Datentypen, Ranges, Default-Werte, Validierungsregeln\n- Mehr semantischer Wert, soll DTDs ablösen\n- Erkennt ungültige Werte / Längen\n```\n\n**XSLT (XSL Transformations)** extrahiert und transformiert XML in andere Formate (HTML, Text, Mobile-Pages) - vergleichbar mit *Views* in SQL. **XSL Style Sheets** definieren die Präsentation. XML trennt also **Datenstruktur von Präsentation**.\n\n**JSON** ist heute der De-facto-Standard für Web-APIs (REST): leichter als XML, weniger Parsing-Overhead, nativ in JavaScript-Objekte konvertierbar. XML bleibt stark bei B2B, Legacy-Integration und Metadictionaries (HR-XML, XBRL, METS).",
+          "keyTerms": [
+            { "term": "XSD (XML Schema Definition)", "definition": "Formales Schema, das Struktur, Datentypen, Ranges und Validierungsregeln eines XML-Dokuments erzwingt; mächtiger als DTD und soll diese ablösen." },
+            { "term": "DTD (Document Type Definition)", "definition": "Älteres Verfahren zur Definition von Struktur/Syntax eines XML-Dokuments (mit Symbolen + und ?), ohne strikte Datentypen." },
+            { "term": "XSLT", "definition": "XSL Transformations - transformiert XML-Dokumente in andere Formate (HTML, Text, Mobile) und trennt so Daten von Präsentation." }
+          ],
+          "examples": [
+            "B2B: Company A tauscht productlist.xml mit Company B aus; beide validieren gegen eine gemeinsame DTD/XSD.",
+            "XSD erzwingt: <Betrag> = Float, <Rechnungsnummer> = exakt 10 Zeichen."
+          ]
+        },
+        {
+          "title": "Zap Prüfungs-Spickzettel (Modul 9)",
+          "content": "## Must-Know auf einen Blick\n\n**Connectivity-Schichten (Kahoot-Klassiker):**\n- 3 Layer = **Data, Middle, Top** (NICHT Connectivity/Transformation/Application).\n- Middleware = *Interface zwischen App und DB*; ersetzt das DBMS NICHT.\n\n**APIs (Exam Q27) - Schnell-Zuordnung:**\n| Frage | Antwort |\n|-------|---------|\n| Connectivity-Technologien? | ODBC, ADO.NET, JDBC (OLAP ist KEINE!) |\n| Für Java entwickelt? | **JDBC** (Sun/Oracle) |\n| Auch nicht-relationale Daten? | **OLE-DB** (COM-basiert) |\n| Windows + relationale Quellen, Standard-API? | **ODBC** (CLI-Standard) |\n| Windows lokal+remote relational? | ODBC, DAO, RDO |\n| Disconnected, .NET, XML-intern? | **ADO.NET** (DataSet) |\n\n**Architektur (Exam Q28):** Figur erkennen anhand der Treiber/Schichten -> ODBC (API+Driver Manager+Treiber), OLE-DB (COM, Consumer/Provider), ADO.NET (DataSet/.NET), JDBC (Java-Applet, kein Client-Setup).\n\n**Web:**\n- HTTP ist **stateless** -> Request-Reply-Modell, Browser = 'dumb terminal'.\n- **CGI** = neuer Prozess pro Request (langsam); **API** = shared/DLL, geteilte Verbindung (schnell, aber Crash-Risiko).\n- **Connection Pooling** + **Disconnected DataSets** = Skalierung für viele Nutzer.\n\n**Datenformate:** XML = W3C 1998, well-formed, beschreibt Daten; **DTD** (Struktur) vs **XSD** (Struktur + Datentypen, löst DTD ab); **XSLT** transformiert; JSON = leichtgewichtiger REST-Standard.",
+          "keyTerms": [
+            { "term": "OLAP (Falle)", "definition": "Online Analytical Processing - Analyse-/Reporting-Technik, KEINE Connectivity-API. Häufiger Distraktor in Q27." }
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "type": "multiple-choice",
+          "question": "Was war historisch gesehen der gravierendste Nachteil der sogenannten 'Native SQL Connectivity', der schließlich zur Entwicklung von Standards wie ODBC führte?",
+          "options": [
+            "Die extrem langsame Verarbeitungsgeschwindigkeit aufgrund des Parsing-Overheads.",
+            "Fehlende Unterstützung für komplexe SQL-Joins.",
+            "Ein starker Vendor Lock-In (Herstellerabhängigkeit), da für jedes unterschiedliche DBMS (Oracle, SQL Server, IBM DB2) eine komplett neue, proprietäre API im Code implementiert werden musste.",
+            "Die Unfähigkeit, über TCP/IP Netzwerke zu kommunizieren."
+          ],
+          "correctAnswer": 2,
+          "explanation": "Native SQL Connectivity war (und ist) zwar extrem performant, aber die herstellerspezifischen APIs verhinderten jegliche Portabilität. ODBC abstrahierte diese Komplexität in einen einzigen Standard."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Welche Technologie löste Microsofts ODBC ab, mit dem speziellen Ziel, nicht nur relationale SQL-Datenbanken abzufragen, sondern auch auf nicht-relationale, unstrukturierte Datenquellen (wie E-Mails, Textdateien, Spreadsheets) über eine einheitliche Schnittstelle zuzugreifen?",
+          "options": [
+            "JDBC",
+            "ADO.NET",
+            "OLE-DB (Object Linking and Embedding for Database)",
+            "Native SQL"
+          ],
+          "correctAnswer": 2,
+          "explanation": "Während ODBC primär für SQL/Relationale-DBs konzipiert war, wurde OLE-DB auf Basis von COM entwickelt, um Universal Data Access (UDA) auf buchstäblich jede Art von Datenquelle (Tabellen, Mails, Verzeichnisse) zu ermöglichen."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Eine moderne Web-Applikation bedient 10.000 parallele Nutzer. Warum bricht die Datenbank nicht unter 10.000 gleichzeitigen physischen Verbindungen zusammen?",
+          "options": [
+            "Weil HTTP-Verbindungen von Natur aus extrem speichereffizient sind.",
+            "Weil die Web-Middleware ein 'Connection Pooling' betreibt. Sie hält z.B. 50 Verbindungen offen, weist diese den zustandslosen HTTP-Requests für Millisekunden zu, führt Queries aus und wirft die Verbindung sofort zurück in den Pool.",
+            "Weil moderne relationale Datenbanken keine Limits für offene TCP/IP-Verbindungen haben.",
+            "Weil Datenbanken bei Web-Apps komplett durch In-Memory Caches ersetzt werden."
+          ],
+          "correctAnswer": 1,
+          "explanation": "Connection Pooling ist die Schlüsseltechnologie zur Skalierung von Web-Datenbanken. Da HTTP zustandslos ist, braucht ein User die Verbindung nur exakt in dem Bruchteil einer Sekunde, in dem Daten gelesen oder geschrieben werden."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Ein B2B-System erwartet den Import von Rechnungsdaten im XML-Format. Um Systemabstürze zu vermeiden, muss das System *vor* dem Import strikt verifizieren, dass das Feld '<Betrag>' ein Float-Datentyp ist und '<Rechnungsnummer>' exakt 10 Zeichen lang ist. Womit wird diese Verifikation durchgeführt?",
+          "options": [
+            "XSLT (Extensible Stylesheet Language Transformations)",
+            "XML Schema Definition (XSD)",
+            "JSON Parsing",
+            "ODBC Driver Manager"
+          ],
+          "correctAnswer": 1,
+          "explanation": "XSD (XML Schema Definition) ist ein extrem mächtiges Tool, das XML validiert. Es definiert im Gegensatz zur älteren DTD nicht nur die Struktur, sondern erzwingt strikte Datentypen und Längen-Constraints für jedes Tag."
+        },
+        {
+          "type": "true-false",
+          "question": "Die ADO.NET Architektur, die auf sogenannten 'Disconnected Data Sets' basiert, erfordert, dass die Netzwerkverbindung zur Datenbank während der gesamten Zeit, in der der Nutzer Daten im Client betrachtet oder editiert, ununterbrochen offen bleibt.",
+          "correctAnswer": false,
+          "explanation": "Falsch. ADO.NET zieht einen Daten-Snapshot (DataSet) in den RAM des Application Servers oder Clients, TRENNT (disconnects) die Verbindung zur Datenbank sofort, und erlaubt lokale Modifikationen. Später werden die Änderungen (Deltas) mit einer kurzen Neuverbindung zurückgeschrieben. Dies schont Datenbank-Ressourcen extrem."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Aus welchen drei Schichten besteht die Database-Connectivity-Software im Client/Server-Konzept?",
+          "options": [
+            "Data, Connectivity, Top",
+            "Data, Transformation, Application",
+            "Data, Middle, Top",
+            "Presentation, Logic, Storage"
+          ],
+          "correctAnswer": 2,
+          "explanation": "Korrekt sind Data Layer (Schnittstelle zum Repository), Middle Layer (Connectivity + Datentransformation) und Top Layer (API für externe Apps). 'Data, Middle, Top' - die anderen Varianten sind typische Kahoot-Distraktoren."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Welche der folgenden ist KEINE Database-Connectivity-Technologie?",
+          "options": [
+            "ODBC",
+            "OLAP",
+            "ADO.NET",
+            "JDBC"
+          ],
+          "correctAnswer": 1,
+          "explanation": "OLAP (Online Analytical Processing) ist eine Analyse-/Reporting-Technik, keine Connectivity-API. ODBC, ADO.NET und JDBC sind dagegen echte Connectivity-Technologien (Exam Q27)."
+        }
+      ]
+    },
+    {
+      "id": "module-10",
+      "title": "Database Administration, Security & NoSQL",
+      "description": "Datenmanagement von der Strategie bis zum Betrieb: Daten als Corporate Asset, die Rollen Data Administrator (DA) vs. Database Administrator (DBA), das Security-Framework (Confidentiality, Integrity, Availability, Compliance), Backup/Recovery sowie NoSQL- und Graph-Datenbanken.",
+      "coreCompetencies": [
+        "Daten als strategisches Corporate Asset und die Kosten von Dirty Data im Data-Information-Decision-Cycle bewerten",
+        "Die Verantwortungsbereiche von Data Administrator (DA/IRM) und Database Administrator (DBA) sowie Staff- vs. Line-Position abgrenzen (Exam Q26)",
+        "Die managerialen und technischen DBA-Aufgaben entlang des DBLC einordnen und DBA-Figuren/Organigramme interpretieren (Exam Q26)",
+        "Die Security-Ziele Confidentiality, Integrity, Availability und Compliance sowie Vulnerabilities vs. Threats unterscheiden",
+        "Authorization-Management, Privilegien/Rollen (GRANT/REVOKE) und View-Definition als Schutzmechanismen anwenden",
+        "Backup-Typen und Recovery-Strategien benennen und der Availability zuordnen",
+        "Die Einschränkungen relationaler Modelle bei Big Data (Volume, Velocity, Variety) und die NoSQL-Antwort (BASE, Horizontal Scaling, CAP) erklären",
+        "Document Stores (MongoDB), Key-Value, Column-Family und Graph-Datenbanken (Neo4j, Cypher) vergleichen und Use-Cases zuordnen"
+      ],
+      "sections": [
+        {
+          "title": "Daten als Corporate Asset & Datenqualität",
+          "content": "## Der Data-Information-Decision Cycle\n\nIn der informationsgetriebenen Wirtschaft sind Daten ein wertvolles **Corporate Asset**, das sorgfältiges Management erfordert. Der monetäre Wert bemisst sich an den entgangenen Chancen und den Kosten eines Datenverlusts.\n\nIm **Data-Information-Decision Cycle** werden Rohdaten im Kontext zu Informationen, die wiederum operative, taktische und strategische **Entscheidungen** stützen - und diese erzeugen neue Daten.\n\n```diagram:Data-Information-Decision Cycle\n   ┌──────────┐    Kontext/    ┌────────────┐   stützt   ┌─────────────┐\n   │  DATEN   │───Analyse────> │ INFORMATION│──────────> │ ENTSCHEIDUNG│\n   └────┬─────┘                └────────────┘            └──────┬──────┘\n        │            erzeugt neue Daten                         │\n        └───────────────────────────────────────────────────────┘\n```\n\n**Dirty Data** - unvollständige, doppelte, veraltete oder inkonsistente Einträge - entsteht durch fehlende Durchsetzung von Integrity-Constraints, Fehler und Inkonsistenzen. Folgen: Fehlentscheidungen, operative Kosten, Compliance-Risiken. Gegenmittel: **Data Governance**, **Data-Profiling**- und **Master-Data-Management**-Tools, strikte Constraints.\n\n**Kahoot:** 'Dirty data' = Data containing errors or inconsistencies (nicht 'immer verschlüsselt' o.ä.).",
+          "keyTerms": [
+            { "term": "Data-Information-Decision Cycle", "definition": "Zyklus, in dem Daten zu Informationen werden, die Entscheidungen (operativ/taktisch/strategisch) stützen, welche wiederum neue Daten erzeugen." },
+            { "term": "Dirty Data", "definition": "Daten mit Fehlern oder Inkonsistenzen (unvollständig, redundant, veraltet), oft durch fehlende Integrity-Constraints - untergräbt das Vertrauen in die DB." }
+          ],
+          "examples": [
+            "Kahoot: 'Which statement best describes dirty data?' -> Data containing errors or inconsistencies.",
+            "Tools gegen Dirty Data: Data-Profiling, Master Data Management (MDM)."
+          ]
+        },
+        {
+          "title": "Die Datenbank in der Organisation & DBMS-Einführung",
+          "content": "## Shared Data über drei Management-Ebenen\n\nDatenmanagement muss **geteilte Daten (shared data)** über Abteilungen hinweg adressieren. Das DBMS erleichtert Interpretation, Verteilung, Bewahrung und Kontrolle der Daten und unterstützt Entscheidungen auf allen Management-Ebenen:\n\n| Ebene | Entscheidungstyp | Aufgaben |\n|-------|------------------|----------|\n| **Top Management** | Strategisch | Policy-Formulierung, Ziele definieren, Monitoring |\n| **Middle Management** | Taktisch | Ressourcenallokation, Performance-Bewertung, Security & Privacy |\n| **Operational Management** | Operativ | Tagesgeschäft, kurzfristige Operations |\n\nDie Einführung eines DBMS hat tiefgreifende Auswirkungen und muss drei Aspekte berücksichtigen:\n- **Technologisch:** Auswahl, Installation, Konfiguration, Monitoring.\n- **Manageriell:** administrative Funktionen, Cloud-Provider-Beziehungen, Organisationsstruktur.\n- **Kulturell:** Auswirkungen auf Menschen, Funktionen, Interaktionen; Widerstand gegen Veränderung minimieren.\n\nWichtiges Prinzip: Das **DBMS soll an die Organisation angepasst werden** - nicht umgekehrt.\n\n**Kahoot:** Strategische Entscheidungen, Policy-Formulierung, Goal-Definition -> **Top Management**. Shared-Data-Bedarf -> Interpretation/Distribution/Preservation/Control + Decision Support + Privacy/Security (NICHT 'GUI-Design verbessern').",
+          "keyTerms": [
+            { "term": "Shared Data", "definition": "Über Abteilungen hinweg geteilte Daten; das DBMS sorgt für deren Interpretation, Verteilung, Bewahrung und Kontrolle." },
+            { "term": "DBMS-Einführung: 3 Aspekte", "definition": "Technologisch (Auswahl/Installation), manageriell (Administration/Struktur), kulturell (Menschen/Akzeptanz) - das DBMS wird an die Organisation angepasst, nicht umgekehrt." }
+          ]
+        },
+        {
+          "title": "DA vs. DBA: Strategie gegen Technik (Exam Q26)",
+          "content": "## Die zentrale Rollen-Abgrenzung\n\nMit wachsender Komplexität entstand die **Database Administration**. In großen Organisationen trennt man zwei Rollen - der häufigste Prüfungsstoff dieses Moduls:\n\n```compare\nData Administrator (DA / IRM)\n- Management-/strategische Ebene\n- GLOBALE, unternehmensweite Datenstrategie\n- Datenmodelle (ERDs), Data Governance, Policies\n- Ziele: Shareability, Konsistenz, Integritaet, Security, Privacy, Qualitaet\n- Umfasst manuelle UND computergestuetzte Daten\n- Berichtet direkt an Top-Management\n===\nDatabase Administrator (DBA)\n- Technische/operative Ebene\n- Focal Point fuer Daten + User-Interaktion\n- Installiert/tuned das DBMS, Indexing, Performance\n- Backup & Recovery, Security-Durchsetzung\n- Definiert/erzwingt Prozeduren fuer Programmierer + End-User\n- Verifiziert Zugriffslevel (Compliance)\n```\n\nDer **DA (Data Administrator)**, auch **Information Resource Manager (IRM)**, liefert die globale Strategie. Der **DBA** ist die technische Umsetzung. Gibt es keine separate DA-Rolle, fallen *alle* Aufgaben dem DBA zu. Über mehreren DBAs steht oft ein **Systems Administrator** als Koordinator.\n\n**Exam Q26 ('What does the following figure show?'):** Erkenne DBA-bezogene Organigramme/Figuren - z.B. *'DBA functional organization according to DBLC model'*, *'Contrasting DA and DBA activities'*, *'Placement of the DBA function'* oder die Security-Architektur. Beachte: Eine solche Figur ist KEIN Normalisierungsprozess, kein Data-Flow-Diagramm und kein ER-Diagramm.",
+          "keyTerms": [
+            { "term": "Data Administrator (DA / IRM)", "definition": "Information Resource Manager - verantwortet auf Management-Ebene die globale Datenstrategie, Governance, Modelle und Standards; berichtet an Top-Management." },
+            { "term": "Database Administrator (DBA)", "definition": "Technisch-operative Rolle: Focal Point fuer Daten/User, installiert und tuned das DBMS, sichert Backup/Recovery und erzwingt Prozeduren und Zugriffslevel." },
+            { "term": "Systems Administrator", "definition": "Genereller Koordinator mehrerer DBAs, wenn verschiedene/inkompatible DBMS im Einsatz sind." }
+          ],
+          "examples": [
+            "Exam Q26: Figur = DBA functional organization according to DBLC model (NICHT Normalisierung/Data-Flow/ER-Diagramm).",
+            "Thomas definiert globale Architektur, ERDs und Governance -> Data Administrator (DA)."
+          ]
+        },
+        {
+          "title": "DBA-Positionierung: Staff vs. Line & DBLC",
+          "content": "## Wo sitzt der DBA - und was tut er wann?\n\nDie DBA-Funktion hat **keine** Standardplatzierung im Organigramm (dynamische Natur). Zwei Grundtypen:\n\n```compare\nStaff Position\n- Beratende Rolle\n- Entwirft Datenadministrations-Strategie\n- KEINE Autoritaet zur Durchsetzung\n- Kann Konflikte nicht erzwingen aufloesen\n===\nLine Position\n- Verantwortung UND Autoritaet\n- Plant, implementiert und erzwingt\n- Policies, Standards, Prozeduren\n- Setzt Datenadministration durch\n```\n\nDie DBA-Operationen orientieren sich am **DBLC (Database Life Cycle)**: Database Planning, Requirements Gathering, Conceptual Design, Logical & Transaction Design, Physical Design, Testing & Debugging, Operations & Maintenance, Training & Support, Data Quality Monitoring.\n\nDie Rolle entwickelt sich mit der Technologie: **Distributed Databases** erzwingen Dezentralisierung; **Internet & Data Warehousing** erweitern Datenmodellierung; **PC-DBMS** erfordert neue Skills (aber Risiko der Datenduplikation); **Cloud Services** verschieben den DBA Richtung strategische Beratung; **Big Data** verlangt mehr technologie-orientierte DBAs (z.B. Hadoop).\n\n**Kahoot:** Staff = devises strategy without enforcement authority; Line = plans, implements, and enforces policies.",
+          "keyTerms": [
+            { "term": "Staff Position", "definition": "DBA in beratender Rolle: entwirft die Strategie, hat aber keine Autoritaet, sie durchzusetzen oder Konflikte zu erzwingen." },
+            { "term": "Line Position", "definition": "DBA mit Verantwortung und Autoritaet, Policies, Standards und Prozeduren zu planen, zu implementieren und durchzusetzen." },
+            { "term": "DBLC (Database Life Cycle)", "definition": "Lebenszyklus, an dem sich DBA-Operationen ausrichten: Planung, Design, Implementierung, Testing, Betrieb, Wartung, Training, Qualitaetsueberwachung." }
+          ]
+        },
+        {
+          "title": "DBA-Aufgaben: managerial & technisch",
+          "content": "## Was ein DBA konkret macht\n\nDie DBA-Verantwortung teilt sich in managerial und technisch:\n\n| Bereich | Managerial | Technisch |\n|---------|-----------|-----------|\n| Planung | Strategie, Goal-Setting, Ressourcenallokation | DBMS-Auswahl, Hardware, Kostenanalyse |\n| Design | Koordination mit Stakeholdern | Datenmodellierung, physische Implementierung |\n| Betrieb | Monitoring, Konfliktlösung | Performance-Tuning, Security-Auditing |\n| User | End-User-Support, Training-Management | Technischer Support, Vendor-Relations |\n| Schutz | Policies & Standards definieren | Backup/Recovery, Wartung, Upgrades |\n\n**Managerial:** Resource Allocation, Strategic Planning, Goal Setting, Monitoring, Coordination; End-User-Support (Anforderungen sammeln, Vertrauen aufbauen, Konflikte lösen, Qualität sichern); Policies/Procedures/Standards definieren und dokumentieren; Data Security, Privacy & Integrity; Data Backup & Recovery.\n\n**Technisch:** DBMS evaluieren/auswählen/installieren; Datenbanken und Applikationen designen und implementieren (Data Modeling, Access-Plan-Generierung); Testen & Evaluieren (QA, Datenvalidierung); DBMS betreiben (Performance-Monitoring/Tuning, Security-Auditing); User trainieren; Wartung (Maintenance, Upgrades, Datenmigration).\n\nWichtige **People Skills**: Der DBA übernimmt auch Staffing und Training im eigenen Bereich.",
+          "keyTerms": [
+            { "term": "Managerial DBA-Aufgaben", "definition": "Resource Allocation, Strategic Planning, Goal Setting, Monitoring, Coordination, End-User-Support sowie Definition von Policies/Standards." },
+            { "term": "Technische DBA-Aufgaben", "definition": "DBMS evaluieren/installieren, Datenbanken designen/implementieren, testen, betreiben (Tuning, Auditing), User trainieren und das System warten." }
+          ]
+        },
+        {
+          "title": "Security-Ziele: Confidentiality, Integrity, Availability, Compliance",
+          "content": "## Das Information-Security-Framework\n\nDatenbanksicherheit verfolgt vier Ziele - die klassische CIA-Triade plus Compliance:\n\n```compare\nConfidentiality (Vertraulichkeit)\n- Schutz vor unautorisiertem Zugriff\n- Nutzung nur fuer autorisierte Zwecke\n- Authentifizierung, RBAC, Verschluesselung\n===\nIntegrity (Integritaet)\n- Konsistenz + Genauigkeit ueber den Lebenszyklus\n- von Erfassung bis Archivierung\n- Constraints, Foreign Keys, Checksums, Trigger\n===\nAvailability (Verfuegbarkeit)\n- Daten jederzeit fuer autorisierte Nutzer\n- fuer autorisierte Zwecke\n- Redundanz/Failover, Backup, Disaster Recovery\n===\nCompliance\n- Einhaltung von Datenschutz-/Security-Regularien\n- interne Prozeduren + externe Aufsichtsbehoerden\n- Audits, GDPR/DSGVO\n```\n\nEine **Security Policy** ist eine Sammlung von Standards, Richtlinien und Prozeduren, die Sicherheit gewährleistet und Auditing/Compliance erleichtert.\n\n**Vulnerabilities vs. Threats:**\n- **Vulnerability** = Schwachstelle in einer Systemkomponente (technisch, manageriell, kulturell oder prozedural).\n- Bleibt sie ungeprüft, wird daraus ein **Threat** (drohende Verletzung).\n- Ein **Security Breach** tritt ein, wenn ein Threat ausgenutzt wird und Integrität, Vertraulichkeit oder Verfügbarkeit gefährdet.\n\n**Kahoot-Falle:** 'Availability: Ensuring data is *encrypted* for secure transmission' ist FALSCH - Verschlüsselung dient der Confidentiality, nicht der Availability.",
+          "keyTerms": [
+            { "term": "CIA + Compliance", "definition": "Die vier Security-Ziele: Confidentiality (Zugriffsschutz), Integrity (Konsistenz/Genauigkeit), Availability (Verfuegbarkeit) und Compliance (Regelkonformitaet)." },
+            { "term": "Vulnerability vs. Threat", "definition": "Vulnerability = Schwachstelle (technisch/manageriell/kulturell/prozedural); Threat = drohende Verletzung; Breach = die tatsaechliche Ausnutzung." }
+          ],
+          "examples": [
+            "Redundantes Cluster + Off-Site-Backups -> sichern primaer die Availability.",
+            "Kahoot: 'Availability: Ensuring data is encrypted' = FALSCH (Verschluesselung = Confidentiality)."
+          ]
+        },
+        {
+          "title": "Authorization-Management, Privilegien & Views",
+          "content": "## Datenbank-Sicherheit konkret umsetzen\n\n**Authorization Management** umfasst Prozeduren, die Sicherheit und Integrität garantieren. Vier Schutzebenen:\n\n| Mechanismus | Was er tut | Beispiel |\n|-------------|-----------|----------|\n| **User Access Management** | User definieren, Passwoerter, User-Gruppen, Zugriffsprivilegien | GRANT SELECT, INSERT ... |\n| **Physical Security** | Verhindert physischen Zugriff auf DBMS-Installation/Anlage | Serverraum-Zutritt |\n| **View Definition** | DBA definiert Views, um den sichtbaren Datenumfang zu begrenzen | View nur mit nicht-sensiblen Spalten |\n| **Encryption** | Daten unlesbar fuer Unbefugte | At Rest / In Transit |\n\nIn SQL werden Berechtigungen mit **DCL** vergeben und entzogen:\n\n```sql\n-- Privileg an eine Rolle vergeben\nGRANT SELECT, INSERT ON kunde TO rolle_vertrieb;\n-- Privileg wieder entziehen\nREVOKE INSERT ON kunde FROM rolle_vertrieb;\n```\n\n**Role-Based Access Control (RBAC):** Privilegien werden nicht einzelnen Nutzern, sondern **Rollen** (z.B. 'HR_Manager') zugewiesen; Nutzer erhalten die Rolle. Das vereinfacht Verwaltung und Auditing massiv. **Views** wirken zugleich als Sicherheitsfilter - der Nutzer sieht nur die freigegebene Teilmenge der Daten (vergleichbar dem least-privilege-Prinzip).",
+          "keyTerms": [
+            { "term": "Authorization Management", "definition": "Prozeduren zur Sicherung von DB-Sicherheit und -Integritaet: User Access Management, physische Sicherheit, View-Definition und Verschluesselung." },
+            { "term": "GRANT / REVOKE (DCL)", "definition": "SQL-Befehle der Data Control Language, um Zugriffsprivilegien an Nutzer oder Rollen zu vergeben (GRANT) bzw. zu entziehen (REVOKE)." },
+            { "term": "Role-Based Access Control (RBAC)", "definition": "Sicherheitsmodell, bei dem Privilegien Rollen statt einzelnen Nutzern zugewiesen werden, um Verwaltung und Compliance zu vereinfachen." },
+            { "term": "View als Sicherheitsfilter", "definition": "Eine View begrenzt den sichtbaren Datenumfang, sodass Nutzer nur freigegebene Spalten/Zeilen sehen (least privilege)." }
+          ]
+        },
+        {
+          "title": "Backup, Recovery & Verfügbarkeit",
+          "content": "## Datensicherung als Availability-Garant\n\nBackup & Recovery gehört zu den Kernaufgaben des DBA und dient primär der **Availability** (und der Integrity gegen Datenverlust). Wichtige Backup-Typen:\n\n| Backup-Typ | Was gesichert wird | Eigenschaft |\n|------------|--------------------|-------------|\n| **Full Backup** | komplette Datenbank | langsam, aber vollstaendig; Basis fuer Recovery |\n| **Differential** | Aenderungen seit letztem Full Backup | schneller als Full, waechst bis zum naechsten Full |\n| **Incremental** | Aenderungen seit letztem (beliebigen) Backup | am schnellsten, aber Recovery braucht ganze Kette |\n| **Transaction Log Backup** | Transaktionsprotokoll | erlaubt Point-in-Time-Recovery |\n\nDer DBA entwickelt Backup-Prozeduren, sorgt für korrekte (idealerweise **Off-Site**) Speicherung, testet und evaluiert die Backups und betreibt **Disaster Management**.\n\n**Recovery-Strategien zur Availability:**\n- **Redundante Cluster / Failover-Nodes:** High Availability bei Hardware-Defekt.\n- **Load Balancing:** Lastverteilung.\n- **Disaster Recovery:** Wiederherstellung nach Totalausfall, auch gegen Ransomware (verschlüsselte Daten lassen sich aus Off-Site-Backups zurückspielen).\n\n**Merke:** Backups, Failover und Redundanz sichern die *Availability* - sie verhindern, dass autorisierte Nutzer den Zugriff verlieren. Verschlüsselung dagegen adressiert Confidentiality.",
+          "keyTerms": [
+            { "term": "Full / Differential / Incremental Backup", "definition": "Full = komplette DB; Differential = Aenderungen seit letztem Full; Incremental = Aenderungen seit letztem Backup (schnell, aber Recovery braucht die ganze Kette)." },
+            { "term": "Disaster Recovery", "definition": "Strategien (Off-Site-Backups, Failover-Cluster) zur Wiederherstellung des Betriebs nach Totalausfall, Hardware-Defekt oder Ransomware." }
+          ]
+        },
+        {
+          "title": "Big Data & NoSQL (BASE, CAP, Horizontal Scaling)",
+          "content": "## Warum NoSQL?\n\nRelationale Systeme stoßen an die **3 V's von Big Data**: **Volume** (Petabytes), **Velocity** (Echtzeit-Streaming) und **Variety** (unstrukturierte Daten). RDBMS erzwingen starre Schemata und skalieren meist nur *vertikal* (teurer Server).\n\n**NoSQL = 'Not Only SQL'** (kein 'No SQL'! Der Name kam von einem Entwickler-Hashtag). Kernidee: flexible, auf Performance und Skalierbarkeit optimierte Datenmodelle statt Tabellen/Zeilen. Vorteile: **Scalability**, **Flexibility** (kein fixes Schema), Performance; oft Open-Source, auf Linux/Unix, für verteilte Systeme.\n\n```compare\nRDBMS (ACID)\n- Starkes Konsistenzmodell (Atomicity, Consistency, Isolation, Durability)\n- Vertikale Skalierung (Scale-Up)\n- Strikte Schemata, Joins\n===\nNoSQL (BASE)\n- Basically Available, Soft state, Eventually consistent\n- Horizontale Skalierung (Scale-Out, Sharding)\n- Flexible/schema-less Modelle\n```\n\n**Horizontal Scaling (Scale-Out):** Last über viele billige Commodity-Server verteilen, statt einen teuren Mainframe aufzurüsten. **Sharding** teilt Daten in unabhängige Stücke (Shards) auf verschiedene Server.\n\n**CAP-Theorem (Brewer):** Ein verteiltes System kann von **Consistency**, **Availability** und **Partition Tolerance** im Fehlerfall nur *zwei* gleichzeitig garantieren. Da Netzwerk-Partitionen in verteilten Systemen unvermeidbar sind (P ist gesetzt), entscheidet man praktisch zwischen **C** und **A** - NoSQL bevorzugt oft Availability (-> Eventual Consistency / BASE), RDBMS bevorzugt Consistency.\n\n**NewSQL** (z.B. NuoDB, ClustrixDB) versucht, ACID *und* horizontale Skalierung zu verbinden.",
+          "keyTerms": [
+            { "term": "3 V's (Big Data)", "definition": "Volume (Datenmenge), Velocity (Geschwindigkeit/Streaming) und Variety (Datenvielfalt/unstrukturiert) - die Herausforderungen, an denen RDBMS skalierungstechnisch scheitern." },
+            { "term": "BASE vs. ACID", "definition": "ACID = strikte Konsistenz (RDBMS); BASE = Basically Available, Soft state, Eventually consistent (NoSQL, zugunsten von Verfuegbarkeit und Skalierung)." },
+            { "term": "CAP-Theorem", "definition": "Ein verteiltes System kann von Consistency, Availability und Partition Tolerance nur zwei zugleich garantieren; da Partitionen unvermeidlich sind, waehlt man zwischen C und A." },
+            { "term": "Sharding / Horizontal Scaling", "definition": "Aufteilung der Daten in unabhaengige Shards ueber viele guenstige Server (Scale-Out) statt teurer Aufruestung eines einzelnen Servers (Scale-Up)." }
+          ],
+          "examples": [
+            "Kahoot: 'What does NoSQL usually mean?' -> Not Only SQL.",
+            "Kahoot: 'Main types of NoSQL?' -> Key-value, Document, Column-family, Graph (NICHT 'Spreadsheet databases')."
+          ]
+        },
+        {
+          "title": "Die vier NoSQL-Typen (Key-Value, Document, Column-Family, Graph)",
+          "content": "## Die NoSQL-Familien im Vergleich\n\n| Typ | Datenmodell | DBMS versteht Inhalt? | Beispiele | Use Case |\n|-----|------------|----------------------|-----------|----------|\n| **Key-Value** | Key -> Value (BLOB) | Nein (App interpretiert) | Redis, DynamoDB | Caching, Session-Storage |\n| **Document** | Key -> Dokument (JSON/BSON) | Ja (Felder abfragbar) | MongoDB | Web-Apps, CMS, E-Commerce |\n| **Column-Family** | Row Key -> Spalten/Super Columns | teilweise | Cassandra, HBase | Big-Data-Analytics |\n| **Graph** | Nodes, Edges, Properties | Ja | Neo4j | Soziale Netze, Fraud Detection |\n\n**Key-Value:** Simpelster Typ - eindeutiger Key zeigt auf einen Wert. Daten liegen in **Buckets** (Keys eindeutig pro Bucket). Abfrage NUR über bucket+key (kein Suchen *innerhalb* der Werte). Operationen: GET, STORE/PUT, DELETE. Extrem schnell und skalierbar.\n\n**Document:** Wert ist ein *strukturiertes Dokument* (JSON/XML/BSON); das DBMS versteht die **Felder (Tags)** und kann *innerhalb* suchen, filtern und aggregieren (SUM, AVG). Dokumente sind in **Collections** (≈ Tabellen) gruppiert und meist *self-contained* (eine Order enthält Kunde + Details + Produkte) - **keine/kaum Joins**.\n\n**Column-Family:** Row Key -> Columns oder **Super Columns** (gruppierte Spalten, ähnlich Composite Attributes). Schema-less, jede Zeile kann andere Spalten haben. Optimiert für analytisches Lesen großer Datasets; CQL statt SQL; inspiriert von Google BigTable. (Hinweis: 'column-oriented Storage' in RDBMS = spaltenweises Speichern für schnelles Analytics-Lesen, langsamer beim Schreiben.)\n\n**Aggregate Awareness:** Key-Value, Document und Column-Family sind *aggregate-aware* - Daten werden denormalisiert um eine zentrale Entität gruppiert (leicht zu sharden). RDBMS und Graph-DBs sind *aggregate-ignorant* (Kombination via Joins bzw. Traversals).",
+          "keyTerms": [
+            { "term": "Key-Value Store", "definition": "Simpelster NoSQL-Typ: eindeutiger Key -> Value; DBMS versteht den Wert nicht, Abfrage nur via bucket+key. Ideal fuer Caching/Sessions." },
+            { "term": "Document Store", "definition": "Speichert strukturierte Dokumente (JSON/BSON) in Collections; Felder sind abfragbar (filter, aggregate), Dokumente sind self-contained statt aufgejoint." },
+            { "term": "Column-Family DB", "definition": "Row Key -> Columns/Super Columns, schema-less, fuer Big-Data-Analytics; nutzt z.B. CQL (Cassandra), inspiriert von Google BigTable." },
+            { "term": "Aggregate Awareness", "definition": "Designprinzip, alle zu einer Entitaet gehoerenden Daten denormalisiert in einer Einheit zu speichern (aggregate-aware) - erleichtert Sharding; Gegenteil aggregate-ignorant (Joins/Traversals)." }
+          ],
+          "examples": [
+            "MongoDB bettet Reviews + Metadaten als Arrays direkt ins Laptop-Dokument ein (Embedded Documents) statt JOINs.",
+            "Key-Value: db.GET(bucket, key) - kein Suchen nach 'Nachname' moeglich."
+          ]
+        },
+        {
+          "title": "Graph-Datenbanken & Neo4j (Cypher)",
+          "content": "## Beziehungen als First-Class Citizens\n\nIn RDBMS werden Beziehungen über **Foreign Keys** abgebildet - tiefe Netzwerke (Freunde von Freunden von ...) erfordern viele teure **Joins** und werden langsam. Eine **Graph Database** speichert die Beziehung *selbst* als physisches Datenelement.\n\n```diagram:Graph-Modell (Neo4j)\n   (Person {name:\"Anna\"})\n        │ [:KNOWS {seit:2019}]\n        ▼\n   (Person {name:\"Ben\"})───[:WORKS_AT]──>(Firma {name:\"FH\"})\n```\n\n- **Nodes (Knoten):** Entitäten/Instanzen (≈ Zeile in SQL). **Labels** gruppieren Nodes in Typen (≈ Tabelle), z.B. `:Member`, `:Restaurant`.\n- **Edges / Relationships (Kanten):** gerichtete Verbindungen ('KNOWS', 'REVIEWED'); zentrales Element, mit eigenen Properties.\n- **Properties:** Attribute von Nodes oder Edges (≈ Spalten), flexibel pro Node.\n\nAbfragen heißen **Traversals** und nutzen die deklarative Sprache **Cypher**:\n\n```sql\nMATCH (m:Member)-[r:REVIEWED]->(res:Restaurant)\nWHERE (r.value > 4 OR r.taste > 4) AND res.state = \"STMK\"\nRETURN m, r, res\n```\n\n`MATCH` sucht Muster (wie SELECT), `(m)-[r]->(res)` beschreibt die gerichtete Beziehung, `WHERE` filtert. Komplexe Pfad-Queries, die in SQL Minuten dauern, laufen in Neo4j in **Millisekunden**.\n\n*Use Cases:* Soziale Netze, Empfehlungssysteme, Fraud Detection, Logistik/Routing, Identity-Management. *Limitation:* Graph-DBs **skalieren schlecht über viele Server** und nutzen kein Standard-SQL.\n\n**Kahoot:** Neo4j-Abfragesprache = **Cypher**; bestes DB für relationship-rich data = **Graph database**.",
+          "keyTerms": [
+            { "term": "Node / Edge / Property", "definition": "Node = Entitaet (mit Label als Typ), Edge = gerichtete Beziehung (First-Class Citizen mit eigenen Properties), Property = Attribut von Node oder Edge." },
+            { "term": "Cypher", "definition": "Deklarative Abfragesprache von Neo4j; MATCH sucht Muster (wie SELECT), die Pfad-Syntax (m)-[r]->(res) beschreibt gerichtete Beziehungen." },
+            { "term": "Traversal", "definition": "Graph-Abfrage entlang vorhandener Kanten/Pfade - statt teurer Joins navigiert die DB direkt durch die Beziehungen." }
+          ],
+          "examples": [
+            "Kahoot: 'Which query language is used by Neo4j?' -> CYPHER.",
+            "Kahoot: 'DB for relationship-rich data (social networks, recommendations)?' -> Graph database."
+          ]
+        },
+        {
+          "title": "SQL vs. MongoDB vs. Neo4j - Entscheidungsmatrix",
+          "content": "## Die richtige Datenbank wählen\n\n| Feature | SQL / Relational | MongoDB (Document) | Neo4j (Graph) |\n|---------|------------------|--------------------|---------------|\n| **Datenmodell** | Tabellen, Zeilen, Spalten | Collections & Documents | Nodes, Edges, Properties |\n| **Schema** | Fixed | Schema-less | Flexible Graph-Struktur |\n| **Beziehungen** | Foreign Keys + Joins | Embedded Documents | Edges sind zentral |\n| **Query-Sprache** | SQL | MongoDB Query Language | Cypher |\n| **Stärke** | Konsistenz & ACID | Flexibilität & Skalierbarkeit | Schnelle Beziehungs-Traversal |\n| **Limitation** | Komplexe Joins werden langsam | Schwach bei tiefen Beziehungen | Schlechter Scale-Out |\n| **Best For** | Banking, ERP, Business | Web-Apps, Produktkataloge, Content | Soziale Netze, Empfehlungen, Fraud Detection |\n\n**Entscheidungsregel:**\n- **SQL**, wenn Daten *strukturiert* sind, *Transaktionen* gebraucht werden und Beziehungen wichtig sind.\n- **MongoDB**, wenn Daten *flexibel* sind, *Skalierbarkeit* gebraucht wird und man Web-/Mobile-Apps baut.\n- **Neo4j**, wenn *Beziehungen komplex und zentral* sind und Queries auf Verbindungen/Pfaden beruhen.\n\nDie Wahl der richtigen Datenbank hängt von **Struktur, Skalierbarkeit und Beziehungskomplexität** ab.\n\n*Strukturvergleich:* Eine SQL-`CREATE TABLE students(name VARCHAR, age INT, course VARCHAR)` entspricht in MongoDB einem freien JSON `{ \"name\":\"Alice\", \"age\":22, \"course\":\"Databases\" }`. SQL `SELECT name FROM students WHERE course='Databases'` entspricht `db.students.find({course:\"Databases\"},{name:1})`.",
+          "keyTerms": [
+            { "term": "SQL vs MongoDB vs Neo4j", "definition": "Relational (Tabellen, ACID, Joins) vs. Document (JSON-Collections, flexibel, embedded) vs. Graph (Nodes/Edges, Cypher, schnelle Traversals) - Wahl je nach Struktur/Skalierung/Beziehung." },
+            { "term": "Row->Document, Table->Collection", "definition": "MongoDB-Analogie: eine SQL-Zeile entspricht einem Dokument, eine SQL-Tabelle einer Collection, eine SQL-Datenbank einer Gruppe von Collections." }
+          ]
+        },
+        {
+          "title": "Zap Prüfungs-Spickzettel (Modul 10)",
+          "content": "## Must-Know auf einen Blick\n\n**DA vs. DBA (Exam Q26):**\n- **DA / IRM** = strategisch, global, Governance, ERDs, berichtet an Top-Management.\n- **DBA** = technisch/operativ, installiert/tuned DBMS, Backup/Recovery, erzwingt Prozeduren.\n- **Staff** = berät (keine Autorität); **Line** = plant, implementiert, *erzwingt*.\n- DBA-Operationen folgen dem **DBLC**. Q26-Figur = z.B. 'DBA functional organization according to DBLC' (NICHT Normalisierung / Data-Flow / ER).\n\n**Management-Ebenen:** Top = strategisch/Policy; Middle = taktisch; Operational = Tagesgeschäft.\n\n**Security (CIA + Compliance):**\n- **Confidentiality** = Zugriffsschutz (Encryption!).\n- **Integrity** = Konsistenz/Genauigkeit (Constraints, FKs).\n- **Availability** = Verfügbarkeit (Backup, Failover, Redundanz).\n- **Compliance** = Regelkonformität (GDPR, Audits).\n- Falle: 'Availability = encrypted' ist FALSCH (Encryption = Confidentiality).\n- **Vulnerability** -> **Threat** -> **Breach**. **GRANT/REVOKE** (DCL), **RBAC**, **Views** als Filter.\n\n**Backup:** Full / Differential / Incremental / Log; Off-Site + Disaster Recovery = Availability.\n\n**NoSQL:**\n- 'NoSQL' = **Not Only SQL**. 4 Typen: **Key-Value, Document, Column-Family, Graph** (NICHT Spreadsheet!).\n- **Dirty Data** = Errors/Inconsistencies.\n- **Horizontal Scaling / Sharding**, **BASE** statt ACID, **CAP** = wähle 2 von C/A/P.\n- **MongoDB** = Document, Embedded/Aggregate-aware. **Neo4j** = Graph, Sprache **Cypher**, Edges = First-Class Citizens. Graph-DBs für relationship-rich data.\n- **NewSQL** = ACID + horizontale Skalierung.",
+          "keyTerms": [
+            { "term": "Q26-Merksatz", "definition": "Eine DBA-Figur zeigt typischerweise die 'DBA functional organization according to DBLC model' oder die DA-vs-DBA-Abgrenzung - nicht Normalisierung, Data-Flow oder ER-Diagramm." }
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "type": "multiple-choice",
+          "question": "In einem Unternehmen legt der IT-Mitarbeiter Thomas die globale Datenarchitektur fest, entwirft die konzeptionellen Entity-Relationship-Diagramme (ERDs) für künftige Projekte und definiert die Compliance-Richtlinien (Governance) für den Umgang mit Kundendaten. Welche Rolle füllt Thomas hier aus?",
+          "options": [
+            "Database Administrator (DBA)",
+            "System Administrator (SysAdmin)",
+            "Data Administrator (DA) / Information Resource Manager",
+            "Data Entry Clerk"
+          ],
+          "correctAnswer": 2,
+          "explanation": "Thomas übernimmt klar die strategische, geschäftsorientierte und architektonische Planung. Dies ist das Profil eines Data Administrators (DA). Ein DBA (Database Administrator) würde sich um die technische Implementierung, Patches und Performance-Tuning in der eigentlichen SQL-Software kümmern."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Im Rahmen der 'CIA Triade' der Datensicherheit wurde auf dem Datenbankserver ein redundantes Cluster (Failover-Nodes) eingerichtet und eine tägliche Off-Site-Backup-Routine automatisiert. Welches der drei Kernziele der Security soll damit primär gesichert werden?",
+          "options": [
+            "Confidentiality (Vertraulichkeit)",
+            "Integrity (Integrität)",
+            "Availability (Verfügbarkeit)",
+            "Authorization"
+          ],
+          "correctAnswer": 2,
+          "explanation": "Backups, Failover-Systeme und Redundanzen dienen der Availability (Verfügbarkeit). Sie stellen sicher, dass autorisierte Nutzer auf die Daten zugreifen können, selbst wenn primäre Hardware defekt ist oder durch Ransomware verschlüsselt wurde."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Eine E-Commerce Plattform speichert ihre Produktdaten in einer NoSQL Document Database (MongoDB). Ein Produkt ('Laptop') hat verschiedene Ausführungen, Reviews und Metadaten. Wie speichert MongoDB typischerweise diese komplexen Daten, um schnelle Ladezeiten ohne SQL-JOINs zu erreichen?",
+          "options": [
+            "Es normalisiert die Daten strikt in die 3. Normalform (3NF) in separate Tabellen.",
+            "Es nutzt 'Aggregate Awareness' und bettet die Reviews und Metadaten als Arrays direkt in das Haupt-JSON-Dokument des Laptops ein (Embedded Documents).",
+            "Es speichert die Daten als Nodes und Edges, die per Cypher abgefragt werden.",
+            "Es erstellt hunderte kleine Dateien auf dem Desktop des Servers."
+          ],
+          "correctAnswer": 1,
+          "explanation": "Document Stores wie MongoDB umgehen das Performance-Problem vieler JOINs, indem sie alle zugehörigen Daten eines Objekts (Aggregate) physisch in einem einzigen JSON-Dokument einkapseln. Ein Read-Operation liefert sofort alle relevanten Daten."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Welche Art von NoSQL-Datenbank behandelt die *Beziehungen (Relationships)* zwischen Datenpunkten nicht als Fremdschlüssel (Foreign Keys), sondern als völlig eigenständige, speicherbare Datenelemente ('First-Class Citizens'), was sie perfekt für das schnelle Traversieren von sozialen Netzwerken macht?",
+          "options": [
+            "Key-Value Stores (z.B. Redis)",
+            "Relational Databases (z.B. MySQL)",
+            "Column-Oriented Databases (z.B. Cassandra)",
+            "Graph Databases (z.B. Neo4j)"
+          ],
+          "correctAnswer": 3,
+          "explanation": "Graph-Datenbanken (Nodes, Edges, Properties) speichern die Kanten (Edges) explizit ab. Anstatt bei einem komplexen Netzwerk (wer kennt wen, der wen gekauft hat) rechenintensive JOINs on-the-fly berechnen zu müssen, navigiert die Graph-DB in Millisekunden entlang der bereits existierenden Kanten."
+        },
+        {
+          "type": "true-false",
+          "question": "Ein zentraler Grund für den Aufstieg von NoSQL-Datenbanken ist deren Fähigkeit zur 'horizontalen Skalierung' (Scale-Out), bei der die Rechenlast auf Tausende handelsübliche, günstige Server verteilt werden kann, während relationale Datenbanken meist teuer 'vertikal' (stärkere CPU/RAM in einem einzigen Mainframe) skaliert werden müssen.",
+          "correctAnswer": true,
+          "explanation": "Korrekt. RDBMS erfordern durch ihre strikte Konsistenzprüfung und ACID-Garantien meist einen zentralisierten Speicherknoten (Scale-Up). NoSQL-Systeme (besonders Key-Value oder Column-Family) wurden speziell dafür designt, Daten über billige Commodity-Hardware zu verteilen (Scale-Out/Sharding)."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Eine Prüfungsfrage zeigt eine Abbildung mit der Beschriftung 'DBA functional organization according to DBLC model'. Was stellt diese Figur dar?",
+          "options": [
+            "Den Datenbank-Normalisierungsprozess (1NF bis 3NF)",
+            "Ein Data-Flow-Diagramm der Web-Architektur",
+            "Die funktionale Organisation der Database-Administration-Aufgaben entlang des Database Life Cycle (Planung, Design, Betrieb, Wartung ...)",
+            "Ein Entity-Relationship-Diagramm der Kundendatenbank"
+          ],
+          "correctAnswer": 2,
+          "explanation": "Die Figur zeigt die DBA-Funktionsorganisation gemäß den Phasen des DBLC (Database Life Cycle). Sie ist weder eine Normalisierung, noch ein Data-Flow- oder ER-Diagramm - ein typischer Distraktor in Exam Q26."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Ein DBA in einer reinen 'Staff Position' stellt fest, dass eine Abteilung gegen die Datenstandards verstößt. Was kann er gemäß seiner Positionsdefinition tun?",
+          "options": [
+            "Er kann die Einhaltung der Policies erzwingen und Sanktionen verhängen.",
+            "Er kann beratend eine Strategie empfehlen, hat aber keine Autorität, die Standards durchzusetzen oder den Konflikt zwangsweise zu lösen.",
+            "Er übernimmt automatisch das Netzwerk-Management der Abteilung.",
+            "Er muss die Datenbank physisch neu installieren."
+          ],
+          "correctAnswer": 1,
+          "explanation": "In einer Staff Position agiert der DBA rein beratend (devises strategy without enforcement authority). Erst in einer Line Position hätte er die Autorität, Policies, Standards und Prozeduren zu planen, zu implementieren und zu erzwingen."
+        }
+      ]
+    }
+  ]
+}

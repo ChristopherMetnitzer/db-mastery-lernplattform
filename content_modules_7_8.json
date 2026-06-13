@@ -1,0 +1,449 @@
+{
+  "modules": [
+    {
+      "id": "module-7",
+      "title": "Advanced SQL",
+      "description": "Erweiterte DDL/DML, Integritäts-Constraints, alle JOIN-Arten, Views, Large-Object-Datentypen sowie prozedurales SQL mit Stored Procedures und Triggern.",
+      "coreCompetencies": [
+        "Die SQL-Befehlsgruppen DDL, DML, DCL und TCL unterscheiden und korrekt einordnen",
+        "Alle Integritäts-Constraints (PRIMARY KEY, FOREIGN KEY, UNIQUE, NOT NULL, CHECK, DEFAULT) auf Spalten- und Tabellenebene implementieren",
+        "Tabellen mit CREATE TABLE, CREATE TABLE AS SELECT und ALTER TABLE anlegen und nachträglich verändern",
+        "Daten mit INSERT, UPDATE und DELETE sicher manipulieren und die Gefahr fehlender WHERE-Klauseln einschätzen",
+        "Alle sechs JOIN-Arten (NATURAL, CROSS, INNER, LEFT, RIGHT, FULL OUTER) sowie SELF JOIN anwenden",
+        "Views als virtuelle Tabellen zur Abstraktion und Sicherheit erstellen und Materialized Views abgrenzen",
+        "Large Objects (Fotos, Videos, CAD) als BLOB/CLOB/NCLOB speichern und das Pointer-Konzept verstehen",
+        "Prozedurales SQL einsetzen: Stored Procedures, Trigger (BEFORE/AFTER, NEW/OLD) und Funktionen erstellen"
+      ],
+      "sections": [
+        {
+          "title": "SQL-Befehlsgruppen: DDL, DML, DCL, TCL",
+          "content": "SQL ist keine monolithische Sprache, sondern in vier Befehlsgruppen organisiert. Wer einen Befehl der falschen Gruppe zuordnet, verliert in der Prüfung sofort Punkte.\n\n| Gruppe | Bedeutung | Befehle | Zweck |\n|--------|-----------|---------|-------|\n| **DDL** | Data Definition Language | CREATE, ALTER, DROP, TRUNCATE | Struktur (Schema) definieren |\n| **DML** | Data Manipulation Language | INSERT, UPDATE, DELETE | Daten (Inhalt) ändern |\n| **DCL** | Data Control Language | GRANT, REVOKE | Rechte/Zugriff steuern |\n| **TCL** | Transaction Control Language | COMMIT, ROLLBACK, SAVEPOINT | Transaktionen steuern |\n\n**Wichtige Abgrenzung:** `TRUNCATE` sieht aus wie ein DML-Befehl (es entfernt alle Zeilen), gehört aber zu **DDL**. Es gibt die Speicherblöcke frei und ist daher viel schneller als ein `DELETE` ohne WHERE, kann aber nicht per ROLLBACK rückgängig gemacht werden. DDL-Befehle wie `CREATE TABLE` werden **automatisch committed** (auto-commit) und sind nicht rollback-fähig.\n\n*Prüfungsfalle:* `SELECT` wird oft fälschlich als eigene Gruppe (DQL) bezeichnet; in dieser Lehre zählt es zur Datenabfrage und ist von den manipulierenden DML-Befehlen abzugrenzen.",
+          "keyTerms": [
+            { "term": "DDL", "definition": "Data Definition Language: erzeugt, ändert und löscht Datenbankobjekte (CREATE, ALTER, DROP, TRUNCATE). DDL-Befehle werden automatisch committed." },
+            { "term": "TCL", "definition": "Transaction Control Language: steuert Transaktionen mit COMMIT, ROLLBACK und SAVEPOINT." }
+          ],
+          "examples": [
+            "ALTER TABLE Kunden ADD Email VARCHAR(255);  -- DDL",
+            "UPDATE Kunden SET Stadt = 'Wien' WHERE ID = 1;  -- DML"
+          ]
+        },
+        {
+          "title": "Integritäts-Constraints (PK, FK, UNIQUE, NOT NULL, CHECK, DEFAULT)",
+          "content": "Constraints sind Regeln, die auf Tabellenspalten erzwungen werden, um die **Datenintegrität** zu sichern und fehlerhafte Eingaben zu blockieren. Sie können auf Spaltenebene (column-level) oder Tabellenebene (table-level) mit dem Schlüsselwort `CONSTRAINT` definiert werden. Dies ist ein zentrales Prüfungsthema (Q25).\n\n| Constraint | Zweck | Beispiel |\n|------------|-------|----------|\n| `PRIMARY KEY` | **Entity Integrity**: eindeutig + automatisch NOT NULL | `CUS_CODE INTEGER PRIMARY KEY` |\n| `FOREIGN KEY` | **Referential Integrity**: verweist auf PK einer anderen Tabelle | `FOREIGN KEY (V_CODE) REFERENCES VENDOR(V_CODE)` |\n| `UNIQUE` | Alle Werte der Spalte(n) müssen eindeutig sein | `UNIQUE (CUS_LNAME, CUS_FNAME)` |\n| `NOT NULL` | Spalte darf keinen NULL-Wert annehmen | `CUS_LNAME VARCHAR(15) NOT NULL` |\n| `CHECK` | Validiert Werte gegen eine Bedingung | `CHECK (PART_PRICE >= 0)` |\n| `DEFAULT` | Standardwert beim INSERT, falls keiner angegeben | `CUS_BALANCE DECIMAL(9,2) DEFAULT 0.00` |\n\nSQL verhindert jede Datenänderung, die einen Constraint verletzt. Merke den Unterschied: **PRIMARY KEY** = eindeutig UND NOT NULL (nur einmal pro Tabelle erlaubt); **UNIQUE** = eindeutig, erlaubt aber (je nach DBMS) einen NULL-Wert und kann mehrfach pro Tabelle vorkommen.",
+          "keyTerms": [
+            { "term": "Entity Integrity", "definition": "Garantiert, dass jede Zeile eindeutig identifizierbar ist – erzwungen durch den PRIMARY KEY (eindeutig + NOT NULL)." },
+            { "term": "Referential Integrity", "definition": "Garantiert, dass ein FOREIGN-KEY-Wert immer auf einen existierenden PRIMARY-KEY-Wert in der referenzierten Tabelle zeigt." }
+          ],
+          "examples": [
+            "CREATE TABLE CUSTOMER (\n  CUS_CODE INTEGER PRIMARY KEY,\n  CUS_LNAME VARCHAR(15) NOT NULL,\n  CUS_AREACODE CHAR(3) DEFAULT '615' NOT NULL\n    CHECK(CUS_AREACODE IN ('615','713','931')),\n  CUS_BALANCE DECIMAL(9,2) DEFAULT 0.00,\n  CONSTRAINT CUS_UI1 UNIQUE (CUS_LNAME, CUS_FNAME)\n);"
+          ]
+        },
+        {
+          "title": "DDL – Tabellen erstellen & kopieren (CREATE, CREATE AS SELECT, INDEX)",
+          "content": "Mit `CREATE TABLE` legt man eine neue Tabelle samt Spalten, Datentypen und Constraints an. `CREATE SCHEMA AUTHORIZATION` erzeugt eine logische Gruppierung von Objekten für einen Nutzer/eine Anwendung.\n\n```sql\nCREATE TABLE Persons (\n  PersonID INT,\n  LastName VARCHAR(255) NOT NULL,\n  CityName VARCHAR(255),\n  PRIMARY KEY (PersonID),\n  FOREIGN KEY (CityName) REFERENCES City\n);\n```\n\n**CREATE TABLE AS SELECT (CTAS):** Erstellt schnell eine neue Tabelle aus den Spalten und Zeilen einer Abfrage – ideal für Backups.\n\n```sql\nCREATE TABLE IF NOT EXISTS PART AS\nSELECT P_CODE AS PART_CODE, P_PRICE AS PART_PRICE, V_CODE\nFROM PRODUCT;\n```\n\n*Wichtige Prüfungsfalle:* CTAS kopiert **Struktur + Daten**, aber **KEINE** Entity- oder Referential-Integrity-Regeln. Primary Keys und Foreign Keys müssen danach manuell per `ALTER TABLE` ergänzt werden!\n\n**INDEX:** Mit `CREATE [UNIQUE] INDEX idx ON tabelle(spalte)` beschleunigt man Suchen und verhindert (mit UNIQUE) doppelte Werte. Ein Index ist eine separate Datenstruktur und verändert die Daten der Basistabelle nicht.",
+          "keyTerms": [
+            { "term": "CTAS", "definition": "CREATE TABLE AS SELECT – kopiert Struktur und Daten einer Abfrage in eine neue Tabelle, jedoch ohne PK/FK-Constraints." },
+            { "term": "Index", "definition": "Hilfsstruktur zur Beschleunigung von Suchabfragen; mit dem Zusatz UNIQUE verhindert er auch doppelte Spaltenwerte." }
+          ],
+          "examples": [
+            "CREATE UNIQUE INDEX idx_email ON Kunden(Email);"
+          ]
+        },
+        {
+          "title": "DDL – ALTER & DROP/TRUNCATE",
+          "content": "**ALTER TABLE** verändert eine bestehende Tabelle: Spalten hinzufügen, ändern oder löschen sowie Constraints nachträglich anlegen.\n\n```sql\nALTER TABLE Customers ADD Email VARCHAR(255);\nALTER TABLE Customers DROP COLUMN Email;\nALTER TABLE PART ADD PRIMARY KEY (PART_CODE);\nALTER TABLE PART ADD FOREIGN KEY (V_CODE) REFERENCES VENDOR(V_CODE);\nALTER TABLE PART ADD CHECK (PART_PRICE >= 0);\n```\n\nGenau so ergänzt man nach einem CTAS die verlorenen Schlüssel-Constraints.\n\n**DROP vs. TRUNCATE vs. DELETE** – ein beliebter Stolperstein:\n\n```compare\nDROP TABLE\n- Löscht die GANZE Tabelle (Struktur + Daten)\n- Tabelle existiert danach nicht mehr\n- DDL, nicht rollback-fähig\n===\nTRUNCATE TABLE\n- Löscht nur die Daten, Tabelle bleibt\n- Sehr schnell (gibt Speicherblöcke frei)\n- DDL, nicht rollback-fähig\n===\nDELETE FROM\n- Löscht Zeilen (mit WHERE gezielt)\n- Langsamer (Zeile für Zeile, geloggt)\n- DML, per ROLLBACK rückgängig machbar\n```",
+          "keyTerms": [
+            { "term": "DROP", "definition": "DDL-Befehl, der ein Objekt (Tabelle, Datenbank, View) vollständig aus der Datenbank entfernt." }
+          ],
+          "examples": [
+            "DROP TABLE table_name;",
+            "TRUNCATE TABLE table_name;"
+          ]
+        },
+        {
+          "title": "DML: INSERT, UPDATE, DELETE",
+          "content": "Data Manipulation Language (DML) modifiziert die gespeicherten Daten.\n\n**INSERT** fügt neue Zeilen ein – mit oder ohne Spaltenliste (ohne Liste muss die Wertereihenfolge exakt der Spaltenreihenfolge entsprechen):\n```sql\nINSERT INTO Tabelle (Spalte1, Spalte2) VALUES (Wert1, Wert2);\nINSERT INTO Tabelle VALUES (Wert1, Wert2, Wert3);\n```\n\n**UPDATE** ändert vorhandene Zeilen:\n```sql\nUPDATE Tabelle SET Spalte = Neuer_Wert WHERE Bedingung;\n```\n\n**DELETE** löscht Zeilen:\n```sql\nDELETE FROM Tabelle WHERE Bedingung;\n```\n\n**Die gefährlichste Falle in SQL – die fehlende WHERE-Klausel:** Ein DML-Befehl ohne WHERE wirkt auf die **gesamte** Tabelle. `UPDATE Personal SET Gehalt = Gehalt * 1.1;` erhöht das Gehalt JEDES Mitarbeiters; `DELETE FROM Tabelle;` leert die ganze Tabelle. Es kommt kein Syntaxfehler – die Datenbank führt den Befehl gnadenlos aus. Innerhalb einer Transaktion lässt sich der Fehler nur durch ein `ROLLBACK` retten (sofern noch kein COMMIT erfolgte).",
+          "keyTerms": [
+            { "term": "WHERE-Klausel", "definition": "Filterbedingung, die festlegt, auf welche Zeilen ein UPDATE oder DELETE wirkt. Fehlt sie, sind ALLE Zeilen betroffen." }
+          ],
+          "examples": [
+            "UPDATE CUSTOMER SET CUST_BALANCE = CUST_BALANCE + 277.55 WHERE CUST_NUMBER = 10016;",
+            "DELETE FROM person WHERE name = 'Paul';"
+          ]
+        },
+        {
+          "title": "JOINs – Grundkonzept & die sechs Arten",
+          "content": "Um normalisierte, über mehrere Tabellen verteilte Daten wieder zusammenzuführen, nutzt man JOINs. Ein JOIN nimmt zwei Relationen und liefert eine neue Relation. Voraussetzung ist meist ein gemeinsames Feld und eine Beziehung. JOINs sind in der Regel schneller als Subqueries und lassen die Basistabellen unverändert.\n\nMan unterscheidet **EQUI JOIN** (Vergleich mit `=`) und **NON-EQUI JOIN** (`<`, `>`, `>=`, `<=`). Der SQL-Standard kennt **sechs** JOIN-Typen:\n\n1. **NATURAL JOIN** – automatischer Join über alle gleichnamigen Spalten (gleicher Datentyp); behält nur eine Kopie jeder gemeinsamen Spalte; **keine** ON-Klausel.\n2. **CROSS JOIN** – kartesisches Produkt: jede Zeile aus A mit jeder aus B (A×B). Mit WHERE verhält es sich wie ein INNER JOIN.\n3. **INNER JOIN** – nur Zeilen mit Übereinstimmung in **beiden** Tabellen.\n4. **LEFT [OUTER] JOIN** – alle Zeilen der linken Tabelle + passende rechts; fehlende rechte Werte = NULL.\n5. **RIGHT [OUTER] JOIN** – Spiegelbild: alle Zeilen der rechten Tabelle.\n6. **FULL OUTER JOIN** – alle Zeilen beider Tabellen (NULL auf der jeweils fehlenden Seite).\n\nZusätzlich der **SELF JOIN**: eine Tabelle wird mit sich selbst verbunden (z. B. Mitarbeiter → Manager), oft wenn ein FK auf den eigenen PK verweist.",
+          "keyTerms": [
+            { "term": "EQUI JOIN", "definition": "JOIN, dessen Verbindungsbedingung den Gleichheitsoperator (=) verwendet." },
+            { "term": "SELF JOIN", "definition": "Eine Tabelle wird mit einer (logischen) Kopie ihrer selbst verbunden, um Hierarchien oder Beziehungen innerhalb derselben Tabelle abzubilden." }
+          ],
+          "examples": [
+            "SELECT name, course_id FROM student NATURAL JOIN takes;",
+            "SELECT a.company_name, b.company_name FROM company a, company b WHERE a.company_city = b.company_city;  -- Self Join"
+          ]
+        },
+        {
+          "title": "JOIN-Vergleich & das CROSS-JOIN-Problem",
+          "content": "Welcher JOIN behält welche Zeilen? Diese Übersicht entscheidet viele Klausurfragen.\n\n| JOIN-Typ | Behaltene Zeilen | NULL-Auffüllung |\n|----------|------------------|------------------|\n| INNER | nur Treffer in beiden | keine |\n| LEFT OUTER | alle links + Treffer rechts | rechts |\n| RIGHT OUTER | alle rechts + Treffer links | links |\n| FULL OUTER | alle aus beiden | beide Seiten |\n| CROSS | jede Kombination (A×B) | keine |\n\n**CROSS JOIN / kartesisches Produkt:** Bei zwei Tabellen mit m und n Zeilen ergeben sich **m × n** Ergebniszeilen. 100 Kunden × 500 Bestellungen = 50.000 Zeilen. Das passiert oft **versehentlich**, wenn man die ON-/Join-Bedingung vergisst – eine klassische Fehlerquelle.\n\n```diagram:LEFT OUTER JOIN — alle Kunden, auch ohne Bestellung\n┌───────────┐        ┌───────────────┐\n│  KUNDE    │ 1    N │  BESTELLUNG   │\n│ (links)   │────────│  (rechts)     │\n└───────────┘        └───────────────┘\n   alle Zeilen          NULL falls\n   bleiben erhalten      kein Match\n```\n\n*Merksatz:* Brauchst du **alle** Datensätze einer Seite (z. B. auch Kunden ohne Bestellung), nimm einen OUTER JOIN. Ein INNER JOIN würde diese „verschlucken“.",
+          "keyTerms": [
+            { "term": "Kartesisches Produkt", "definition": "Vollständige Kombination aller Zeilen zweier Tabellen (m × n). Entsteht beim CROSS JOIN oder bei einem JOIN ohne Bedingung." }
+          ],
+          "examples": [
+            "SELECT * FROM Kunden CROSS JOIN Bestellungen;  -- 100 x 500 = 50.000 Zeilen",
+            "SELECT k.Name, COUNT(b.ID) FROM Kunden k LEFT JOIN Bestellungen b ON k.ID = b.KundeID GROUP BY k.Name;"
+          ]
+        },
+        {
+          "title": "Views (virtuelle Tabellen) & Materialized Views",
+          "content": "Eine **View** (Sicht) ist eine **virtuelle Tabelle**, deren Inhalt durch eine SELECT-Abfrage definiert wird. Sie speichert physisch **keine** eigenen Daten, sondern zieht sie bei jeder Abfrage dynamisch aus den Basistabellen.\n\n```sql\nCREATE VIEW customer_city_view AS\nSELECT CustomerID, CustomerName, City, Country\nFROM Customers\nWHERE City = 'Berlin';\n```\n\nViews können beliebige SELECT-Funktionen enthalten – WHERE, IN, BETWEEN, AND, ORDER BY, GROUP BY/HAVING, Aggregatfunktionen und arithmetische Ausdrücke. Man kann ihnen auch eigene Spaltennamen geben: `CREATE VIEW countgrade(grade, gradecount) AS SELECT grade, COUNT(*) ...`.\n\n**Vorteile:**\n- **Sicherheit:** Nutzer sehen nur erlaubte Spalten (z. B. Name, Abteilung – nicht Gehalt).\n- **Abstraktion:** komplexe Multi-Tabellen-JOINs werden zu einem einfachen `SELECT * FROM MeineView`.\n- **Datenunabhängigkeit:** Ändert sich die Basistabelle, passt man oft nur die View an, nicht den Anwendungscode.\n\n**Materialized View:** Im Gegensatz zur normalen View wird hier bei der Definition eine **physische Kopie** gespeichert. Vorteil: schnelle Lesezugriffe. Nachteil: Wird eine Basistabelle geändert, ist die Materialized View veraltet und muss aufgefrischt (aktualisiert) werden.",
+          "keyTerms": [
+            { "term": "View", "definition": "Virtuelle Tabelle, definiert durch eine gespeicherte SELECT-Abfrage; speichert selbst keine Daten." },
+            { "term": "Materialized View", "definition": "View, deren Ergebnis physisch gespeichert wird; muss bei Änderungen der Basistabellen aktiv aktualisiert werden." }
+          ],
+          "examples": [
+            "CREATE VIEW TeureProdukte AS SELECT Name, Preis FROM Produkte WHERE Preis > 1000;",
+            "CREATE VIEW agentview AS SELECT * FROM agents WHERE working_area='Bangalore' AND commission > .1;"
+          ]
+        },
+        {
+          "title": "Datentypen & Large Objects (BLOB / CLOB)",
+          "content": "Jede Spalte hat einen **Datentyp**, der zulässige Werte und Speicherform bestimmt: numerisch (`INTEGER`, `DECIMAL(p,s)`), Zeichen (`CHAR(n)`, `VARCHAR(n)`), Datum/Zeit (`DATE`, `DATETIME`, `TIMESTAMP`) usw.\n\n**Large Objects (LOBs)** – zentrales Prüfungsthema (Q24/Q25): Große Objekte wie **Fotos, Videos, CAD-Dateien, Audio oder lange Dokumente** werden in speziellen Large-Object-Datentypen gespeichert:\n\n| Typ | Voller Name | Inhalt |\n|-----|-------------|--------|\n| **BLOB** | Binary Large Object | rohe, uninterpretierte Binärdaten (Foto, Video, CAD, Audio) – Interpretation übernimmt eine Anwendung außerhalb der DB |\n| **CLOB** | Character Large Object | sehr große Mengen an Zeichendaten (lange Texte/Dokumente) |\n| **NCLOB** | National Character Large Object | große Mengen nationaler (z. B. Unicode-)Zeichendaten |\n\n*Merksatz:* **B**LOB = **B**inär (Bilder/Video/CAD), **C**LOB = **C**haracter (Text). \n\n**Wichtiges Detail:** Gibt eine Abfrage ein Large Object zurück, liefert das DBMS in der Regel einen **Pointer (Zeiger)** auf das Objekt statt das gesamte Objekt selbst – das spart Speicher und Übertragungszeit.\n\n**Auto-Increment & Sequences:** Für eindeutige Schlüsselwerte gibt es Auto-Increment-/Identity-Spalten (MySQL: `AUTO_INCREMENT`, nur eine Spalte pro Tabelle, meist als PK) und unabhängige **Sequences** (`CREATE SEQUENCE ... START WITH ... INCREMENT BY ...`; Oracle: `NEXTVAL`/`CURRVAL`, SQL Server: `NEXT VALUE FOR`). Einmal verbrauchte Sequence-Werte werden nicht wiederverwendet.",
+          "keyTerms": [
+            { "term": "BLOB", "definition": "Binary Large Object: speichert rohe Binärdaten wie Fotos, Videos und CAD-Dateien; die Interpretation übernimmt eine externe Anwendung." },
+            { "term": "CLOB / NCLOB", "definition": "Character Large Object bzw. National CLOB: speichern sehr große Mengen an (nationalen) Zeichendaten, z. B. lange Texte." },
+            { "term": "Sequence", "definition": "Unabhängiges Datenbankobjekt zur Erzeugung eindeutiger Zahlenwerte, nicht an eine bestimmte Tabelle/Spalte gebunden." }
+          ],
+          "examples": [
+            "CREATE TABLE Medien (ID INT PRIMARY KEY, Foto BLOB, Beschreibung CLOB);",
+            "CREATE SEQUENCE seq_kunde START WITH 1 INCREMENT BY 1;"
+          ]
+        },
+        {
+          "title": "Prozedurales SQL: Stored Procedures",
+          "content": "**Prozedurales SQL (PL/SQL, T-SQL, MySQL-Routinen)** erweitert das deklarative SQL um Programmierkonstrukte: Variablen, Bedingungen (`IF-THEN-ELSE`, `ELSEIF`), Schleifen (`LOOP`, `WHILE`, `DO-WHILE`) und Fehlerbehandlung. Solche Codeblöcke heißen **Persistent Stored Modules (PSM)** und laufen **im DBMS-Server**.\n\nEine **Stored Procedure** ist ein benannter, gespeicherter Block prozeduralen SQL-Codes, der per `CALL` aufgerufen wird. Vorteile: **weniger Netzwerkverkehr**, höhere Performance, gekapselte Geschäftslogik und Wiederverwendbarkeit.\n\n```sql\nDELIMITER //\nCREATE PROCEDURE UpdateProductStock(\n    IN p_ProductID INT,\n    IN p_NewStock INT\n)\nBEGIN\n    UPDATE Products\n    SET Stock = p_NewStock,\n        LastUpdated = NOW()\n    WHERE ProductID = p_ProductID;\nEND //\nDELIMITER ;\n\nCALL UpdateProductStock(2, 50);\n```\n\nParameter können `IN` (Eingabe), `OUT` (Ausgabe) oder `INOUT` sein. Mit `DECLARE` werden lokale Variablen angelegt. **Cursor** (OPEN/FETCH/CLOSE) erlauben zeilenweise Verarbeitung mehrerer Ergebniszeilen. **Functions** sind prozedurale Routinen, die einen Wert zurückgeben und in Triggern oder Procedures aufrufbar sind.",
+          "keyTerms": [
+            { "term": "Stored Procedure", "definition": "Benannter, im DBMS gespeicherter Block prozeduralen SQL-Codes, der per CALL ausgeführt wird; reduziert Netzwerkverkehr und kapselt Logik." },
+            { "term": "Cursor", "definition": "Konstrukt, das die Ergebniszeilen einer SELECT-Abfrage hält und zeilenweise (OPEN, FETCH, CLOSE) verarbeitet." }
+          ],
+          "examples": [
+            "DECLARE v_avg DOUBLE DEFAULT 0;",
+            "SHOW PROCEDURE STATUS WHERE Db = 'school_demo';"
+          ]
+        },
+        {
+          "title": "Trigger (ECA-Modell, BEFORE/AFTER, NEW/OLD)",
+          "content": "Ein **Trigger** ist eine spezielle Stored Procedure, die **automatisch** als Reaktion auf ein Datenbankereignis ausgeführt wird. Trigger folgen dem **ECA-Modell (Event-Condition-Action)**: Ein Ereignis (INSERT/UPDATE/DELETE) löst aus, eine optionale Bedingung wird geprüft, dann läuft die Aktion (Trigger-Body).\n\nZwei Dimensionen bestimmen jeden Trigger – **Timing** (`BEFORE`/`AFTER`, bei Views `INSTEAD OF`) und **Event** (`INSERT`/`UPDATE`/`DELETE`):\n\n```sql\nCREATE TRIGGER person_bi\nBEFORE INSERT ON person\nFOR EACH ROW\nIF NEW.age < 18 THEN\n  SIGNAL SQLSTATE '50001' SET MESSAGE_TEXT = 'Person must be older than 18.';\nEND IF;\n```\n\n**Pseudotabellen NEW und OLD** geben Zugriff auf die betroffenen Werte – ihre Verfügbarkeit hängt vom Event ab:\n\n| Event | OLD verfügbar? | NEW verfügbar? |\n|-------|:--------------:|:--------------:|\n| INSERT | Nein | Ja |\n| UPDATE | Ja | Ja |\n| DELETE | Ja | Nein |\n\n**Trigger-Typen nach Wirkung:** `FOR EACH ROW` (Row-Level – einmal pro betroffener Zeile) vs. `FOR EACH STATEMENT` (Statement-Level – einmal pro Befehl). **INSTEAD OF**-Trigger machen sonst nicht direkt änderbare **Views** beschreibbar. Naming-Konvention: `before_customer_insert` bzw. `customer_bi`.\n\n**Vorteile:** zentrale Logik (kein redundanter Code in jeder Anwendung), Integrität, Sicherheit. **Nachteile:** Performance-Overhead, schwer vorhersehbare **Kaskadeneffekte** (ein Trigger löst den nächsten aus), nicht planbar (kein Scheduling), geringere Portabilität (DBMS-Dialekte).",
+          "keyTerms": [
+            { "term": "Trigger", "definition": "Spezielle Stored Procedure, die automatisch BEFORE/AFTER einem INSERT/UPDATE/DELETE-Ereignis ausgeführt wird (ECA-Modell)." },
+            { "term": "NEW / OLD", "definition": "Pseudotabellen im Trigger: NEW = Werte nach dem Ereignis, OLD = Werte davor. Bei INSERT existiert nur NEW, bei DELETE nur OLD." },
+            { "term": "INSTEAD OF Trigger", "definition": "Trigger, der statt der ursprünglichen DML-Anweisung ausgeführt wird und so eine View beschreibbar macht." }
+          ],
+          "examples": [
+            "CREATE TRIGGER person_bd BEFORE DELETE ON person FOR EACH ROW\nINSERT INTO person_archive (name, age) VALUES (OLD.name, OLD.age);",
+            "CREATE TRIGGER person_ai AFTER INSERT ON person FOR EACH ROW\nUPDATE average_age SET average = (SELECT AVG(age) FROM person);"
+          ]
+        },
+        {
+          "title": "⚡ Prüfungs-Spickzettel Advanced SQL",
+          "content": "**Befehlsgruppen:** DDL (CREATE/ALTER/DROP/TRUNCATE), DML (INSERT/UPDATE/DELETE), DCL (GRANT/REVOKE), TCL (COMMIT/ROLLBACK/SAVEPOINT). TRUNCATE ist DDL und nicht rollback-fähig!\n\n**Constraints (Q25) – auswendig:**\n- `PRIMARY KEY` → Entity Integrity (eindeutig + NOT NULL, 1× pro Tabelle)\n- `FOREIGN KEY` → Referential Integrity\n- `UNIQUE`, `NOT NULL`, `CHECK(bedingung)`, `DEFAULT wert`\n\n**Large Objects (Q24/25):** Fotos/Videos/CAD → **BLOB** (binär); lange Texte → **CLOB**; nationale Zeichen → **NCLOB**. Abfrage liefert einen **Pointer**, nicht das Objekt selbst.\n\n**JOINs:** CROSS = m×n (kartesisch, oft versehentlich); INNER = nur Treffer; LEFT/RIGHT = alle einer Seite + NULL; FULL = alle beider; NATURAL = gleichnamige Spalten, keine ON-Klausel; SELF = Tabelle mit sich selbst.\n\n**Häufige Fallen:**\n- `CREATE TABLE AS SELECT` kopiert **keine** PK/FK-Constraints → danach `ALTER TABLE`.\n- DML ohne WHERE wirkt auf **alle** Zeilen (kein Syntaxfehler!).\n- Normale View speichert **keine** Daten; nur **Materialized Views** sind physisch.\n\n**Prozedurales SQL:** Stored Procedure = per `CALL`, reduziert Netzwerkverkehr. Trigger = automatisch (ECA), Timing BEFORE/AFTER/INSTEAD OF, Event INSERT/UPDATE/DELETE. INSERT→nur NEW, DELETE→nur OLD, UPDATE→beide. Nachteile: Overhead, Kaskaden, nicht planbar.",
+          "keyTerms": [
+            { "term": "Pointer (LOB)", "definition": "Bei der Abfrage eines Large Objects liefert das DBMS einen Zeiger auf das Objekt statt der gesamten Daten." }
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "type": "multiple-choice",
+          "question": "Du hast zwei Tabellen: `Kunden` (100 Zeilen) und `Bestellungen` (500 Zeilen). Du führst aus Versehen einen CROSS JOIN zwischen beiden aus. Wie viele Zeilen hat dein Resultset (Ergebnis)?",
+          "options": [
+            "500 Zeilen",
+            "100 Zeilen",
+            "600 Zeilen",
+            "50.000 Zeilen"
+          ],
+          "correctAnswer": 3,
+          "explanation": "Ein CROSS JOIN bildet das kartesische Produkt. Jede der 100 Kunden-Zeilen wird mit jeder der 500 Bestell-Zeilen kombiniert (100 * 500 = 50.000). Dies passiert oft ungewollt bei fehlender ON-Klausel."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Welche Art von JOIN verwendest du zwingend, wenn du eine Liste ALLER deiner Kunden abfragen möchtest, mitsamt der Anzahl ihrer Bestellungen, ABER du möchtest, dass auch Kunden auf der Liste aufscheinen, die bisher noch nie eine Bestellung getätigt haben?",
+          "options": [
+            "INNER JOIN",
+            "LEFT OUTER JOIN",
+            "NATURAL JOIN",
+            "CROSS JOIN"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Ein INNER JOIN würde Kunden ohne Bestellungen komplett verschlucken. Der LEFT OUTER JOIN garantiert, dass alle Datensätze der linken (primären) Tabelle (Kunden) im Ergebnis bleiben, auch wenn es rechts keinen Match gibt."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Welche Aussage über den Befehl `CREATE TABLE ... AS SELECT ...` ist absolut korrekt?",
+          "options": [
+            "Er kopiert die Tabellenstruktur, die Daten, sowie alle Primary und Foreign Keys automatisch mit.",
+            "Er erstellt eine View, keine physische Tabelle.",
+            "Er kopiert die Tabellenstruktur und die Daten, aber er übernimmt KEINERLEI Entity- oder Referential-Integrity Constraints (keine Primary Keys!).",
+            "Er leert die Ursprungstabelle."
+          ],
+          "correctAnswer": 2,
+          "explanation": "Der Befehl ist toll für schnelle Backups, aber man muss danach manuell mit `ALTER TABLE` die Primary Keys und Foreign Keys wieder hinzufügen, da diese beim Kopieren verloren gehen."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Was passiert, wenn du in einer großen Datenbank ein `UPDATE Personal SET Gehalt = Gehalt * 1.1;` ausführst, ohne eine WHERE-Klausel anzugeben?",
+          "options": [
+            "Die Datenbank meldet einen Syntax Error, da WHERE zwingend erforderlich ist.",
+            "Es wird nur die allererste Zeile in der Tabelle aktualisiert.",
+            "Es passiert nichts, das Kommando wird ignoriert.",
+            "Das Gehalt von JEDEM EINZELNEN Mitarbeiter in der gesamten Tabelle wird um 10% erhöht."
+          ],
+          "correctAnswer": 3,
+          "explanation": "Ein DML-Befehl ohne Filterbedingung wendet sich gnadenlos auf die gesamte Tabelle an. Dies ist einer der gefährlichsten Anfängerfehler in SQL."
+        },
+        {
+          "type": "true-false",
+          "question": "Eine VIEW speichert ihre Daten als physische Kopie dauerhaft auf der Festplatte, um Lesezugriffe zu beschleunigen.",
+          "correctAnswer": false,
+          "explanation": "Falsch. Normale Views sind nur gespeicherte Abfragen (Queries) und enthalten physisch überhaupt keine eigenen Daten. (Ausnahme: Materialized Views, aber das ist ein Spezialkonzept zur Performance-Steigerung)."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Wie werden große Objekte wie Fotos, Videos oder CAD-Dateien in einer relationalen Datenbank gespeichert?",
+          "options": [
+            "Als VARCHAR mit maximaler Länge",
+            "Als BLOB (Binary Large Object) bzw. CLOB für Texte",
+            "Ausschließlich außerhalb der Datenbank als reine Dateipfade",
+            "Als INTEGER-Referenznummer"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Binärdaten wie Fotos, Videos und CAD-Dateien werden als BLOB (Binary Large Object) gespeichert, große Textmengen als CLOB (Character Large Object) bzw. NCLOB für nationale Zeichen. Bei der Abfrage wird meist ein Pointer statt des Objekts zurückgegeben."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Welcher Constraint erzwingt die Entity Integrity, indem er eine Spalte gleichzeitig eindeutig UND NOT NULL macht?",
+          "options": [
+            "UNIQUE",
+            "CHECK",
+            "PRIMARY KEY",
+            "DEFAULT"
+          ],
+          "correctAnswer": 2,
+          "explanation": "Der PRIMARY KEY erzwingt Entity Integrity: Er ist eindeutig und automatisch NOT NULL und darf nur einmal pro Tabelle definiert werden. UNIQUE garantiert zwar Eindeutigkeit, erlaubt aber (je nach DBMS) NULL und kann mehrfach vorkommen."
+        }
+      ]
+    },
+    {
+      "id": "module-8",
+      "title": "Transactions & Concurrency Control",
+      "description": "Transaktionsmanagement, die ACID-Eigenschaften, Nebenläufigkeitsprobleme sowie deren Lösung durch Locking, Time Stamping, optimistische Verfahren und ANSI-Isolationsstufen.",
+      "coreCompetencies": [
+        "Eine Datenbanktransaktion als logische Arbeitseinheit definieren und mit COMMIT/ROLLBACK/SAVEPOINT steuern",
+        "Die vier ACID-Eigenschaften (Atomicity, Consistency, Isolation, Durability) präzise erklären",
+        "Die drei Nebenläufigkeitsprobleme (Lost Update, Uncommitted Data/Dirty Read, Inconsistent Retrieval) analysieren",
+        "Die fünf Stufen der Lock-Granularität (Database, Table, Page, Row, Field) gegeneinander abwägen",
+        "Lock-Typen (binär, shared, exclusive) sowie das Zwei-Phasen-Locking-Protokoll (2PL) anwenden",
+        "Deadlocks erkennen und Prevention, Detection und Avoidance unterscheiden",
+        "Time-Stamping- und optimistische Verfahren als alternative Concurrency-Methoden einordnen",
+        "Die vier ANSI-Isolationsstufen mit den von ihnen erlaubten Lesephänomenen verknüpfen"
+      ],
+      "sections": [
+        {
+          "title": "Was ist eine Transaktion?",
+          "content": "Eine **Transaktion** ist eine **logische Arbeitseinheit (Logical Unit of Work)** aus einer oder mehreren Datenbankoperationen (SELECT, INSERT, UPDATE, DELETE). Sie muss **entweder vollständig ausgeführt oder vollständig abgebrochen** werden – Zwischenzustände darf es nicht geben. Eine erfolgreiche Transaktion überführt die Datenbank von einem konsistenten in einen neuen konsistenten Zustand.\n\nNach dem SQL-Standard beginnt eine Transaktion **implizit** mit der ersten Anweisung. Sie endet durch eines von **vier** Ereignissen:\n\n1. **COMMIT** – Änderungen werden permanent gespeichert, Transaktion endet.\n2. **ROLLBACK** – Änderungen werden verworfen, Rückkehr zum vorherigen Zustand.\n3. **Programmende** – erfolgreiches Ende, entspricht einem COMMIT.\n4. **Abnormaler Abbruch** – z. B. Absturz, entspricht einem ROLLBACK.\n\nNicht jede Transaktion verändert Daten – eine reine SELECT-Abfrage ist ebenfalls eine Transaktion. Wichtig: Das DBMS prüft die **technische** Integrität (Constraints), kann aber die **semantische** (inhaltliche) Richtigkeit nicht beurteilen – dafür ist die korrekte Definition der Transaktion durch den Entwickler verantwortlich.",
+          "keyTerms": [
+            { "term": "Transaktion", "definition": "Logische Arbeitseinheit aus einer oder mehreren DB-Operationen, die als unteilbares Ganzes ausgeführt oder verworfen wird." },
+            { "term": "Serializability", "definition": "Eigenschaft eines Schedules, dasselbe Ergebnis zu liefern wie eine strikt serielle (hintereinander ausgeführte) Reihenfolge der Transaktionen." }
+          ],
+          "examples": [
+            "Verkaufstransaktion: INSERT INVOICE → INSERT LINE → UPDATE CUSTOMER (Saldo) → UPDATE PRODUCT (Bestand) → COMMIT;"
+          ]
+        },
+        {
+          "title": "TCL: COMMIT, ROLLBACK & SAVEPOINT",
+          "content": "Transaktionen werden über die **TCL (Transaction Control Language)** gesteuert – das sind die ANSI-Standardbefehle zur Sicherung von Integrität und Konsistenz.\n\n- **COMMIT** – speichert alle Änderungen der Transaktion **permanent** und beendet sie.\n- **ROLLBACK** – macht alle noch nicht committeten Änderungen rückgängig und stellt den vorherigen konsistenten Zustand wieder her.\n- **SAVEPOINT** – setzt einen Zwischenpunkt innerhalb einer Transaktion, zu dem man teilweise zurückrollen kann (`ROLLBACK TO savepoint`).\n\n```sql\nUPDATE PRODUCT SET PROD_QOH = PROD_QOH - 1 WHERE PROD_NUMBER = '89-WRE-Q';\nSAVEPOINT nach_bestand;\nUPDATE CUSTOMER SET CUST_BALANCE = CUST_BALANCE + 277.55 WHERE CUST_NUMBER = 10016;\n-- Fehler? -> ROLLBACK TO nach_bestand;\nCOMMIT;\n```\n\n**Wichtig:** ROLLBACK wirkt nur auf DML-Befehle (INSERT/UPDATE/DELETE). **DDL-Befehle** wie `CREATE TABLE` oder `CREATE INDEX` werden automatisch committed und können **nicht** zurückgerollt werden. Verschiedene DBMS starten Transaktionen unterschiedlich: SQL Server nutzt `BEGIN TRANSACTION`, Oracle `SET TRANSACTION`.",
+          "keyTerms": [
+            { "term": "COMMIT", "definition": "TCL-Befehl, der alle Änderungen einer Transaktion permanent in die Datenbank schreibt und die Transaktion beendet." },
+            { "term": "ROLLBACK", "definition": "TCL-Befehl, der alle noch nicht committeten Änderungen verwirft und den vorherigen konsistenten Zustand wiederherstellt." },
+            { "term": "SAVEPOINT", "definition": "Markierung innerhalb einer Transaktion, zu der gezielt teilweise zurückgerollt werden kann." }
+          ],
+          "examples": [
+            "BEGIN TRANSACTION; ... COMMIT TRANSACTION;",
+            "ROLLBACK TO SAVEPOINT nach_bestand;"
+          ]
+        },
+        {
+          "title": "Die ACID-Eigenschaften",
+          "content": "Jedes verlässliche DBMS garantiert Transaktionssicherheit durch die vier **ACID**-Eigenschaften – das Kern-Prüfungsthema (Q29).\n\n```compare\nAtomicity (Atomarität)\n- Alles oder nichts\n- Bei Fehler: kompletter Rollback\n- Transaktion = unteilbare Einheit\n===\nConsistency (Konsistenz)\n- Von konsistentem zu konsistentem Zustand\n- Alle Integritätsregeln eingehalten\n- Sonst: Abbruch der Transaktion\n===\nIsolation\n- Transaktionen stören sich nicht\n- Daten unsichtbar bis zum COMMIT\n- Wichtig im Mehrbenutzerbetrieb\n===\nDurability (Dauerhaftigkeit)\n- Nach COMMIT dauerhaft gespeichert\n- Überlebt Systemabstürze\n- Wiederherstellung via Transaction Log\n```\n\n**Merkhilfe für die Prüfung:**\n- **A**tomicity → „Alles oder nichts“ (hälftige Transaktion nach Stromausfall wird komplett zurückgerollt).\n- **C**onsistency → Regeln (PK, FK, CHECK) gelten vorher wie nachher.\n- **I**solation → parallele Transaktionen sehen die unbestätigten Daten der anderen nicht.\n- **D**urability → nach bestätigtem COMMIT ist alles permanent auf Platte.\n\n*Falle:* **Scalability** und **Redundancy** sind **keine** ACID-Eigenschaften – nur A, C, I, D.",
+          "keyTerms": [
+            { "term": "ACID", "definition": "Atomicity, Consistency, Isolation, Durability – die vier Garantien zuverlässiger Transaktionsverarbeitung." },
+            { "term": "Atomicity", "definition": "Eine Transaktion wird ganz oder gar nicht ausgeführt; bei Teilfehler wird alles zurückgerollt." }
+          ],
+          "examples": [
+            "Atomicity: Nach Stromausfall mitten in einer Überweisung wird die halbe Buchung komplett zurückgerollt.",
+            "Durability: Sobald die Bank das COMMIT bestätigt, überlebt die Buchung jeden Crash."
+          ]
+        },
+        {
+          "title": "Transaction Log & Recovery",
+          "content": "Das **Transaction Log (Transaktionsprotokoll)** ist eine fundamentale DBMS-Komponente, die **alle datenverändernden Transaktionen** mitschreibt. Es ist die Grundlage für die Wiederherstellung (Recovery) nach ROLLBACK, abnormalem Programmende oder Systemausfällen wie einem Plattencrash.\n\nGespeichert werden u. a.:\n- der **Operationstyp** (INSERT/UPDATE/DELETE) und das betroffene Objekt (Tabellenname),\n- die **Vorher- und Nachher-Werte** (before/after image) geänderter Felder,\n- **Zeiger** auf vorherige/nächste Einträge derselben Transaktion,\n- **Beginn und Ende (COMMIT)** jeder Transaktion.\n\n**Recovery-Logik:** Bei einem Systemausfall werden **nicht committete** Transaktionen zurückgerollt (rollback) und **committete, aber noch nicht physisch geschriebene** Transaktionen nachgezogen (roll forward). Ein gezieltes ROLLBACK betrifft nur die eine Transaktion – bereits committete Transaktionen bleiben (Durability) unangetastet.\n\nDas Log wird typischerweise in **separaten Dateien** geführt (oft auf anderen Platten), um das Risiko von disk-full-Situationen und Plattencrashs zu mindern.\n\n*Falle:* Das Transaction Log dient der **Datensicherheit/Recovery**, NICHT der Beschleunigung von Abfragen oder JOINs.",
+          "keyTerms": [
+            { "term": "Transaction Log", "definition": "Protokolldatei, die jede Datenänderung samt Vorher-/Nachher-Werten festhält und so Recovery sowie ROLLBACK ermöglicht." },
+            { "term": "Recovery", "definition": "Wiederherstellung eines konsistenten Datenbankzustands nach einem Fehler durch Roll-back unbestätigter und Roll-forward bestätigter Transaktionen." }
+          ]
+        },
+        {
+          "title": "Concurrency Control & die drei Nebenläufigkeitsprobleme",
+          "content": "**Concurrency Control** verwaltet die gleichzeitige Ausführung von Transaktionen in einem Mehrbenutzersystem. Ziel: **Serializability** sicherstellen und die **Isolation** wahren. Ein **Single-User-DBMS** garantiert Serializability automatisch; ein **Multiuser-DBMS** muss eigene Kontrollmechanismen implementieren.\n\nOhne Kontrolle drohen drei Probleme (Q-Kandidat):\n\n1. **Lost Update (Verlorenes Update):** T1 und T2 lesen denselben Wert (z. B. PROD_QOH = 35), ändern ihn und schreiben zurück – die Änderung der einen Transaktion überschreibt blind die der anderen. Ein Update geht verloren.\n2. **Uncommitted Data (Dirty Read):** T2 liest Daten, die T1 geändert, aber **noch nicht committed** hat. Wird T1 danach zurückgerollt, arbeitet T2 mit „Geisterdaten“, die nie existierten – Verletzung der Isolation.\n3. **Inconsistent Retrieval:** T1 liest mehrere Werte (z. B. eine Summe), während T2 mittendrin Daten ändert. T1 liest also einen Mix aus Vorher- und Nachher-Werten und berechnet ein falsches Ergebnis (z. B. 102 statt 92).\n\n**Konflikt-Regel:** Zwei Operationen stehen im Konflikt, wenn sie dieselben Daten betreffen und **mindestens eine ein WRITE** ist. Reine Lesezugriffe (read/read) sind nie ein Konflikt.",
+          "keyTerms": [
+            { "term": "Lost Update", "definition": "Zwei parallele Transaktionen überschreiben gegenseitig ihre Änderungen, wodurch ein Update verloren geht." },
+            { "term": "Dirty Read", "definition": "Eine Transaktion liest Daten, die eine andere noch nicht committed hat und ggf. später zurückrollt." },
+            { "term": "Inconsistent Retrieval", "definition": "Eine Transaktion liest Daten vor und nach der Änderung durch eine andere Transaktion und erhält dadurch ein inkonsistentes Ergebnis." }
+          ]
+        },
+        {
+          "title": "Der Scheduler & Lösungsmethoden im Überblick",
+          "content": "Der **Scheduler** legt die Ausführungsreihenfolge der Operationen nebenläufiger Transaktionen fest. Er erzeugt einen **serialisierbaren Schedule**, der dasselbe Ergebnis wie eine serielle Ausführung liefert, optimiert dabei CPU/Speicher und vermeidet starres First-come-first-served.\n\nFür konfliktbehaftete Operationen gibt es **drei Methodenfamilien** der Concurrency Control:\n\n```compare\nLocking (Sperren)\n- Häufigste Methode\n- Pessimistisch: Konflikt wahrscheinlich\n- Sperrt Datenelemente vor Zugriff\n===\nTime Stamping\n- Globaler, eindeutiger Zeitstempel je Transaktion\n- Eindeutig + monoton steigend\n- Konflikt -> Stop/Rollback/Restamp\n===\nOptimistic (Optimistisch)\n- Annahme: meiste Operationen kollidieren nicht\n- Phasen: Read -> Validation -> Write\n- Ideal für leseintensive Systeme\n```\n\n**Time-Stamping-Schemata gegen Deadlocks:** Beim **Wait/Die** wartet die ältere Transaktion auf die jüngere, die jüngere wird zurückgerollt (mit gleichem Zeitstempel neu gestartet). Beim **Wound/Wait** verdrängt (wound) die ältere die jüngere, die jüngere wartet auf die ältere. Optimistische Verfahren brauchen kein Locking/Stamping, eignen sich aber kaum für update-intensive Systeme.",
+          "keyTerms": [
+            { "term": "Scheduler", "definition": "DBMS-Komponente, die die verschachtelte Ausführungsreihenfolge nebenläufiger Operationen festlegt, um Serializability zu sichern." },
+            { "term": "Optimistic Concurrency", "definition": "Verfahren ohne Sperren, das Konflikte erst in einer Validierungsphase prüft (Read-, Validation-, Write-Phase)." }
+          ]
+        },
+        {
+          "title": "Locking & Lock-Granularität (DB > Table > Page > Row > Field)",
+          "content": "Locking ist die **häufigste** Concurrency-Methode. Ein **Lock** garantiert exklusiven (oder geteilten) Zugriff auf ein Datenelement; er wird vor dem Zugriff gesetzt und nach Abschluss freigegeben. Der **Lock Manager** des DBMS vergibt und überwacht Sperren automatisch.\n\nDie **Lock Granularity** (Q30) bestimmt, *wie viel* gesperrt wird – fünf Stufen vom Groben zum Feinen:\n\n```diagram:Lock-Granularität — von grob (oben) nach fein (unten)\n┌──────────────────────────────────┐\n│ DATABASE  — ganze DB gesperrt     │  grob, geringste Nebenläufigkeit\n├──────────────────────────────────┤\n│ TABLE     — ganze Tabelle         │\n├──────────────────────────────────┤\n│ PAGE      — Disk-Page (4/8/16 KB)  │  am häufigsten genutzt\n├──────────────────────────────────┤\n│ ROW       — einzelne Zeile        │  hohe Parallelität, viel Overhead\n├──────────────────────────────────┤\n│ FIELD     — einzelnes Attribut    │  fein, kaum implementiert\n└──────────────────────────────────┘\n```\n\n| Stufe | Beschreibung | Nebenläufigkeit | Overhead |\n|-------|--------------|:---------------:|:--------:|\n| **Database** | gesamte DB gesperrt, nur Batch | sehr gering | minimal |\n| **Table** | ganze Tabelle; andere Tabellen frei | gering | gering |\n| **Page** | ein Disk-Block (kann mehrere Zeilen enthalten); meistgenutzt | mittel | mittel |\n| **Row** | nur die konkrete Zeile | hoch | hoch |\n| **Field** | einzelnes Attribut einer Zeile | höchste | extrem |\n\n**Trade-off:** Je feiner die Sperre (Row/Field), desto höher die Parallelität – aber desto mehr Verwaltungs-Overhead (RAM/CPU für Millionen Locks). Moderne DBMS eskalieren daher Row-Locks zu Page-Locks, wenn zu viele Sperren auf einer Page angefordert werden. **Field-Level** wird wegen extremen Overheads kaum implementiert.",
+          "keyTerms": [
+            { "term": "Lock Granularity", "definition": "Umfang eines Locks: Database-, Table-, Page-, Row- oder Field-Level. Feiner = mehr Parallelität, aber mehr Overhead." },
+            { "term": "Lock Manager", "definition": "DBMS-Komponente, die Sperren automatisch zuweist, durchsetzt und freigibt." }
+          ],
+          "examples": [
+            "Row-Level: Tausende Nutzer arbeiten gleichzeitig in einer Tabelle, solange sie nicht dieselbe Zeile berühren.",
+            "Database-Level: nur für Batch-Prozesse sinnvoll, blockiert sonst alle anderen."
+          ]
+        },
+        {
+          "title": "Lock-Typen: binär, shared & exclusive",
+          "content": "Unabhängig von der Granularität nutzt das DBMS verschiedene **Lock-Modi**.\n\n**Binary Lock:** nur zwei Zustände – locked (1) oder unlocked (0). Jede Operation sperrt das Objekt, kein anderer darf zugreifen. Einfach, aber zu restriktiv: Selbst paralleles *Lesen* ohne Änderung ist blockiert.\n\n**Shared/Exclusive Locks** lösen dieses Problem mit drei Zuständen (unlocked, shared/read, exclusive/write):\n\n| | Shared (S) angefordert | Exclusive (X) angefordert |\n|---------------------------|:----------------------:|:-------------------------:|\n| **Shared (S) gehalten** | ✓ kompatibel | ✗ Konflikt (warten) |\n| **Exclusive (X) gehalten**| ✗ Konflikt (warten) | ✗ Konflikt (warten) |\n\n- **Shared (Read) Lock:** mehrere Transaktionen dürfen gleichzeitig lesen; Shared-Locks kollidieren untereinander **nicht**.\n- **Exclusive (Write) Lock:** reserviert das Objekt exklusiv zum Schreiben; blockiert jeden anderen Zugriff – wird beim Aktualisieren benötigt.\n\nMerksatz: **Nur read/read ist kompatibel.** Sobald ein Exclusive-Lock im Spiel ist, müssen andere warten. Das Shared/Exclusive-Schema erhöht den Verwaltungsaufwand des Lock Managers (Upgrades/Downgrades), erlaubt aber deutlich mehr Parallelität als binäre Locks.",
+          "keyTerms": [
+            { "term": "Shared Lock", "definition": "Leselock, der mehreren Transaktionen gleichzeitigen Lesezugriff erlaubt; Shared-Locks kollidieren nicht miteinander." },
+            { "term": "Exclusive Lock", "definition": "Schreiblock, der einer Transaktion exklusiven Zugriff sichert und jeden anderen Zugriff blockiert." }
+          ]
+        },
+        {
+          "title": "Two-Phase Locking (2PL) & Deadlocks",
+          "content": "Das **Zwei-Phasen-Locking-Protokoll (2PL)** regelt, wie Transaktionen Sperren erwerben und freigeben, und garantiert so **Serializability**:\n\n```diagram:2PL — Growing- und Shrinking-Phase\n  Locks\n   │        ┌── locked point\n   │       ╱│╲\n   │      ╱ │ ╲\n   │     ╱  │  ╲\n   │    ╱   │   ╲\n   │   ╱    │    ╲___\n   └───┴────┴─────────► Zeit\n     Growing   Shrinking\n   (nur lock)  (nur unlock)\n```\n\n- **Growing Phase:** Transaktion erwirbt alle benötigten Locks, gibt aber keinen frei – bis zum **locked point** (alle Locks vorhanden).\n- **Shrinking Phase:** Transaktion gibt Locks frei und darf **keine neuen** mehr erwerben. Datenänderungen erst ab dem locked point.\n\n*Falle:* In 2PL darf eine Transaktion **NICHT** neue Locks erwerben, nachdem sie begonnen hat, welche freizugeben. 2PL sichert Serializability, kann aber **Deadlocks** verursachen.\n\n**Deadlock (Verklemmung / „Deadly Embrace“):** T1 hält X und wartet auf Y, T2 hält Y und wartet auf X – beide warten ewig. Deadlocks entstehen **nur**, wenn mindestens eine Transaktion einen **Exclusive Lock** will; unter reinen Shared-Locks gibt es nie einen Deadlock.\n\n**Drei Strategien:**\n- **Prevention:** anfordernde Transaktion abbrechen, bevor ein Deadlock entstehen kann.\n- **Detection:** periodisch prüfen und eine Transaktion als „Opfer“ abbrechen (Rollback).\n- **Avoidance:** alle Locks vorab anfordern (kann Antwortzeiten erhöhen).\n\nDie meisten DBMS setzen auf **Deadlock Detection**.",
+          "keyTerms": [
+            { "term": "Two-Phase Locking (2PL)", "definition": "Protokoll mit Growing- (nur Locks erwerben) und Shrinking-Phase (nur Locks freigeben); sichert Serializability, kann aber Deadlocks erzeugen." },
+            { "term": "Deadlock", "definition": "Zyklische Verklemmung: zwei oder mehr Transaktionen warten unendlich auf die jeweils gehaltenen Sperren der anderen." }
+          ]
+        },
+        {
+          "title": "ANSI-Isolationsstufen & Lesephänomene",
+          "content": "Die **ANSI-SQL-Isolationsstufen (1992)** definieren, welche Daten anderer Transaktionen sichtbar sind, und balancieren **Nebenläufigkeit gegen Konsistenz**. Drei problematische Lesephänomene sind dafür zentral:\n\n- **Dirty Read:** Lesen noch nicht committeter Daten.\n- **Non-repeatable Read:** dieselbe **Zeile** liefert zu t1 und t2 unterschiedliche Werte (Update/Delete dazwischen).\n- **Phantom Read:** dieselbe **Query** liefert zu t2 zusätzliche Zeilen (Insert dazwischen).\n\n| Isolationsstufe | Dirty Read | Non-repeatable Read | Phantom Read |\n|-----------------|:----------:|:-------------------:|:------------:|\n| **Read Uncommitted** | möglich | möglich | möglich |\n| **Read Committed** *(Default)* | verhindert | möglich | möglich |\n| **Repeatable Read** | verhindert | verhindert | möglich |\n| **Serializable** | verhindert | verhindert | verhindert |\n\n- **Read Uncommitted:** keine Locks, höchste Performance, niedrigste Konsistenz.\n- **Read Committed:** liest nur committete Daten (Default der meisten DBMS).\n- **Repeatable Read:** Shared-Locks verhindern Änderungen gelesener Zeilen, lässt aber Phantome zu.\n- **Serializable:** restriktivste Stufe, höchste Konsistenz – aber **Deadlocks bleiben möglich**.\n\nHöhere Stufen = mehr Sperren (shared/exclusive) = bessere Konsistenz, aber geringere Parallelität. Setzen via `SET TRANSACTION ISOLATION LEVEL ...`. Oracle ergänzt z. B. **Snapshot Isolation** (wie Repeatable Read, aber ohne Phantome).",
+          "keyTerms": [
+            { "term": "Read Committed", "definition": "Standard-Isolationsstufe: liest nur committete Daten, verhindert Dirty Reads, lässt aber Non-repeatable und Phantom Reads zu." },
+            { "term": "Serializable", "definition": "Restriktivste ANSI-Isolationsstufe; verhindert Dirty, Non-repeatable und Phantom Reads – Deadlocks bleiben dennoch möglich." },
+            { "term": "Phantom Read", "definition": "Dieselbe Abfrage liefert bei wiederholter Ausführung zusätzliche Zeilen, weil zwischenzeitlich Datensätze eingefügt wurden." }
+          ],
+          "examples": [
+            "SET TRANSACTION ISOLATION LEVEL READ COMMITTED;",
+            "BEGIN TRANSACTION ISOLATION LEVEL SERIALIZABLE; ... COMMIT TRANSACTION;"
+          ]
+        },
+        {
+          "title": "⚡ Prüfungs-Spickzettel Transactions & Concurrency",
+          "content": "**ACID (Q29):** **A**tomicity (alles oder nichts) · **C**onsistency (Regeln gelten) · **I**solation (parallel unsichtbar bis COMMIT) · **D**urability (nach COMMIT permanent). Scalability/Redundancy sind KEINE ACID-Eigenschaften.\n\n**TCL:** COMMIT (speichern), ROLLBACK (verwerfen), SAVEPOINT (Zwischenpunkt). DDL ist nicht rollback-fähig.\n\n**3 Nebenläufigkeitsprobleme:** Lost Update (gegenseitiges Überschreiben) · Uncommitted Data/Dirty Read (liest unbestätigte Daten) · Inconsistent Retrieval (Mix aus vor/nach Änderung). Konflikt = gleiche Daten + mind. ein WRITE.\n\n**Lock-Granularität (Q30) grob→fein:** Database > Table > **Page** (meistgenutzt) > Row (höchste Parallelität, viel Overhead) > Field (kaum implementiert).\n\n**Lock-Typen:** Shared (read, untereinander kompatibel) vs. Exclusive (write, blockiert alles). Nur read/read ist kompatibel.\n\n**2PL:** Growing (nur locken) → locked point → Shrinking (nur freigeben); KEINE neuen Locks nach erster Freigabe. Sichert Serializability, kann Deadlocks erzeugen.\n\n**Deadlock:** „Deadly Embrace“, T1↔T2 warten ewig; nur bei Exclusive-Lock möglich. Lösungen: Prevention, **Detection** (meist), Avoidance.\n\n**ANSI-Isolation (least→most):** Read Uncommitted → Read Committed (Default) → Repeatable Read → Serializable. Phänomene: Dirty / Non-repeatable / Phantom. Serializable verhindert alle drei, Deadlocks bleiben möglich.",
+          "keyTerms": [
+            { "term": "Deadly Embrace", "definition": "Anderer Name für Deadlock – die wechselseitige, endlose Blockade zweier Transaktionen." }
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "type": "multiple-choice",
+          "question": "Welche ACID-Eigenschaft sorgt dafür, dass nach einem Server-Stromausfall eine Transaktion, die nur zur Hälfte abgearbeitet wurde, komplett rückgängig gemacht wird (alles oder nichts)?",
+          "options": [
+            "Consistency",
+            "Atomicity (Atomarität)",
+            "Isolation",
+            "Durability"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Atomicity (Atomarität) ist das 'Alles oder Nichts'-Prinzip. Eine Transaktion kann nicht zur Hälfte existieren. Entweder werden alle Schritte durchgeführt, oder bei einem Fehler wird komplett zurückgerollt."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Was versteht man unter dem Nebenläufigkeitsproblem 'Lost Update'?",
+          "options": [
+            "Eine Festplatte crasht und das Backup ist defekt.",
+            "Zwei Transaktionen lesen denselben Wert, modifizieren ihn und schreiben ihn zurück, wodurch die Änderung der ersten Transaktion von der zweiten blind überschrieben und zerstört wird.",
+            "Eine Transaktion liest Daten, die noch nicht mit COMMIT bestätigt wurden.",
+            "Ein Deadlock löscht die Datenbank."
+          ],
+          "correctAnswer": 1,
+          "explanation": "Beim Lost Update überschreiben sich parallele Transaktionen gegenseitig, weil sie unkoordiniert auf Basis eines alten, mittlerweile überholten Standes operieren."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Welches Level an Sperr-Granularität (Lock Granularity) erlaubt die absolut höchste Parallelität und Nebenläufigkeit durch andere Nutzer, erfordert aber den meisten Management-Overhead durch das DBMS?",
+          "options": [
+            "Database-Level Lock",
+            "Table-Level Lock",
+            "Page-Level Lock",
+            "Row-Level Lock"
+          ],
+          "correctAnswer": 3,
+          "explanation": "Row-Level Locks sperren nur die exakte Zeile, wodurch tausende Nutzer in derselben Tabelle arbeiten können, solange sie nicht dieselbe Zeile anfassen. Dies erzeugt für das DBMS enorm viel RAM- und CPU-Overhead, um die Millionen von Locks zu tracken."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Transaktion T1 hat exklusiven Zugriff auf Konto A und wartet darauf, auf Konto B zugreifen zu können. Gleichzeitig hat T2 exklusiven Zugriff auf Konto B und wartet endlos darauf, auf Konto A zugreifen zu können. Wie nennt man diesen Zustand?",
+          "options": [
+            "Inconsistent Retrieval",
+            "Data Anomaly",
+            "Deadlock (Verklemmung)",
+            "Rollback"
+          ],
+          "correctAnswer": 2,
+          "explanation": "Dies ist ein klassischer Deadlock (oder Deadly Embrace). Ohne Eingriff des DBMS würden beide Transaktionen bis ans Ende der Zeit blockiert bleiben."
+        },
+        {
+          "type": "true-false",
+          "question": "Das 'Transaction Log' (Transaktionsprotokoll) wird vom DBMS primär dazu verwendet, die Geschwindigkeit von JOIN-Abfragen zu erhöhen.",
+          "correctAnswer": false,
+          "explanation": "Falsch. Das Transaction Log ist überlebenswichtig für die Datensicherheit. Es trackt jede Änderung (Vorher/Nachher-Werte), um bei einem Systemabsturz Datenbanken wiederherzustellen (Recovery) und ROLLBACKs zu ermöglichen."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Wofür steht das Akronym ACID im Kontext von Datenbanktransaktionen?",
+          "options": [
+            "Availability, Consistency, Integrity, Durability",
+            "Atomicity, Consistency, Isolation, Durability",
+            "Atomicity, Concurrency, Isolation, Distribution",
+            "Authorization, Consistency, Integration, Durability"
+          ],
+          "correctAnswer": 1,
+          "explanation": "ACID steht für Atomicity (alles oder nichts), Consistency (konsistenter Zustand vor und nach), Isolation (Transaktionen stören sich nicht) und Durability (nach COMMIT permanent gespeichert). Scalability oder Redundancy gehören nicht dazu."
+        },
+        {
+          "type": "true-false",
+          "question": "Beim Two-Phase Locking (2PL) darf eine Transaktion neue Locks erwerben, nachdem sie bereits begonnen hat, Locks freizugeben.",
+          "correctAnswer": false,
+          "explanation": "Falsch. 2PL trennt strikt in Growing Phase (nur Locks erwerben) und Shrinking Phase (nur Locks freigeben). Sobald die Shrinking-Phase begonnen hat, dürfen keine neuen Locks mehr erworben werden – genau das sichert die Serializability."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Welche ANSI-Isolationsstufe verhindert Dirty Reads, Non-repeatable Reads UND Phantom Reads und ist damit die restriktivste Stufe?",
+          "options": [
+            "Read Uncommitted",
+            "Read Committed",
+            "Repeatable Read",
+            "Serializable"
+          ],
+          "correctAnswer": 3,
+          "explanation": "Serializable ist die restriktivste ANSI-Stufe und verhindert alle drei Lesephänomene. Read Committed (Default) verhindert nur Dirty Reads, Repeatable Read zusätzlich Non-repeatable Reads, lässt aber Phantome zu. Trotz Serializable bleiben Deadlocks möglich."
+        }
+      ]
+    }
+  ]
+}

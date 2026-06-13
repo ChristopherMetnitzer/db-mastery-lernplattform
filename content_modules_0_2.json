@@ -1,0 +1,423 @@
+{
+  "modules": [
+    {
+      "id": "module-1",
+      "title": "Database Systems",
+      "description": "Grundlagen zu Datenbanken: Daten vs. Information, Vorteile eines DBMS, Probleme von Dateisystemen, Datenanomalien, Datenbanktypen und Datenabstraktion.",
+      "coreCompetencies": [
+        "Unterschied zwischen Daten und Information praezise erklaeren und anwenden",
+        "Gruende fuer die Notwendigkeit von Datenbanken nennen",
+        "Vorteile eines DBMS benennen (Data Sharing, Security, Integration, Integritaet)",
+        "Komponenten und Funktionen eines DBMS umfassend beschreiben",
+        "Nachteile von Dateisystemen sowie Datenredundanz und ihre Konsequenzen erkennen",
+        "Die drei Datenanomalien (Update, Insertion, Deletion) unterscheiden",
+        "Datenbanktypen nach Nutzerzahl und Standort klassifizieren (Workgroup/Enterprise, Centralized/Distributed)",
+        "Ebenen der Datenabstraktion (ANSI/SPARC) erklaeren"
+      ],
+      "sections": [
+        {
+          "title": "Daten vs. Information im Detail",
+          "content": "Der Unterschied zwischen **Daten** und **Information** ist fundamental fuer das Verstaendnis der Rolle von Datenbanken.\n\n- **Daten (Data):** Rohe, unverarbeitete Fakten oder Beobachtungen, die noch keine Bedeutung offenbaren. Das koennen Zahlen, Texte, Bilder oder Toene sein. Sie sind die grundlegenden Bausteine.\n- **Information:** Das Ergebnis der **Verarbeitung** von Rohdaten zur Gewinnung von Bedeutung oder Erkenntnis. Verarbeitung umfasst Sortieren, Filtern, Zusammenfassen, Analysieren und Interpretieren.\n\nVier Schluessel-Unterscheidungen laut Lehrbuch:\n1. **Processing:** Daten werden durch Verarbeitung zu Information transformiert.\n2. **Context:** Information braucht zwingend **Kontext**, um bedeutungsvoll zu sein.\n3. **Decision-making:** Daten allein sind nicht handlungsleitend; erst Information dient als Basis fuer Entscheidungen.\n4. **Format & Praesentation:** Information wird organisiert dargeboten (Reports, Charts, Grafiken).\n\n**Pruefungsfalle:** Die Aussage 'Daten sind verarbeitet, Information ist roh' ist FALSCH. Korrekt: Daten sind rohe Fakten, Information ist *verarbeitete* Daten. Daten bilden das Fundament, auf dem Information aufgebaut wird.",
+          "keyTerms": [
+            { "term": "Data", "definition": "Rohe, unverarbeitete Fakten ohne direkten Bedeutungskontext (Zahlen, Texte, Bilder, Toene)." },
+            { "term": "Information", "definition": "Verarbeitete, organisierte Daten, die Bedeutung und Kontext bieten und Entscheidungen unterstuetzen." },
+            { "term": "Knowledge (Wissen)", "definition": "Die Faehigkeit, Information zu nutzen und daraus sinnvolle Handlungen abzuleiten." }
+          ],
+          "examples": [
+            "**Rohdaten (Uni-DB):** Fakultaetsnamen, Kursnummern ('CS101'), Einschreibezahlen (45, 120, 80).",
+            "**Information:** 'Kurs CS101 ist mit 120 Studenten ueberbelegt und benoetigt einen weiteren Professor.'"
+          ]
+        },
+        {
+          "title": "Warum Datenbanken? Die Notwendigkeit",
+          "content": "Warum reichen Excel-Listen nicht aus? Datenbanken sind in der heutigen, datengetriebenen Welt unverzichtbar. Die wesentlichen Gruende:\n\n- **Persistence (Persistenz):** Zuverlaessige, strukturierte Speicherung, die auch nach Systemausfaellen oder Stromverlust erhalten bleibt.\n- **Shareability:** Daten koennen von vielen Nutzern und Applikationen kontrolliert geteilt werden (Collaboration).\n- **Security:** Authentifizierung, Zugriffskontrolle und Verschluesselung schuetzen sensible Daten.\n- **Decision Making:** Genaue, aktuelle, organisierte Daten unterstuetzen Analyse, Reporting und Forecasting.\n- **Data Integrity:** Integritaets-Constraints stellen sicher, dass Daten korrekt, konsistent und gueltig bleiben.\n- **Performance:** Optimiert fuer schnellen Datenzugriff in Echtzeit-Anwendungen.\n- **Scalability (Skalierbarkeit):** Von Megabytes bis Petabytes; unterstuetzt hohe Geschwindigkeit bei Ingestion und Retrieval.\n- **Data Analysis:** Querying, Aggregation und Data Mining liefern wertvolle Erkenntnisse und Trends.\n\nDatenbanken bilden das **Rueckgrat von Informationssystemen** wie ERP, CRM und Business Intelligence (BI).",
+          "keyTerms": [
+            { "term": "Persistence", "definition": "Eigenschaft von Daten, dauerhaft (nicht-fluechtig) gespeichert zu bleiben." },
+            { "term": "Scalability", "definition": "Faehigkeit der Datenbank, mit wachsenden Datenmengen und Nutzerzahlen mitzuwachsen." }
+          ]
+        },
+        {
+          "title": "Datenbank, DBMS und Metadaten",
+          "content": "Eine **Datenbank** ist eine strukturierte, organisierte Sammlung von Daten, die elektronisch gespeichert wird. Sie ist ein zentrales Repository (central repository).\n\nDie gespeicherten Daten bestehen aus zwei Teilen:\n- **End-User Data:** Die eigentlichen Rohfakten, die fuer die Endnutzer von Interesse sind (z.B. Studierendenakten, Kursinfos, Einschreibedaten).\n- **Metadata (Metadaten):** 'Daten ueber Daten'. Sie beschreiben Eigenschaften, Struktur und Beziehungen der End-User-Data. Dazu gehoeren Namen der Datenelemente, Datentypen (numeric, text, date), Constraints und Beziehungen. Metadaten machen die Datenbank **selbstbeschreibend (self-describing)**.\n\nEin **DBMS (Database Management System)** ist eine Software-Suite, die es erlaubt, Datenbanken zu erstellen, zu warten und zu manipulieren. Es bietet Werkzeuge zum Definieren der Struktur, zur Datenmanipulation (Insert, Delete, Modify), zum Abfragen, zur Durchsetzung von Integritaet und zur Zugriffskontrolle.\n\nDas DBMS agiert als **Vermittler (intermediary)** zwischen Nutzern/Applikationen und der Datenbank. Es abstrahiert die Komplexitaet der physischen Speicherung.\n\n**Pruefungsfalle:** Metadaten sind NICHT die Inhalte selbst (z.B. 'Mueller'), sondern die Struktur (Tabelle 'Kunde', Spalte 'Name', Typ VARCHAR).",
+          "keyTerms": [
+            { "term": "DBMS", "definition": "Software-Suite zum Erstellen, Warten und Manipulieren von Datenbanken (z.B. Oracle, MySQL, PostgreSQL, SQL Server)." },
+            { "term": "End-User Data", "definition": "Die eigentlichen Rohfakten, die fuer Endnutzer und das Geschaeft von Interesse sind." },
+            { "term": "Metadata", "definition": "Daten ueber Daten; das Data Dictionary. Beschreibt Struktur, Datentypen, Tabellen und Beziehungen." }
+          ],
+          "examples": [
+            "Metadaten-Eintrag: Tabelle CUSTOMER, Spalte CUS_CREDIT_LIMIT, Typ NUMBER(9,2), NOT NULL."
+          ]
+        },
+        {
+          "title": "Vorteile eines DBMS (enhanced data ...)",
+          "content": "Ein DBMS bietet zahlreiche Vorteile gegenueber dem reinen Dateisystem. Diese sind ein direktes Pruefungsthema (Q5: 'How does a DBMS contribute to enhanced data ...').\n\n- **Improved Data Sharing:** Besserer, kontrollierter Zugriff fuer mehrere Nutzer und Applikationen gleichzeitig.\n- **Enhanced Data Security:** Mechanismen zur Durchsetzung von Sicherheitsrichtlinien: Access Control, Authentifizierung, Verschluesselung, Audit Trails.\n- **Better Data Integration:** Ein zentrales Repository ermoeglicht eine integrierte Sicht auf die Organisation; Daten aus verschiedenen Quellen koennen gemeinsam analysiert werden.\n- **Minimized Data Inconsistency:** Reduziert widerspruechliche Versionen derselben Daten durch Integritaet und Validierungsregeln.\n- **Improved Data Access:** Schnelle ad-hoc Queries liefern zeitnahe, relevante Information.\n- **Enhanced Decision Making:** Zugriff auf genaue, aktuelle Information unterstuetzt fundierte Entscheidungen.\n- **Increased End-User Productivity:** Benutzerfreundliche Werkzeuge erhoehen die Effizienz der Anwender.\n\n**Pruefungsfalle:** Ein DBMS *minimiert* (minimized) Datenredundanz und Inkonsistenz, es *eliminiert* sie nicht vollstaendig. Aussagen wie 'Removal of ALL data redundancy' oder 'Elimination of ALL hardware' sind FALSCH.",
+          "keyTerms": [
+            { "term": "Data Integration", "definition": "Zusammenfuehren von Daten aus verschiedenen Quellen zu einer einheitlichen, integrierten Sicht." },
+            { "term": "Data Sharing", "definition": "Kontrollierter, gleichzeitiger Zugriff mehrerer Nutzer und Anwendungen auf dieselben Daten." }
+          ]
+        },
+        {
+          "title": "Die 5 Komponenten der Database System Environment",
+          "content": "Das Datenbankumfeld (Database System Environment) besteht aus **fuenf Kernkomponenten**:\n\n1. **Hardware:** Physische Geraete - Computer, Speichermedien (SSDs/HDDs), Drucker, Netzwerkgeraete.\n2. **Software:** Drei Ebenen - das **Betriebssystem (OS)**, das eigentliche **DBMS** (z.B. SQL Server, Oracle, MySQL) und **Application Programs/Utilities**.\n3. **People (Menschen):** System Administrators (allgemeiner Betrieb), Database Administrators / DBAs (verwalten das DBMS), Database Designers (entwerfen die Struktur), System Analysts & Programmers (entwickeln Apps), End Users (taegliche Nutzung).\n4. **Procedures (Prozeduren):** Anweisungen und Regeln fuer Design und Nutzung des Systems. Sie setzen Standards durch, ueberwachen Daten und regeln z.B. Backups und Business Rules.\n5. **Data (Daten):** Die Sammlung von Fakten - das Rohmaterial fuer Information.\n\n| Komponente | Beispiele | Aufgabe |\n|------------|-----------|---------|\n| Hardware | Server, SSDs, Netzwerk | Physische Basis |\n| Software | OS, DBMS, Apps | Steuerung & Zugriff |\n| People | DBA, Designer, End User | Betrieb & Nutzung |\n| Procedures | Backup-Plan, Standards | Regeln durchsetzen |\n| Data | End-User Data + Metadata | Rohmaterial fuer Info |\n\n**Pruefungsfalle:** Fuer Business Rules und Backup-Intervalle sind die **Procedures** zustaendig, nicht die People oder Software.",
+          "keyTerms": [
+            { "term": "DBA (Database Administrator)", "definition": "Person, die das DBMS verwaltet und dessen korrekten Betrieb sicherstellt." },
+            { "term": "Procedures", "definition": "Schriftliche Anweisungen und Regeln, die Design und Nutzung der Datenbank steuern (Standards, Backups)." }
+          ]
+        },
+        {
+          "title": "DBMS-Funktionen",
+          "content": "Ein DBMS erfuellt eine Reihe definierter Kern-Funktionen. Diese sind ein beliebtes Pruefungsthema (Multiple Select):\n\n- **Data Dictionary Management:** Speichert Definitionen aller Datenelemente und ihrer Beziehungen (Metadaten). Aenderungen an der Struktur werden automatisch erfasst.\n- **Data Storage Management:** Erstellt und verwaltet die komplexen Strukturen fuer Datenspeicherung, Formulare, Reports und Validierungsregeln; wichtig fuer Performance Tuning.\n- **Data Transformation and Presentation:** Transformiert eingegebene Daten in die geforderte Struktur und formatiert ausgelesene Daten gemaess Nutzererwartung.\n- **Security Management:** Setzt Sicherheit und Datenschutz durch (Zugriffsrechte, erlaubte Operationen, Authentifizierung).\n- **Multiuser Access Control:** Ausgefeilte Algorithmen erlauben gleichzeitigen Zugriff vieler Nutzer ohne Integritaetsverlust.\n- **Backup and Recovery Management:** Werkzeuge fuer Sicherung und Wiederherstellung nach Ausfaellen (Disk-Fehler, Stromausfall).\n- **Data Integrity Management:** Setzt Integritaetsregeln durch, minimiert Redundanz, maximiert Konsistenz.\n- **Database Access Languages and APIs:** Stellt SQL bereit und APIs fuer Sprachen wie Java, C, COBOL.\n- **Database Communication Interfaces:** Akzeptiert Anfragen ueber Web-Browser, APIs und weitere Protokolle.\n\n**Pruefungsfalle:** 'Weather prediction' oder 'Elimination of all hardware' sind KEINE DBMS-Funktionen.",
+          "keyTerms": [
+            { "term": "Data Dictionary", "definition": "Vom DBMS gepflegte Sammlung von Metadaten (Definitionen aller Datenelemente und Beziehungen)." },
+            { "term": "Multiuser Access Control", "definition": "DBMS-Funktion, die vielen Nutzern gleichzeitigen, konsistenten Zugriff ermoeglicht." }
+          ]
+        },
+        {
+          "title": "Dateisysteme: Probleme & Data Dependence",
+          "content": "Vor der Verbreitung von DBMS nutzte man klassische **Dateisysteme (File Systems)** oder missbrauchte Tabellenkalkulationen wie Excel. Das fuehrte zu massiven Problemen:\n\n- **Lengthy Development Times:** Selbst einfache Datenabfragen erforderten umfangreiche Programmierung.\n- **Difficulty of Getting Quick Answers:** Ad-hoc Queries waren unmoeglich; fuer jeden Report musste ein Programm geschrieben werden.\n- **Complex System Administration:** Jede Datei brauchte eigene Verwaltungsprogramme.\n- **Lack of Security & Limited Data Sharing:** Kaum robuste Sicherheit oder kontrollierte Teilung.\n- **Extensive Programming for Changes.**\n\nZwei zentrale Abhaengigkeits-Probleme:\n- **Structural Dependence:** Der Zugriff haengt von der Datei-*Struktur* ab. Aendert sich die Struktur (neues Feld), muessen alle zugreifenden Programme angepasst werden. **Structural Independence** = Struktur aenderbar ohne Programmaenderung.\n- **Data Dependence:** Der Zugriff haengt von den *Daten-Charakteristika* (z.B. Datentyp) ab. Aendert sich der Datentyp, muessen alle Programme geaendert werden. **Data Independence** = Speichercharakteristik aenderbar ohne Programmaenderung.\n\nDie praktische Folge: eine Kluft zwischen dem **logischen Datenformat** (menschliche Sicht) und dem **physischen Datenformat** (Computer).",
+          "keyTerms": [
+            { "term": "Data Dependence", "definition": "Applikationen haengen von den physischen Daten-Charakteristika (Datentyp, Speicherung) ab." },
+            { "term": "Structural Dependence", "definition": "Applikationen haengen von der Datei-Struktur ab; Strukturaenderungen erzwingen Programmaenderungen." }
+          ]
+        },
+        {
+          "title": "Datenredundanz & ihre Konsequenzen",
+          "content": "Die Organisationsstruktur in Dateisystemen foerdert das Speichern derselben Daten an verschiedenen Orten - sogenannte **'islands of information'** (Daten-Inseln). Jedes Abteilungsmitglied legt eigene Kopien an, durch inkonsistente Updates entstehen verschiedene Versionen derselben Daten.\n\nDas zentrale Problem ist die **Data Redundancy (Datenredundanz)**: unnoetige Duplizierung. Ihre **Konsequenzen** sind ein direktes Pruefungsthema (Q6):\n\n- **Poor Data Security:** Hoehere Wahrscheinlichkeit unbefugten Zugriffs (Daten an vielen Orten).\n- **Data Inconsistency:** Widerspruechliche Versionen fuehren zu inkonsistenten Reports.\n- **Data-Entry Errors:** Komplexe, mehrfache Eingaben sind fehleranfaelliger.\n- **Data Integrity Problems:** Moeglichkeit, nicht existierende Daten einzugeben, gefaehrdet Genauigkeit und Konsistenz.\n\n**Data Integrity (Datenintegritaet)** bedeutet umgekehrt: die Daten stimmen mit realen Ereignissen und Bedingungen ueberein; sie sind genau (accurate) und verifizierbar.\n\n```compare\nDateisystem (File System)\n- Hohe Redundanz, 'islands of information'\n- Data & Structural Dependence\n- Keine ad-hoc Queries\n- Schwache Sicherheit, kaum Sharing\n===\nDatenbanksystem (DBMS)\n- Kontrollierte Redundanz, zentrales Repository\n- Data & Structural Independence\n- SQL ad-hoc Queries\n- Zugriffskontrolle, Multiuser-Sharing\n```\n\n**Merksatz:** Redundanz ist die Wurzel; daraus folgen Inkonsistenz, Anomalien, schlechte Sicherheit und Integritaetsprobleme.",
+          "keyTerms": [
+            { "term": "Data Redundancy", "definition": "Unnoetige Duplizierung von Daten an verschiedenen Orten; Ursache von Inkonsistenz und Anomalien." },
+            { "term": "Islands of Information", "definition": "Voneinander isolierte, oft widerspruechliche Datenbestaende in verschiedenen Abteilungen/Dateien." },
+            { "term": "Data Integrity", "definition": "Uebereinstimmung der Daten mit der Realitaet; Genauigkeit und Verifizierbarkeit der Daten." }
+          ]
+        },
+        {
+          "title": "Die drei Datenanomalien",
+          "content": "Anomalien sind Abnormalitaeten im Datenmanagement: Idealerweise sollte eine Aenderung an genau **einer** Stelle reichen, aber wegen Redundanz muss sie an **vielen** Stellen erfolgen. Es gibt drei Typen:\n\n- **Update-Anomalie (Aenderungsanomalie):** Aendert sich ein Wert (z.B. die Telefonnummer eines Agenten), muss er in *vielen* Datensaetzen aktualisiert werden. Vergisst man eine Stelle, entsteht Inkonsistenz.\n- **Insertion-Anomalie (Einfuegeanomalie):** Das Hinzufuegen neuer Daten (z.B. ein neuer Agent ohne Kunden) erfordert das Anlegen redundanter Dummy-Daten (z.B. fiktiver Kunde), nur damit der Datensatz speicherbar ist.\n- **Deletion-Anomalie (Loeschanomalie):** Das Loeschen eines Datensatzes (z.B. des letzten Kunden eines Agenten) loescht versehentlich auch andere, nur dort gespeicherte Information (z.B. die Agenten-Daten).\n\n```diagram:Anomalien durch Redundanz\n        ┌──────────────────────────────┐\n        │   Eine flache Tabelle mit     │\n        │   redundanten Daten           │\n        └──────────────┬───────────────┘\n                        │\n      ┌─────────────────┼──────────────────┐\n      ▼                 ▼                  ▼\n  UPDATE-Anom.     INSERT-Anom.       DELETE-Anom.\n  (vielfach        (Dummy-Daten       (verliert\n   aendern)         noetig)            Info ungewollt)\n```\n\n**Loesung:** Gutes Datenbankdesign und Modellierung (spaeter: Normalisierung) beseitigen diese Anomalien.",
+          "keyTerms": [
+            { "term": "Update-Anomalie", "definition": "Eine Wertaenderung muss in vielen redundanten Datensaetzen wiederholt werden - Fehlerquelle." },
+            { "term": "Insertion-Anomalie", "definition": "Neue Daten lassen sich nur durch Anlegen unnoetiger Dummy-Daten einfuegen." },
+            { "term": "Deletion-Anomalie", "definition": "Loeschen eines Datensatzes entfernt ungewollt andere, nur dort gespeicherte Information." }
+          ],
+          "examples": [
+            "Loeschanomalie: Ein Krankenhaus loescht einen Patienten mit nur einer Behandlung; dabei verschwindet auch die einzige Info ueber ein neu verschriebenes Medikament."
+          ]
+        },
+        {
+          "title": "Datenbanktypen: Nutzerzahl & Standort",
+          "content": "Datenbanken werden nach mehreren Kriterien klassifiziert. Besonders pruefungsrelevant (Q7) sind **Nutzerzahl** und **Standort**.\n\n**Nach Anzahl der Nutzer (Number of Users):**\n- **Single-User Database:** Nur ein Nutzer zur Zeit (typisch auf PCs). Ein Spezialfall ist die *Desktop Database*.\n- **Multiuser Database:** Mehrere gleichzeitige Nutzer. Zwei Auspraegungen:\n  - **Workgroup Database:** Kleine Nutzerzahl (meist < 50) oder eine einzelne Abteilung.\n  - **Enterprise Database:** Die gesamte Organisation, viele Nutzer (oft Hunderte) ueber mehrere Abteilungen.\n\n**Nach Standort (Location):**\n- **Centralized Database:** Daten an einem einzigen Standort (single site).\n- **Distributed Database:** Daten ueber mehrere Standorte verteilt, ueber ein Netzwerk verwaltet und zugaenglich.\n\n| Kriterium | Typ | Merkmal |\n|-----------|-----|---------|\n| Nutzerzahl | Single-User | 1 Nutzer, PC |\n| Nutzerzahl | Workgroup | < 50 Nutzer / 1 Abteilung |\n| Nutzerzahl | Enterprise | Hunderte, ganze Organisation |\n| Standort | Centralized | 1 Standort |\n| Standort | Distributed | mehrere Standorte, Netzwerk |\n\n**Weitere Klassifikationen:** nach Datennutzung (Operational/OLTP vs. Analytical/OLAP), nach Strukturierungsgrad (structured, unstructured, semistructured/XML), sowie Cloud- und NoSQL-Datenbanken.\n\n**Pruefungsfalle:** 'Centralized' und 'Distributed' beschreiben den **Standort**, nicht die Nutzerzahl. 'Analytical' ist eine Klassifikation nach **Nutzung**, nicht nach Nutzerzahl.",
+          "keyTerms": [
+            { "term": "Workgroup Database", "definition": "Multiuser-DB fuer eine kleine Nutzerzahl (meist < 50) oder eine einzelne Abteilung." },
+            { "term": "Enterprise Database", "definition": "Multiuser-DB fuer die gesamte Organisation mit vielen (oft hunderten) Nutzern." },
+            { "term": "Distributed Database", "definition": "Datenbank, deren Daten ueber mehrere Standorte verteilt und per Netzwerk zugaenglich sind." }
+          ],
+          "examples": [
+            "OLTP (Operational): taegliche Transaktionen, sofortige Erfassung.",
+            "OLAP (Analytical): historische Daten und Kennzahlen fuer strategische Entscheidungen."
+          ]
+        },
+        {
+          "title": "Ebenen der Datenabstraktion (ANSI/SPARC)",
+          "content": "Die **ANSI/SPARC-Architektur** (American National Standards Institute, Standards Planning and Requirements Committee) definiert Abstraktionsebenen, um **Data Independence** zu gewaehrleisten. Urspruenglich drei Ebenen (External, Conceptual, Internal), erweitert um das **Physical**-Modell.\n\n1. **External Level:** Sicht der Endnutzer/Applikationen (externe Schemata, oft als ER-Diagramm). Vertrieb sieht nur Kundendaten, kein Gehalt. Realisiert ueber *Views*.\n2. **Conceptual Level:** Globale, logische Gesamtsicht der ganzen Organisation (komplettes ER-Modell). Software- und hardware-unabhaengig.\n3. **Internal Level:** Sicht des gewaehlten DBMS - Mapping des konzeptuellen Modells auf Tabellen/Indizes des konkreten relationalen Systems. **Software-abhaengig**, aber **hardware-unabhaengig**.\n4. **Physical Level:** Tiefste Ebene; wie Bits physisch auf Speichermedien liegen (Blockgroessen, Dateiorganisation, Kompression). Software- UND hardware-abhaengig.\n\n```diagram:ANSI/SPARC - 3-Level (+ Physical)\n┌─────────────────────────────────────────┐\n│ EXTERNAL  Views einzelner Nutzer/Apps     │\n├─────────────────────────────────────────┤\n│ CONCEPTUAL  globale logische Gesamtsicht  │ <- ER-Modell\n├─────────────────────────────────────────┤\n│ INTERNAL  DBMS-Sicht (Tabellen, Indizes)  │ <- SW-abhaengig\n├─────────────────────────────────────────┤\n│ PHYSICAL  Bits auf Disk/SSD               │ <- HW+SW-abh.\n└─────────────────────────────────────────┘\n```\n\nZwei Arten von Unabhaengigkeit:\n- **Logical Independence:** Aenderung des internen Modells ohne Auswirkung auf konzeptuelles/externes Modell.\n- **Physical Independence:** Aenderung des physischen Modells (z.B. HDD -> SSD) ohne Auswirkung auf das interne Modell.",
+          "keyTerms": [
+            { "term": "ANSI/SPARC", "definition": "Standard-Framework mit den Abstraktionsebenen External, Conceptual, Internal (+ Physical)." },
+            { "term": "Logical Independence", "definition": "Aenderungen am internen Modell beeinflussen das konzeptuelle/externe Modell nicht." },
+            { "term": "Physical Independence", "definition": "Aenderungen am physischen Modell (Speicher, Hardware) beeinflussen das interne Modell nicht." }
+          ]
+        },
+        {
+          "title": "⚡ Pruefungs-Spickzettel (Module 1)",
+          "content": "Die Must-Know-Fakten fuer die Pruefung auf einen Blick:\n\n- **Daten vs. Information:** Daten = rohe Fakten; Information = *verarbeitete* Daten mit Kontext. (Falle: nicht vertauschen!)\n- **DBMS-Vorteile (Q5):** improved data sharing, enhanced security, better integration, minimized inconsistency, improved access, enhanced decision making, increased productivity. DBMS *minimiert* Redundanz, eliminiert sie nicht vollstaendig.\n- **5 Komponenten:** Hardware, Software (OS + DBMS + Apps), People, **Procedures** (Backups/Business Rules!), Data.\n- **Metadaten:** 'Daten ueber Daten' - Struktur, Typen, Beziehungen; machen die DB self-describing. NICHT die Inhalte selbst.\n- **Dateisystem-Probleme:** data redundancy, inconsistency, data anomalies, data dependence, structural dependence, schwache Sicherheit, keine ad-hoc Queries.\n- **Redundanz-Konsequenzen (Q6):** poor security, data inconsistency, data-entry errors, integrity problems. Stichwort 'islands of information'.\n- **3 Anomalien:** UPDATE (vielfach aendern), INSERTION (Dummy-Daten noetig), DELETION (verliert Info ungewollt).\n- **Datenbanktypen (Q7):** Nutzerzahl -> Single-User / Workgroup (<50) / Enterprise (hunderte). Standort -> Centralized (1 Site) / Distributed (mehrere Sites, Netzwerk).\n- **ANSI/SPARC (4 Ebenen):** External (Views) -> Conceptual (globale Logik, ER) -> Internal (DBMS, SW-abhaengig) -> Physical (Disk, HW+SW). Logical vs. Physical Independence merken.\n\n**Haeufige Fallen:** 'Centralized/Distributed' = Standort (nicht Nutzerzahl). 'Removal of ALL redundancy' = falsch. Internal Level ist software-abhaengig aber hardware-unabhaengig.",
+          "keyTerms": [
+            { "term": "Data Independence", "definition": "Faehigkeit, eine Abstraktionsebene zu aendern, ohne die darueberliegende anzupassen." }
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "type": "multiple-choice",
+          "question": "Ein Krankenhaus speichert alle Patientendaten und Behandlungen in einer einzigen, riesigen Excel-Tabelle. Wenn ein Patient, der nur eine einzige Behandlung hatte, aus dem System gelöscht wird, geht versehentlich auch die Information über das neue Medikament, das ihm verschrieben wurde, vollständig verloren. Um welche Art von Anomalie handelt es sich hierbei?",
+          "options": [
+            "Update-Anomalie",
+            "Insertion-Anomalie",
+            "Deletion-Anomalie (Löschanomalie)",
+            "Redundanz-Anomalie"
+          ],
+          "correctAnswer": 2,
+          "explanation": "Bei einer Löschanomalie (Deletion Anomaly) führt das Löschen eines primären Datensatzes (hier der Patient) unbeabsichtigt dazu, dass andere, verknüpfte Informationen (hier das Medikament, das nirgendwo sonst erfasst ist) komplett aus dem System verschwinden."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Welche der folgenden Definitionen beschreibt am besten das Konzept der 'Metadaten' in einem DBMS?",
+          "options": [
+            "Es handelt sich um die riesigen Datenmengen, die von Endnutzern generiert werden (Big Data).",
+            "Daten über Daten; sie beschreiben die Struktur, Datentypen, Einschränkungen und Beziehungen der Endnutzer-Daten.",
+            "Die Hardware-Komponenten, die die Datenbank antreiben.",
+            "Die Prozeduren und Backups, die zur Wiederherstellung nach einem Crash verwendet werden."
+          ],
+          "correctAnswer": 1,
+          "explanation": "Metadaten (Metadata) bilden das Data Dictionary des DBMS. Sie speichern nicht die eigentlichen Inhalte (wie 'Müller'), sondern die Struktur (z.B. Tabelle 'Kunde', Spalte 'Name', Typ 'VARCHAR')."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Ein Unternehmen wechselt seine Festplatten-Infrastruktur von herkömmlichen HDDs auf moderne NVMe SSDs und konfiguriert die Speicherblöcke neu. Die Applikationsprogrammierer müssen jedoch keine einzige Zeile SQL-Code in ihrer App umschreiben. Welches Konzept der ANSI/SPARC Architektur beschreibt diesen Vorteil?",
+          "options": [
+            "Logical Data Independence",
+            "Physical Data Independence",
+            "External Data Dependence",
+            "Data Redundancy"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Physical Data Independence bedeutet, dass Änderungen an der physischen Speicherungsebene (Physical Level) keine Auswirkungen auf das interne oder konzeptuelle Modell (Internal/Conceptual Level) und somit auch nicht auf die Applikationen haben."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Welche der 5 Datenbankumgebungs-Komponenten (Database Environment) ist für die Durchsetzung von Business Rules und Backup-Intervallen verantwortlich?",
+          "options": [
+            "Hardware",
+            "People (Menschen)",
+            "Procedures (Prozeduren)",
+            "Software"
+          ],
+          "correctAnswer": 2,
+          "explanation": "Procedures (Prozeduren) sind die definierten Richtlinien, Handlungsanweisungen und Regeln, die den Umgang mit der Datenbank steuern. Sie garantieren, dass Datensicherung und Business Rules standardisiert eingehalten werden."
+        },
+        {
+          "type": "true-false",
+          "question": "Datenabhängigkeit (Data Dependence) in klassischen Dateisystemen bedeutet, dass eine Änderung im Datentyp eines Feldes zwingend eine Änderung in allen zugreifenden Applikationsprogrammen erfordert.",
+          "correctAnswer": true,
+          "explanation": "Korrekt. In alten File-Systems (ohne DBMS) musste die Applikation genau wissen, wie die Daten physisch gespeichert waren. Ein DBMS löst dieses Problem durch Abstraktion."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Ein Konzern führt eine Datenbank ein, die von hunderten Mitarbeitern über viele verschiedene Abteilungen hinweg gleichzeitig genutzt wird. Um welchen Datenbanktyp (nach Anzahl der Nutzer) handelt es sich?",
+          "options": [
+            "Single-User Database",
+            "Workgroup Database",
+            "Enterprise Database",
+            "Distributed Database"
+          ],
+          "correctAnswer": 2,
+          "explanation": "Eine Enterprise Database unterstützt die gesamte Organisation mit vielen (oft hunderten) Nutzern über mehrere Abteilungen. Eine Workgroup Database wäre auf eine kleine Gruppe (meist < 50) oder eine Abteilung begrenzt. 'Distributed' beschreibt hingegen den Standort, nicht die Nutzerzahl."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Welche der folgenden Aussagen beschreibt KORREKT, wie ein DBMS zur verbesserten Datenverwaltung beiträgt (enhanced data ...)?",
+          "options": [
+            "Es eliminiert vollständig jede Form von Datenredundanz in allen Systemen.",
+            "Es verbessert Data Sharing, Security und Integration und minimiert Dateninkonsistenz.",
+            "Es macht jegliche Hardware überflüssig.",
+            "Es ersetzt die Notwendigkeit von Datenbank-Administratoren komplett."
+          ],
+          "correctAnswer": 1,
+          "explanation": "Ein DBMS bietet improved data sharing, enhanced security, better integration und minimized data inconsistency. Es 'minimiert' Redundanz und Inkonsistenz - eine vollständige Eliminierung jeglicher Redundanz oder das Überflüssigmachen von Hardware ist falsch."
+        }
+      ]
+    },
+    {
+      "id": "module-2",
+      "title": "Data Models",
+      "description": "Datenmodellierung und Business Rules, ERM-Komponenten und Notationen, die Evolution der Datenbankarchitekturen und die ANSI/SPARC-Abstraktionsebenen.",
+      "coreCompetencies": [
+        "Bedeutung und iterativen Charakter der Datenmodellierung erklaeren",
+        "Business Rules identifizieren und in Entitaeten/Attribute/Beziehungen/Constraints uebersetzen",
+        "Die Bausteine eines Datenmodells (Entity, Attribute, Relationship, Constraint) anwenden",
+        "Entity-Relationship Model (ERM): Komponenten, Kardinalitaeten und Notationen beherrschen",
+        "Datenbankarchitekturen (Hierarchisch, Netzwerk, Relational, OO) und ihre Unterschiede beschreiben",
+        "Die Evolution bis NoSQL/Big Data einordnen",
+        "Die ANSI/SPARC-Abstraktionsebenen (External, Conceptual, Internal, Physical) erklaeren",
+        "Naming Conventions im Datenbankdesign anwenden"
+      ],
+      "sections": [
+        {
+          "title": "Datenmodellierung & ihre Bedeutung",
+          "content": "**Datenmodellierung (Data Modeling)** ist der grundlegende, erste Schritt beim Datenbankdesign. Ein Datenmodell ist eine - typischerweise grafische - vereinfachte Repraesentation komplexer realer Datenstrukturen innerhalb einer Problem-Domaene (problem domain).\n\n**Zweck:** Datenmodelle abstrahieren reale Objekte und Ereignisse. Sie bilden Datenstrukturen, Beziehungen, Constraints und Transformationen ab.\n\n**Eigenschaften:**\n- **Iterativer Prozess:** Modellierung beginnt mit grundlegendem Verstaendnis und entwickelt sich in steigender Komplexitaet weiter.\n- **Blueprint (Bauplan):** Das fertige Datenmodell dient als Bauplan - mit narrativen Beschreibungen UND grafischen Darstellungen der Datenelemente.\n\nEin implementierungsreifes Datenmodell enthaelt drei Bestandteile:\n1. Eine Beschreibung der Datenstruktur, die die End-User-Data speichert.\n2. Durchsetzbare Regeln zur Sicherung der Datenintegritaet.\n3. Eine Methodik zur Datenmanipulation, die reale Transformationen unterstuetzt.\n\nFrueher verliessen sich Designer auf ihr Urteilsvermoegen (oft subjektiv); moderne Designer nutzen etablierte Modellierungskonstrukte und Tools, um Fehler zu reduzieren.",
+          "keyTerms": [
+            { "term": "Data Model", "definition": "Vereinfachte, meist grafische Repraesentation realer Datenstrukturen einer Problem-Domaene." },
+            { "term": "Problem Domain", "definition": "Der klar abgegrenzte reale Bereich, fuer den die Datenbank eine Loesung bieten soll." },
+            { "term": "Blueprint", "definition": "Das fertige Datenmodell als Bauplan zum Erstellen der Datenbank." }
+          ]
+        },
+        {
+          "title": "Bausteine: Entity, Attribute, Relationship, Constraint",
+          "content": "Die Erstellung eines genauen Datenmodells erfordert das korrekte Identifizieren von vier Bausteinen:\n\n1. **Identify Entities (Entitaeten):** Eine Entitaet ist ein eindeutiges, unterscheidbares Objekt, Konzept oder Ereignis, ueber das Daten gespeichert werden. Man findet sie an **Nomen (nouns)** in der Beschreibung. *Beispiele:* Customer, Product, Employee, Order, Invoice.\n2. **Determine Attributes (Attribute):** Eigenschaften, die eine Entitaet beschreiben (vergleichbar mit Feldern). Man findet sie an **Adjektiven/Deskriptoren**. *Beispiel:* Customer hat name, address, phone number, credit limit.\n3. **Establish Relationships (Beziehungen):** Assoziationen zwischen Entitaeten, abgeleitet aus Business Rules. Es wird die **Kardinalitaet** bestimmt: 1:1, 1:M oder M:N. *Beispiel:* 'Customer places Order', 'Employee manages Department'.\n4. **Define Constraints (Einschraenkungen):** Regeln/Restriktionen zur Sicherung von Integritaet und Konsistenz. *Beispiele:* Gehaltsgrenzen, GPA-Anforderungen, Eindeutigkeit bestimmter Attribute.\n\nAbschliessend werden die **Business Rules dokumentiert** - sie sind die Grundlage fuer alle vier Bausteine, und alle Stakeholder muessen sie verstehen und ihnen zustimmen.\n\n**Pruefungsfalle:** Ein effektives Datenmodell erfordert ALLE vier Bausteine - nicht nur Entitaeten und Attribute, und auch nicht das Verstehen der Business Rules allein.",
+          "keyTerms": [
+            { "term": "Entity (Entitaet)", "definition": "Eindeutiges, unterscheidbares Objekt/Konzept/Ereignis, ueber das Daten gespeichert werden (Nomen)." },
+            { "term": "Attribute", "definition": "Eigenschaft/Charakteristikum, das eine Entitaet beschreibt (vergleichbar mit einem Feld)." },
+            { "term": "Constraint", "definition": "Regel oder Restriktion auf Daten zur Sicherung von Integritaet und Konsistenz." }
+          ]
+        },
+        {
+          "title": "Business Rules & ihre Uebersetzung",
+          "content": "**Business Rules (Geschaeftsregeln)** sind fundamentale, kurze, **klare und unmissverstaendliche** Beschreibungen einer Policy, Prozedur oder eines Prinzips einer Organisation. Sie definieren, wie die Organisation arbeitet und wie Daten genutzt werden - und beeinflussen direkt das Datenbankdesign (Q8).\n\n**Eigenschaften einer guten Business Rule:** clear and concise, consistent with business operations, enforceable in the system. (NICHT 'randomly defined'.)\n\n**Quellen:** Manager, Policy Maker, Abteilungsleiter, schriftliche Dokumentation, direkte Interviews mit Endnutzern. Endnutzer haben teils abweichende Wahrnehmungen -> Diskrepanzen moeglich.\n\n**Die Noun-Verb-Translation (zentrale Pruefungstechnik):**\n- **Nomen (Nouns)** -> **Entitaeten**\n- **Verben (Verbs)** -> **Beziehungen (Relationships)**\n\nMan betrachtet beide Richtungen der Beziehung (bidirektional), um die Kardinalitaet zu bestimmen:\n- 'A customer may generate many invoices' und 'an invoice is generated by only one customer' => **1:M** (Customer -> Invoice).\n- 'Many students enroll in many classes' => **M:N**.\n\n**Limitations:** Nicht alle Business Rules lassen sich direkt in der Datenbank modellieren; manche werden durch die **Application Software** durchgesetzt.\n\n**Pruefungsfalle:** 'Company managers have the final say in database design' ist KEINE gueltige Aussage ueber Modellierungs-Limitationen.",
+          "keyTerms": [
+            { "term": "Business Rule", "definition": "Klare, unmissverstaendliche Beschreibung einer Policy/Prozedur, die das Datenbankdesign steuert." },
+            { "term": "Noun-Verb-Translation", "definition": "Technik: Nomen werden zu Entitaeten, Verben zu Beziehungen." }
+          ],
+          "examples": [
+            "'A training session cannot be scheduled for fewer than 10 or more than 30 employees' -> Constraint.",
+            "'A customer may generate many invoices' -> Entitaeten Customer & Invoice, Beziehung 1:M."
+          ]
+        },
+        {
+          "title": "Naming Conventions",
+          "content": "**Naming Conventions (Namenskonventionen)** stellen sicher, dass Objekte eindeutig identifizierbar und unterscheidbar sind, und sie verbessern Konsistenz und Lesbarkeit des Modells.\n\n- **Entity Names:** Beschreibend und vertraut fuer Nutzer, in **Grossbuchstaben** und **Singular**: z.B. CUSTOMER, USER, INVOICE.\n- **Attribute Names:** Beschreibend; oft mit Entitaets-Praefix/Abkuerzung, um Eindeutigkeit zu sichern: z.B. `CUS_CREDIT_LIMIT` fuer das Kreditlimit in CUSTOMER.\n- **Moderne Praxis:** Tabellen-Praefix per Punkt-Notation, z.B. `CUSTOMER.CREDIT_LIMIT`.\n\n**Vorteile:** Bessere Kommunikation zwischen Designer, Programmierer und Endnutzer; das Modell wird **selbst-dokumentierend**.\n\n```compare\nGute Namen\n- customer_id, order_date\n- CUS_CREDIT_LIMIT (beschreibend)\n- konsistent, lesbar\n===\nSchlechte Namen\n- data1, field123\n- nichtssagend, kryptisch\n- erschweren Wartung\n```\n\n**Pruefungsfalle:** `customer_id` und `order_date` sind gute Konventionen; `data1` und `field123` sind schlechte Beispiele.",
+          "keyTerms": [
+            { "term": "Naming Convention", "definition": "Regelwerk fuer beschreibende, konsistente Benennung von Entitaeten und Attributen." }
+          ],
+          "examples": [
+            "Entitaet in Grossbuchstaben + Singular: CUSTOMER (nicht 'customers').",
+            "Attribut mit Praefix: CUS_NAME, CUS_CREDIT_LIMIT."
+          ]
+        },
+        {
+          "title": "Hierarchisches & Netzwerk-Modell",
+          "content": "Die ersten Datenbankarchitekturen der **1960er Jahre** (Q10):\n\n**Hierarchisches Modell (Hierarchical Model):**\n- Entwickelt zur Verwaltung grosser Daten komplexer Fertigungsprojekte (z.B. Apollo-Rakete).\n- Struktur: **'Upside-down tree'** (umgedrehter Baum) mit Ebenen/Segmenten.\n- **Parent-Child-Beziehung (1:M):** Ein Parent kann viele Children haben, aber jedes Child hat **strikt nur EINEN Parent** (Single Parent Nodes).\n- Hauptsystem: IBMs **IMS**.\n\n**Netzwerk-Modell (Network Model):**\n- Entwickelt zur Darstellung komplexerer Datenbeziehungen, besserer Performance und zur Durchsetzung von DB-Standards.\n- **Erlaubt einem Record mehrere Parents** -> kann M:N-Strukturen abbilden.\n- Records = Nodes (Segmente), Beziehungen = Sets (Edges) in einer Graphenstruktur; Implementierung ueber **Pointer**.\n- Prominentes System: **IDMS/R**.\n\nAus dem Netzwerk-Modell stammen Legacy-Konzepte, die bis heute genutzt werden: **Schema** (Gesamtorganisation), **Subschema** (sichtbarer Teil fuer ein Programm), **DML** (Data Manipulation Language) und **DDL** (Data Definition Language).\n\n**Nachteile beider:** unhandlich fuer komplexe Anwendungen, **keine ad-hoc Queries**, begrenzte Datenunabhaengigkeit. Abgeloest durch das relationale Modell in den 1980ern.\n\n**Pruefungsfalle (Q10):** Der Hauptunterschied: Hierarchisch = nur EIN Parent pro Child (strenger Baum); Netzwerk = mehrere Parents moeglich (Graph, M:N).",
+          "keyTerms": [
+            { "term": "Hierarchical Model", "definition": "Baumstruktur (upside-down tree); jedes Child hat genau einen Parent (1:M)." },
+            { "term": "Network Model", "definition": "Graphenstruktur; ein Record kann mehrere Parents haben (loest M:N), per Pointer implementiert." },
+            { "term": "Schema / Subschema", "definition": "Schema = konzeptuelle Gesamtorganisation; Subschema = der fuer ein Programm sichtbare Teil." }
+          ]
+        },
+        {
+          "title": "Relationales Modell (RDBMS)",
+          "content": "Das **Relationale Modell** wurde **1970 von E. F. Codd (IBM)** eingefuehrt - ein konzeptioneller Durchbruch fuer Nutzer und Designer (Q10).\n\n- **Fundament:** basiert auf dem mathematischen Begriff der **Relation** (= Tabelle), einer zweidimensionalen Struktur mit Zeilen (**tuples**) und Spalten (**attributes**).\n- **Entwicklung:** Anfangs als genial, aber unpraktisch angesehen (Rechnerlimits). Erst der Leistungszuwachs und Kostenverfall machten die Implementierung praktikabel.\n- **RDBMS:** Das Relational Database Management System verwaltet die physischen Details und praesentiert die Daten als intuitive Tabellen - es **versteckt die Komplexitaet** vor dem Nutzer.\n- **Data Relationships:** Tabellen sind ueber **gemeinsame Attribute** (common attributes) verknuepft (z.B. `branchNo`), was die Assoziation von Daten ermoeglicht.\n- **Redundancy Control:** Kontrollierte Redundanz beseitigt die typischen Dateisystem-Redundanzen.\n- **Data & Structural Independence:** Vollstaendige Daten- und Strukturunabhaengigkeit.\n\nDie Abfragesprache ist **SQL**: maechtig und flexibel, **deklarativ** - sie spezifiziert *was* zu tun ist, nicht *wie*.\n\n```compare\nSQL - was stimmt\n- Powerful and flexible\n- Declarative (was, nicht wie)\n- Minimaler Aufwand fuer Retrieval\n===\nSQL - was FALSCH ist\n- 'complex and rigid'\n- 'specifies how tasks are done'\n- 'used only for data insertion'\n```\n\nDas relationale Modell wurde zum De-facto-Standard, da es breit anwendbar ist und eine mathematische Grundlage besitzt.",
+          "keyTerms": [
+            { "term": "Relation", "definition": "Mathematischer Begriff fuer eine Tabelle: 2D-Struktur mit Zeilen (tuples) und Spalten (attributes)." },
+            { "term": "RDBMS", "definition": "Relationales DBMS; verwaltet physische Details, praesentiert Daten als Tabellen, verbirgt Komplexitaet." },
+            { "term": "SQL", "definition": "Deklarative Abfragesprache des relationalen Modells; spezifiziert was, nicht wie." }
+          ],
+          "examples": [
+            "Zwei Tabellen AGENT und CUSTOMER verbunden ueber gemeinsames Attribut -> 1:M-Beziehung."
+          ]
+        },
+        {
+          "title": "Objektorientiertes Modell (OODM)",
+          "content": "Das **Objektorientierte Datenmodell (OODM)** repraesentiert Daten UND Beziehungen in einer einzigen Struktur, dem **Object** (Q10). Es ist die Basis fuer **OODBMS**.\n\n**Komponenten:**\n- **Object:** Abstraktion einer realen Entitaet. Es ist **self-contained** - es enthaelt faktische Inhalte, Informationen ueber Beziehungen zu anderen Objekten UND operationale Prozeduren (Methoden).\n- **Attributes:** Beschreiben die Eigenschaften eines Objekts (z.B. Name, SSN, Geburtsdatum).\n- **Classes (Klassen):** Gruppieren Objekte mit aehnlichen Charakteristika. Eine Klasse enthaelt die gemeinsame **Struktur (Attribute)** UND das **Verhalten (Methoden)**. Klassen sind in einer **Klassenhierarchie** (upside-down tree) organisiert.\n- **Inheritance (Vererbung):** Objekte/Subklassen erben Attribute und Methoden von uebergeordneten Klassen.\n- **UML:** Class Diagrams stellen OODM-Konzepte grafisch dar.\n\nVerwandte Konzepte: Das **Extended Relational Data Model (ERDM)** und **O/R-DBMS** integrieren OO-Features (gekapselte Daten, Methoden, erweiterbare Datentypen, Vererbung) in die relationale Struktur. O/R-DBMS dominieren in OLTP/OLAP; reine OO-DBMS gedeihen in Nischen (CAD/CAM, GIS, Telekommunikation, Multimedia).\n\n**Pruefungsfalle (Q10):** Eine Klasse kapselt **sowohl Struktur (Attribute) als auch Verhalten (Methoden)** - nicht nur Attribute, nicht nur Methoden.",
+          "keyTerms": [
+            { "term": "Object", "definition": "Self-contained Struktur mit Daten, Beziehungen und Methoden; Abstraktion einer realen Entitaet." },
+            { "term": "Class (Klasse)", "definition": "Gruppiert aehnliche Objekte; kapselt Struktur (Attribute) UND Verhalten (Methoden)." },
+            { "term": "Inheritance (Vererbung)", "definition": "Subklassen/Objekte erben Attribute und Methoden von uebergeordneten Klassen." }
+          ]
+        },
+        {
+          "title": "Evolution der Datenmodelle & NoSQL",
+          "content": "Die Datenmodelle entwickelten sich, um wachsende Anforderungen zu bewaeltigen:\n\n| Generation | Modell | Kennzeichen |\n|-----------|--------|-------------|\n| 1960er | Hierarchisch | Baum, 1 Parent/Child (IMS) |\n| 1960/70er | Netzwerk | Graph, mehrere Parents (IDMS) |\n| 1970 | Relational | Tabellen, Codd, SQL |\n| 1990er | Objektorientiert | Objekte, Vererbung (OODBMS) |\n| 1990er+ | ERDM / O-R | OO-Features im RDBMS |\n| 2000er+ | NoSQL / Big Data | verteilt, skalierbar |\n\n**Big Data** ist gekennzeichnet durch die **3 Vs**: **Volume** (Datenmenge), **Velocity** (Geschwindigkeit der Entstehung) und **Variety** (Vielfalt der Formate). Begriff gepraegt von John Mashey (1990er), formalisiert durch Douglas Laney (Gartner).\n\nDas relationale Modell **stoesst an Grenzen** bei unstrukturierten, Social-Media- und Sensordaten sowie bei der horizontalen Skalierung. Antworten:\n- **Hadoop:** Java-basiertes Open-Source-Framework fuer verteilte Speicherung/Verarbeitung. Komponenten: **HDFS** (verteiltes Dateisystem) und **MapReduce** (Analytics).\n- **NoSQL-Datenbanken:** verteilt, fehlertolerant; betonen Performance ueber strikte Transaktionskonsistenz. Vier Typen: **Key-Value Stores**, **Document Databases**, **Columnar Databases** (Analytics), **Graph Databases** (Beziehungen).\n\nDer Aufstieg des Internets foerderte zudem **XML** als Standard fuer den Austausch strukturierter, semistrukturierter und unstrukturierter Daten.",
+          "keyTerms": [
+            { "term": "Big Data (3 Vs)", "definition": "Volume, Velocity, Variety - die drei charakterisierenden Eigenschaften grosser Datenmengen." },
+            { "term": "NoSQL", "definition": "Nicht-relationale DBMS-Generation: verteilt, skalierbar, fehlertolerant (Key-Value, Document, Columnar, Graph)." },
+            { "term": "Hadoop", "definition": "Open-Source-Framework fuer verteilte Speicherung (HDFS) und Verarbeitung (MapReduce)." }
+          ]
+        },
+        {
+          "title": "Entity Relationship Model (ERM) & Notationen",
+          "content": "Das **ERM** wurde **1976 von Peter Chen** eingefuehrt. Es ergaenzt das relationale Modell und ist dank seiner visuellen Einfachheit das dominante Modellierungs- und Designwerkzeug (Q9). Das ERM ist ein **konzeptuelles Modell** - es zeigt Entitaeten, Attribute und Beziehungen.\n\n**ERM-Komponenten:**\n- **Entity:** als **Rechteck** dargestellt, Name in Grossbuchstaben, Singular. Instanzen = Zeilen.\n- **Attributes:** Charakteristika der Entitaet.\n- **Relationships:** Assoziationen zwischen Entitaeten, benannt mit aktiven/passiven Verben. Typen: **1:1, 1:M, M:N**.\n\n**Notationen (Q15-relevant):**\n- **Chen Notation:** Beziehungen als **Raute (Diamond)**, Konnektivitaeten als Text neben den Entitaetsboxen, Attribute als Ellipsen. Eher akademisch.\n- **Crow's Foot Notation:** Konnektivitaeten als **Symbole** - kurzer Strich fuer '1', dreizackiger **Kraehenfuss** fuer 'M'. Industriestandard (kompakt).\n- **UML Notation:** Linien mit Symbolen (1..1, 1..*), Namen auf beiden Seiten.\n\n```diagram:Crow's Foot - 1:M (PROFESSOR teaches CLASS)\n┌───────────┐                 ┌───────────┐\n│ PROFESSOR ││────────────o{ │   CLASS   │\n└───────────┘   teaches       └───────────┘\n   (eins)                       (viele = Kraehenfuss)\n```\n\nEine 1:M-Beziehung liest man von der '1'-Seite zur 'M'-Seite. **M:N**-Beziehungen muessen im relationalen Modell ueber eine Bridging-Tabelle aufgeloest werden.\n\n**Pruefungsfalle:** Die Chen-Notation ist NICHT der Industriestandard - das ist die Crow's-Foot-Notation. Chen ist primaer akademisch.",
+          "keyTerms": [
+            { "term": "ERM", "definition": "Entity Relationship Model (Chen 1976): konzeptuelles, grafisches Modell mit Entitaeten, Attributen, Beziehungen." },
+            { "term": "Chen Notation", "definition": "ER-Notation mit Rauten fuer Beziehungen und Ellipsen fuer Attribute; akademisch." },
+            { "term": "Crow's Foot Notation", "definition": "Industrie-ER-Notation; Symbole an den Linien (Strich = 1, Kraehenfuss = viele)." }
+          ],
+          "examples": [
+            "1:M - 'Ein Kunde kann viele Rechnungen haben'.",
+            "M:N - 'Ein Student belegt viele Kurse, ein Kurs hat viele Studenten' (braucht Bridging-Tabelle)."
+          ]
+        },
+        {
+          "title": "ANSI/SPARC: External, Conceptual, Internal, Physical",
+          "content": "Die **ANSI/SPARC-Architektur** definiert die **Degrees of Data Abstraction** (Q11). Ursprünglich drei Ebenen - External, Conceptual, Internal - erweitert um das **Physical**-Modell.\n\n**1. External Model (Externe Ebene):** Sicht der Endnutzer, die ueber Applikationen mit Daten arbeiten. Jede Business Unit (Sales, Finance) hat ihren eigenen Datenausschnitt. Dargestellt als ER-Diagramme; jede Darstellung = **external schema**. Vorteile: identifiziert benoetigte Daten je Business Unit, validiert das Modell, unterstuetzt **Security** (Isolation von Teilmengen) und vereinfacht App-Entwicklung.\n\n**2. Conceptual Model (Konzeptuelle Ebene):** **Globale Sicht** der gesamten Datenbank ueber die ganze Organisation; integriert alle externen Views (= **conceptual schema**). Typischerweise als **ER-Modell/ERD** umgesetzt - die grundlegende Datenbank-Blaupause. **Software- UND Hardware-unabhaengig** (Macro-Level, bird's-eye view).\n\n**3. Internal Model (Interne Ebene):** Sicht des **gewaehlten DBMS**; mappt das konzeptuelle Modell auf die Konstrukte der Implementierung (= **internal schema**). Beim relationalen Modell: Entitaeten -> Tabellen, SQL als Sprache. **Software-abhaengig**, aber **hardware-unabhaengig**. Aenderung ohne Auswirkung auf das konzeptuelle Modell = **Logical Independence**.\n\n**4. Physical Model (Physische Ebene):** Niedrigste Ebene; **wie** Daten auf Speichermedien (magnetisch, SSD, optisch) abgelegt werden, inkl. physischer Zugriffsmethoden. **Software- UND Hardware-abhaengig**. Aenderung ohne Auswirkung auf das interne Modell = **Physical Independence**.\n\n```diagram:Degrees of Data Abstraction\n  Nutzer-Apps                      Hardware-naehe\n  ──────────────────────────────────────────────▶\n  EXTERNAL  →  CONCEPTUAL  →  INTERNAL  →  PHYSICAL\n  (Views)      (ER, global)   (DBMS)       (Disk)\n  SW+HW-       SW+HW-         SW-abh.,     SW+HW-\n  unabh.       unabh.         HW-unabh.    abhaengig\n```\n\n**Pruefungsfalle (Q11):** Alle vier Ebenen sind External, Conceptual, Internal, Physical. Das Conceptual Model ist software-/hardware-unabhaengig; das Internal Model ist software-abhaengig, aber hardware-unabhaengig.",
+          "keyTerms": [
+            { "term": "External Model", "definition": "Sicht einzelner Endnutzer/Business Units; external schema, unterstuetzt Security." },
+            { "term": "Conceptual Model", "definition": "Globale, organisationsweite Sicht; ER-Modell; software- und hardware-unabhaengig." },
+            { "term": "Internal Model", "definition": "Sicht des gewaehlten DBMS (Tabellen, SQL); software-abhaengig, hardware-unabhaengig." },
+            { "term": "Physical Model", "definition": "Speicherung auf Medien (niedrigste Ebene); software- und hardware-abhaengig." }
+          ]
+        },
+        {
+          "title": "⚡ Pruefungs-Spickzettel (Module 2)",
+          "content": "Die Must-Know-Fakten fuer die Pruefung auf einen Blick:\n\n- **Datenmodellierung:** iterativer Prozess, liefert den Blueprint der DB; abstrahiert die reale Problem-Domaene.\n- **Vier Bausteine:** Entities (Nomen), Attributes (Adjektive), Relationships (aus Business Rules, Kardinalitaet), Constraints. Ein gutes Modell braucht ALLE vier.\n- **Business Rules (Q8):** klar, konsistent, durchsetzbar. Noun->Entity, Verb->Relationship. Beide Richtungen pruefen -> Kardinalitaet. Nicht alle BR sind in der DB modellierbar; manche per Application Software.\n- **Naming:** Entitaeten GROSS + Singular; Attribute mit Praefix (CUS_CREDIT_LIMIT). Gut: customer_id, order_date. Schlecht: data1, field123.\n- **Architekturen (Q10):** Hierarchisch (Baum, 1 Parent/Child, IMS) | Netzwerk (Graph, mehrere Parents, M:N, IDMS) | Relational (Codd 1970, Tabellen, SQL) | OO (Objekt = Daten + Methoden, Klasse kapselt Struktur + Verhalten, Vererbung).\n- **ERM (Q9):** Chen 1976, konzeptuelles Modell; Entity=Rechteck, Relationship, Attribute. Notationen: Chen (Raute, akademisch) | Crow's Foot (Symbole, Industriestandard) | UML.\n- **ANSI/SPARC (Q11):** External (Views) -> Conceptual (ER, global, SW/HW-unabh.) -> Internal (DBMS, SW-abh., HW-unabh.) -> Physical (Disk, SW+HW-abh.).\n- **NoSQL/Big Data:** 3 Vs = Volume, Velocity, Variety. Typen: Key-Value, Document, Columnar, Graph. Hadoop = HDFS + MapReduce.\n\n**Haeufige Fallen:** Chen ist NICHT Industriestandard (Crow's Foot ist es). Hierarchisch = 1 Parent, Netzwerk = mehrere Parents. SQL ist deklarativ (was, nicht wie). Eine OO-Klasse kapselt Struktur UND Verhalten.",
+          "keyTerms": [
+            { "term": "Cardinality (Kardinalitaet)", "definition": "Anzahl der Instanzen einer Entitaet, die mit einer Instanz der anderen verbunden sein koennen (1:1, 1:M, M:N)." }
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "type": "multiple-choice",
+          "question": "Welche Aussage beschreibt den Hauptunterschied zwischen dem Hierarchischen Modell und dem Netzwerk-Modell korrekt?",
+          "options": [
+            "Das Hierarchische Modell nutzt Tabellen, während das Netzwerk-Modell Objekte nutzt.",
+            "Im Hierarchischen Modell darf ein Child-Knoten nur exakt einen Parent haben, während das Netzwerk-Modell Datensätze erlaubt, die mehrere Parents haben (M:N).",
+            "Das Netzwerk-Modell war die Grundlage für SQL, das Hierarchische nicht.",
+            "Es gibt keinen Unterschied, beide Bezeichnungen beschreiben dasselbe Modell von IBM."
+          ],
+          "correctAnswer": 1,
+          "explanation": "Das Hierarchische Modell ist ein strenger 'Upside-down tree' (1:M). Das Netzwerk-Modell wurde speziell entwickelt, um komplexe Graphen mit multiplen Eltern (M:N Beziehungen) zu ermöglichen."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Du liest folgende Business Rule: 'Eine Fluggesellschaft (Airline) besitzt mehrere Flugzeuge (Aircrafts). Jedes Flugzeug gehört genau zu einer Fluggesellschaft.' Wie sieht die korrekte Beziehung im ER-Modell aus?",
+          "options": [
+            "Eine 1:1 Beziehung zwischen Airline und Aircraft.",
+            "Eine M:N Beziehung zwischen Airline und Aircraft.",
+            "Eine 1:M Beziehung (One-to-Many), bei der die Airline die '1'-Seite und das Aircraft die 'M'-Seite ist.",
+            "Es ist keine Beziehung, sondern eine Vererbung."
+          ],
+          "correctAnswer": 2,
+          "explanation": "Eine Airline (1) kann viele Aircrafts (M) haben. Ein Aircraft gehört jedoch nur einer einzigen Airline. Das ist die klassische 1:M (One-to-Many) Beziehung."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Welcher Datenbankpionier veröffentlichte 1970 das Paper, das den Grundstein für das 'Relationale Datenmodell' legte, und befreite Endnutzer von der physischen Komplexität der Daten?",
+          "options": [
+            "Peter Chen",
+            "Charles Babbage",
+            "E.F. Codd",
+            "Bill Gates"
+          ],
+          "correctAnswer": 2,
+          "explanation": "Dr. Edgar F. Codd (E.F. Codd) von IBM erfand das relationale Datenmodell, was einen gewaltigen Paradigmenwechsel in der Informatik auslöste."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "In einem Objektorientierten Datenmodell (OODM) fasst eine 'Klasse' (Class) bestimmte Dinge zusammen. Welche sind das?",
+          "options": [
+            "Nur die Attribute der Objekte.",
+            "Sowohl die Struktur (Attribute) als auch das Verhalten (Methoden/Operationen) der Objekte.",
+            "Nur die Methoden und Fremdschlüssel.",
+            "Lediglich das visuelle UI-Design."
+          ],
+          "correctAnswer": 1,
+          "explanation": "Das OODM verschmilzt Daten und Programmcode. Eine Klasse kapselt die Eigenschaften (Attribute) der Objekte UND ihr Verhalten (Methoden) an einem Ort (Encapsulation)."
+        },
+        {
+          "type": "true-false",
+          "question": "Die 'Chen-Notation' ist heute der absolute Industrie-Standard, der von fast allen professionellen Datenbank-Design-Tools primär anstelle der Crow's Foot Notation verwendet wird.",
+          "correctAnswer": false,
+          "explanation": "Falsch. Die Chen-Notation (mit Rauten für Beziehungen) ist vor allem im akademischen Bereich wichtig. In der Industrie und in Tools (wie ERwin, MySQL Workbench) wird fast ausschließlich die Crow's Foot (Krähenfuß) oder UML-Notation verwendet, da sie kompakter ist."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Du analysierst die Business Rule 'A customer may generate many invoices'. Welche Übersetzungsregel wendest du an, um daraus ein Datenmodell abzuleiten?",
+          "options": [
+            "Nomen werden zu Beziehungen, Verben werden zu Attributen.",
+            "Nomen (customer, invoice) werden zu Entitäten, das Verb (generate) wird zur Beziehung.",
+            "Jedes Wort wird zu einem eigenen Constraint.",
+            "Business Rules werden ignoriert, da sie nur in der Anwendungssoftware gelten."
+          ],
+          "correctAnswer": 1,
+          "explanation": "Bei der Übersetzung von Business Rules werden Nomen zu Entitäten (customer, invoice) und Verben zu Beziehungen (generate). 'A customer may generate many invoices' impliziert zudem eine 1:M-Beziehung."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Welche Ebene der ANSI/SPARC-Architektur stellt eine globale, organisationsweite Sicht der gesamten Datenbank dar und ist sowohl software- als auch hardware-unabhängig (typischerweise als ER-Modell)?",
+          "options": [
+            "External Level",
+            "Conceptual Level",
+            "Internal Level",
+            "Physical Level"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Das Conceptual Level (Conceptual Model) bietet die globale, integrierte Gesamtsicht der Organisation, wird meist als ER-Modell dargestellt und ist software- und hardware-unabhängig. Das External Level zeigt nur Teilsichten, das Internal Level ist DBMS-/software-abhängig und das Physical Level beschreibt die Speicherung auf den Medien."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,294 @@
+{
+  "modules": [
+    {
+      "moduleId": "module-1",
+      "questions": [
+        {
+          "type": "multiple-choice",
+          "question": "Was unterscheidet 'Daten' von 'Informationen'?",
+          "options": [
+            "Informationen sind rohe Fakten, Daten haben Kontext.",
+            "Es gibt keinen Unterschied, die Begriffe sind synonym.",
+            "Daten sind unstrukturierte Rohfakten, Informationen sind verarbeitete Daten mit Bedeutung.",
+            "Informationen werden nur in relationalen Datenbanken gespeichert."
+          ],
+          "correctAnswer": 2,
+          "explanation": "Daten sind die reinen Rohfakten (z.B. eine Zahl wie '42'). Erst durch Kontext und Verarbeitung (z.B. '42 Grad Celsius Körpertemperatur') werden sie zu nutzbaren Informationen."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Welche Datenanomalie tritt auf, wenn durch das Löschen einer Entität (z.B. Kunde) versehentlich auch Informationen über ein Objekt (z.B. ein Produkt, das nur dieser Kunde bestellt hat) gelöscht werden?",
+          "options": [
+            "Update-Anomalie",
+            "Lösch-Anomalie (Deletion Anomaly)",
+            "Einfüge-Anomalie (Insertion Anomaly)",
+            "Redundanz-Anomalie"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Die Lösch-Anomalie (Deletion Anomaly) entsteht, wenn das Entfernen eines Datensatzes zum ungewollten Verlust von anderen, verknüpften, aber unabhängig relevanten Daten führt."
+        }
+      ]
+    },
+    {
+      "moduleId": "module-2",
+      "questions": [
+        {
+          "type": "multiple-choice",
+          "question": "Wie werden 'Verben' (z.B. 'Kunde BESTELLT Produkt') in einer Business Rule typischerweise im ER-Modell abgebildet?",
+          "options": [
+            "Als Entitäten (Entities)",
+            "Als Attribute",
+            "Als Primärschlüssel",
+            "Als Beziehungen (Relationships)"
+          ],
+          "correctAnswer": 3,
+          "explanation": "In der konzeptionellen Modellierung werden Substantive zu Entitäten (Kunde, Produkt) und Verben definieren die Beziehungen (Relationships) zwischen diesen Entitäten."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Welches Datenmodell wurde von E.F. Codd erfunden und basiert auf mathematischer Mengenlehre?",
+          "options": [
+            "Netzwerk-Modell",
+            "Hierarchisches Modell",
+            "Objektorientiertes Modell",
+            "Relationales Modell"
+          ],
+          "correctAnswer": 3,
+          "explanation": "E.F. Codd stellte 1970 das Relationale Modell vor, welches Daten in Form von Tabellen (Relationen) abstrahiert und die physische Komplexität vor dem Nutzer verbirgt."
+        }
+      ]
+    },
+    {
+      "moduleId": "module-3",
+      "questions": [
+        {
+          "type": "multiple-choice",
+          "question": "Welche Eigenschaft muss eine Spalte (oder Spaltenkombination) haben, um als Primärschlüssel (Primary Key) geeignet zu sein?",
+          "options": [
+            "Sie darf keine numerischen Werte enthalten.",
+            "Sie muss in jeder Tabelle gleich heißen.",
+            "Sie muss jeden Datensatz eindeutig identifizieren und darf niemals NULL sein.",
+            "Sie darf mehrfach denselben Wert enthalten, solange ein anderer Schlüssel eindeutig ist."
+          ],
+          "correctAnswer": 2,
+          "explanation": "Ein Primärschlüssel dient der eindeutigen Identifikation einer Zeile (Entity Integrity). Daher muss er zwingend UNIQUE und NOT NULL sein."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Wie wird eine M:N (Many-to-Many) Beziehung im relationalen Modell klassischerweise aufgelöst?",
+          "options": [
+            "Man fügt in beide Tabellen jeweils einen Foreign Key der anderen Tabelle ein.",
+            "Man erstellt eine assoziative Entität (Verknüpfungstabelle), die die Primärschlüssel beider Tabellen als Fremdschlüssel aufnimmt.",
+            "M:N Beziehungen können in SQL direkt ohne Änderungen abgebildet werden.",
+            "Man speichert alle verknüpften IDs als kommagetrennten String in einer Spalte."
+          ],
+          "correctAnswer": 1,
+          "explanation": "Relationale Datenbanken können M:N Beziehungen nicht direkt abbilden. Sie werden aufgelöst, indem man eine Zwischentabelle (assoziative Entität) erstellt, wodurch zwei 1:M Beziehungen entstehen."
+        }
+      ]
+    },
+    {
+      "moduleId": "module-4",
+      "questions": [
+        {
+          "type": "multiple-choice",
+          "question": "Was beschreibt ein 'schwacher Entity-Typ' (Weak Entity)?",
+          "options": [
+            "Eine Entität ohne Attribute.",
+            "Eine Entität, die nur aus Fremdschlüsseln besteht.",
+            "Eine Entität, die keinen eigenen vollwertigen Primärschlüssel hat und existenziell von einer starken Entität abhängt.",
+            "Eine Tabelle, die weniger als 10 Datensätze enthält."
+          ],
+          "correctAnswer": 2,
+          "explanation": "Eine Weak Entity (z.B. 'Raum' in einem 'Gebäude') kann ohne ihre Parent-Entität (starke Entität) nicht existieren und übernimmt einen Teil ihres Schlüssels von der Parent-Entität (identifying relationship)."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Welches Symbol wird in der Crow's Foot Notation typischerweise verwendet, um 'Optionalität' (Minimum Cardinality = 0) darzustellen?",
+          "options": [
+            "Ein doppelter Strich (||)",
+            "Ein Kreis (o)",
+            "Ein Dreieck",
+            "Ein Krähenfuß mit drei Zehen"
+          ],
+          "correctAnswer": 1,
+          "explanation": "In der Crow's Foot Notation symbolisiert der Kreis ein 'Zero' (optional), der senkrechte Strich ein 'One' (mandatory) und der Krähenfuß 'Many'."
+        }
+      ]
+    },
+    {
+      "moduleId": "module-5",
+      "questions": [
+        {
+          "type": "multiple-choice",
+          "question": "Welche Bedingung muss für die 2. Normalform (2NF) erfüllt sein?",
+          "options": [
+            "Alle atomaren Werte müssen in Strings umgewandelt werden.",
+            "Die Tabelle muss in 1NF sein und alle nicht-Schlüsselattribute müssen vom gesamten Primärschlüssel abhängen (keine partiellen Abhängigkeiten).",
+            "Es dürfen keine Fremdschlüssel mehr vorhanden sein.",
+            "Alle transitiven Abhängigkeiten müssen entfernt sein."
+          ],
+          "correctAnswer": 1,
+          "explanation": "Die 2NF zielt auf partielle Abhängigkeiten ab (die nur bei zusammengesetzten Primärschlüsseln auftreten können). Jedes Nicht-Schlüsselattribut muss vom gesamten Schlüssel abhängen."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Warum betreibt man manchmal gezielte 'Denormalisierung'?",
+          "options": [
+            "Um Speicherplatz zu sparen.",
+            "Um Dateninkonsistenzen absichtlich herbeizuführen.",
+            "Um Lesezugriffe und Abfragegeschwindigkeiten zu optimieren, indem man teure JOIN-Operationen vermeidet.",
+            "Um die Sicherheit der Datenbank vor Hackern zu erhöhen."
+          ],
+          "correctAnswer": 2,
+          "explanation": "Während Normalisierung Schreib-Anomalien verhindert, kann sie durch viele Tabellen und Joins beim Lesen langsam sein. Denormalisierung nimmt bewusst Redundanz in Kauf (z.B. vorberechnete Aggregate), um Leseabfragen massiv zu beschleunigen."
+        }
+      ]
+    },
+    {
+      "moduleId": "module-6",
+      "questions": [
+        {
+          "type": "multiple-choice",
+          "question": "Welcher SQL-Befehl gehört zur DDL (Data Definition Language)?",
+          "options": [
+            "SELECT",
+            "UPDATE",
+            "GRANT",
+            "CREATE TABLE"
+          ],
+          "correctAnswer": 3,
+          "explanation": "DDL befasst sich mit der Struktur der Datenbank (CREATE, ALTER, DROP). DML befasst sich mit den Daten (SELECT, INSERT, UPDATE, DELETE). DCL mit Rechten (GRANT, REVOKE)."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Wenn man in SQL ein Ergebnis nach der Anzahl aggregieren will, und nur Gruppen anzeigen möchte, die mehr als 5 Einträge haben – welche Klausel verwendet man?",
+          "options": [
+            "WHERE COUNT(*) > 5",
+            "HAVING COUNT(*) > 5",
+            "FILTER COUNT > 5",
+            "GROUP BY COUNT(*) > 5"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Die WHERE-Klausel filtert Zeilen VOR der Gruppierung. Um auf aggregierte Ergebnisse (wie COUNT oder SUM) zu filtern, muss zwingend die HAVING-Klausel verwendet werden."
+        }
+      ]
+    },
+    {
+      "moduleId": "module-7",
+      "questions": [
+        {
+          "type": "multiple-choice",
+          "question": "Was liefert ein LEFT OUTER JOIN?",
+          "options": [
+            "Nur Zeilen, die in der rechten Tabelle vorhanden sind.",
+            "Nur Zeilen, bei denen die JOIN-Bedingung in beiden Tabellen zutrifft.",
+            "Alle Zeilen der linken Tabelle, ergänzt um die passenden Zeilen der rechten Tabelle (oder NULL, falls es keinen Match gibt).",
+            "Das kartesische Produkt beider Tabellen."
+          ],
+          "correctAnswer": 2,
+          "explanation": "Der LEFT OUTER JOIN (oder einfach LEFT JOIN) garantiert, dass kein Datensatz der linken (primären) Tabelle verloren geht, selbst wenn es keinen zugehörigen Datensatz in der rechten Tabelle gibt."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Wofür eignet sich ein AFTER DELETE Trigger besonders gut?",
+          "options": [
+            "Um das Löschen eines Datensatzes zu verhindern, wenn er noch referenziert wird.",
+            "Um einen gelöschten Datensatz automatisch in einer Archiv- oder Audit-Tabelle zu protokollieren.",
+            "Um Views zu erstellen.",
+            "Um Indizes neu zu berechnen."
+          ],
+          "correctAnswer": 1,
+          "explanation": "AFTER DELETE Trigger werden oft für Audit-Logs verwendet. Da der Datensatz gelöscht wurde, kann der Trigger die 'OLD' Werte nutzen, um sie sicher in eine Historien-Tabelle zu schreiben."
+        }
+      ]
+    },
+    {
+      "moduleId": "module-8",
+      "questions": [
+        {
+          "type": "multiple-choice",
+          "question": "Was beschreibt die ACID-Eigenschaft 'Isolation'?",
+          "options": [
+            "Ein Datensatz darf nur von einer Person jemals gelesen werden.",
+            "Transaktionen finden auf isolierten Servern statt.",
+            "Änderungen einer Transaktion sind für andere Transaktionen unsichtbar, bis sie mit COMMIT bestätigt werden.",
+            "Wenn eine Transaktion fehlschlägt, wird der Server isoliert."
+          ],
+          "correctAnswer": 2,
+          "explanation": "Isolation stellt sicher, dass simultane Transaktionen so ablaufen, als ob sie strikt nacheinander ausgeführt würden. Dadurch werden Probleme wie Dirty Reads vermieden."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Was ist ein 'Deadlock' (Verklemmung)?",
+          "options": [
+            "Ein gesperrter Account nach zu vielen Fehlversuchen beim Login.",
+            "Ein Zustand, bei dem Transaktion A auf eine Ressource von Transaktion B wartet, während Transaktion B gleichzeitig auf eine Ressource von Transaktion A wartet.",
+            "Eine fehlerhafte Transaktion, die nicht beendet werden kann, weil der Server abgestürzt ist.",
+            "Ein Lock auf Datenbankebene, der alle Tabellen schützt."
+          ],
+          "correctAnswer": 1,
+          "explanation": "Ein Deadlock entsteht durch zyklisches Warten auf Locks. T1 hat Lock auf X und wartet auf Y. T2 hat Lock auf Y und wartet auf X. Beide sind blockiert und können ohne Eingriff des DBMS nicht weiterlaufen."
+        }
+      ]
+    },
+    {
+      "moduleId": "module-9",
+      "questions": [
+        {
+          "type": "multiple-choice",
+          "question": "Welche Technologie wird primär in Java verwendet, um standardisiert auf relationale Datenbanken zuzugreifen?",
+          "options": [
+            "ODBC",
+            "OLE-DB",
+            "ADO.NET",
+            "JDBC"
+          ],
+          "correctAnswer": 3,
+          "explanation": "JDBC (Java Database Connectivity) ist die Standard-API für Java-Anwendungen, um unabhängig vom spezifischen DBMS SQL-Abfragen auszuführen."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Welcher Standard wird oft verwendet, um die Struktur und Validierungsregeln eines XML-Dokuments exakt zu definieren (inkl. Datentypen)?",
+          "options": [
+            "XSLT",
+            "HTML",
+            "XML Schema (XSD)",
+            "CSS"
+          ],
+          "correctAnswer": 2,
+          "explanation": "Ein XML Schema (XSD) definiert detailliert, welche Tags erlaubt sind, wie sie verschachtelt sein dürfen und welche Datentypen (z.B. Date, Integer) sie enthalten dürfen."
+        }
+      ]
+    },
+    {
+      "moduleId": "module-10",
+      "questions": [
+        {
+          "type": "multiple-choice",
+          "question": "Welche Art von NoSQL Datenbank eignet sich besonders gut für hochkomplexe Beziehungen wie soziale Netzwerke oder Empfehlungs-Systeme?",
+          "options": [
+            "Key-Value Store (z.B. Redis)",
+            "Document Database (z.B. MongoDB)",
+            "Column-Oriented Database (z.B. Cassandra)",
+            "Graph Database (z.B. Neo4j)"
+          ],
+          "correctAnswer": 3,
+          "explanation": "Graph-Datenbanken (Nodes, Edges, Properties) sind optimiert für das Traversieren von Netzwerken, was in relationalen Datenbanken zu sehr langsamen und komplexen JOIN-Kaskaden führen würde."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Was beschreibt der Begriff 'Dirty Data' im Kontext des Database Administrations?",
+          "options": [
+            "Daten, die in der falschen Tabelle gespeichert wurden.",
+            "Fehlerhafte, redundante, inkonsistente oder veraltete Daten, die zu falschen Geschäftsentscheidungen führen können.",
+            "Daten, die ohne SSL-Verschlüsselung über das Netzwerk übertragen wurden.",
+            "Der Cache des Datenbankservers."
+          ],
+          "correctAnswer": 1,
+          "explanation": "Datenqualität ist essenziell. 'Dirty Data' bezeichnet mangelhafte Daten, die den Wert der Datenbank massiv reduzieren, da darauf basierende Analysen wertlos oder irreführend sind ('Garbage in, garbage out')."
+        }
+      ]
+    }
+  ]
+}

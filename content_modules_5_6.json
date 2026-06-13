@@ -1,0 +1,466 @@
+{
+  "modules": [
+    {
+      "id": "module-5",
+      "title": "Normalization of Database Tables",
+      "description": "Systematischer Modellierungsprozess zur Minimierung von Redundanz und Eliminierung von Insert-, Update- und Delete-Anomalien mittels funktionaler Abhängigkeiten, 1NF, 2NF, 3NF, BCNF und gezielter Denormalisierung.",
+      "coreCompetencies": [
+        "Die drei Datenanomalien (Insert, Update, Delete) sowie Dateninkonsistenz erkennen und ihre Ursache in Redundanz erklären",
+        "Funktionale, partielle und transitive Abhängigkeiten präzise identifizieren und in Pfeilnotation darstellen",
+        "Prime- und Nonprime-Attribute, Candidate Key und Primary Key korrekt unterscheiden",
+        "Eine Tabelle methodisch von der unnormalisierten Form (0NF) über 1NF und 2NF bis zur 3NF transformieren",
+        "Die Regeln und den Sinn von BCNF, 4NF und 5NF als höhere Normalformen einordnen",
+        "Den Trade-off zwischen Normalisierung (Schreib-Integrität) und Denormalisierung (Lese-Performance) bewerten",
+        "Permanente und temporäre Denormalisierungsstrategien situationsgerecht auswählen"
+      ],
+      "sections": [
+        {
+          "title": "Warum Normalisierung? Ziel & Einsatzszenarien",
+          "content": "**Normalisierung** ist ein *manueller, systematischer Daten-Modellierungsprozess*, der unstrukturierte Daten in gut geformte Tabellen (Relationen) zerlegt. Sie wird typischerweise von **Datenbank-Entwicklern und -Administratoren** durchgeführt und ist auf jedes relationale DBMS (Oracle, SQL Server, MySQL, PostgreSQL) anwendbar.\n\n**Das zentrale Ziel:** Redundanz minimieren und Anomalien eliminieren. Die Leitregel lautet *\"Single Subject\"* — jede Tabelle darf nur **ein einziges Thema** repräsentieren (z. B. nur Studenten, nur Kurse, nur Mitarbeiter).\n\nNormalisierung kommt vor allem in zwei Szenarien zum Einsatz:\n1. Beim **Entwurf einer neuen** Datenbankstruktur auf Basis von Business-Anforderungen.\n2. Beim **Anpassen bestehender** Datenstrukturen.\n\n*(Achtung Prüfungsfalle: Normalisierung dient NICHT der Report-Erzeugung oder der Benutzer-Authentifizierung — das sind typische falsche Antworten im Kahoot-Recap.)*\n\nMerkmale einer **gut geformten Relation**:\n- **Single Subject:** ein Thema pro Tabelle\n- **Atomare Werte:** jede Zelle enthält genau einen Wert\n- **Minimale Redundanz:** jede Information nur an einer Stelle\n- **Abhängigkeit vom PK:** alle Nonprime-Attribute hängen vom Primary Key ab\n- **Keine Anomalien:** frei von Insert-, Update- und Delete-Anomalien",
+          "keyTerms": [
+            { "term": "Normalization", "definition": "Systematischer, manueller Prozess zur Minimierung von Redundanz und Eliminierung von Anomalien durch Zerlegung in mehrere, jeweils einem Thema gewidmete Tabellen." },
+            { "term": "Single Subject Rule", "definition": "Jede Tabelle repräsentiert genau ein Thema/eine Entität, was die Daten logisch organisiert und leichter wartbar macht." }
+          ],
+          "examples": [
+            "Neuentwurf: Aus Business-Regeln entstehen Entitäten, Attribute und Beziehungen.",
+            "Refactoring: Eine bestehende, gewachsene 'Excel-artige' Tabelle wird nachträglich normalisiert."
+          ]
+        },
+        {
+          "title": "Die drei Datenanomalien (Insert, Update, Delete)",
+          "content": "Unnormalisierte Tabellen leiden unter drei berüchtigten **Anomalien**, die alle aus *Redundanz* entstehen. Normalisierung zielt genau darauf ab, sie zu verhindern.\n\n- **Insert Anomaly (Einfügeanomalie):** Ein Datensatz kann nicht eingefügt werden, weil andere (logisch unabhängige) Pflichtdaten fehlen. *Beispiel:* Ein neuer Student (Jared, ID 5) hat sich noch für keinen Kurs eingeschrieben — in einer kombinierten Tabelle bleibt der Kursname leer (`?`), bzw. ein neuer Kurs lässt sich gar nicht anlegen, solange kein Student existiert.\n- **Update Anomaly (Änderungsanomalie):** Dieselbe Information ist mehrfach gespeichert und muss überall gleichzeitig geändert werden. Vergisst man eine Zeile, wird die DB inkonsistent. *Beispiel:* Der Kurs *\"Biology 1\"* wird in *\"Intro to Biology\"* umbenannt — das muss in jeder einzelnen Studentenzeile nachgezogen werden.\n- **Delete Anomaly (Löschanomalie):** Das Löschen eines Datensatzes vernichtet ungewollt andere wertvolle Daten. *Beispiel:* Susan Johnson exmatrikuliert sich — löscht man ihre Zeile, geht auch die Information verloren, dass der Kurs *\"Medicine\"* und die Klasse *\"Biology 2\"* überhaupt existieren.\n\nEine vierte verwandte Plage ist die **Data Inconsistency**: uneinheitliche Schreibweisen desselben Werts (z. B. *\"Elect. Engineer\"* vs. *\"Elect.Eng.\"* vs. *\"EE\"*).\n\n| Anomalie | Auslöser | Folge | Schulbeispiel |\n|----------|----------|-------|---------------|\n| **Insert** | fehlende Pflichtdaten | Datensatz nicht einfügbar | neuer Kurs ohne Student |\n| **Update** | Redundanz | Inkonsistenz bei Teil-Update | Kursname an vielen Stellen ändern |\n| **Delete** | vermischte Themen | unbeabsichtigter Datenverlust | letzter Student löscht Kurs |",
+          "keyTerms": [
+            { "term": "Data Inconsistency", "definition": "Widersprüchliche Daten durch uneinheitliche Erfassung desselben Sachverhalts (z. B. verschiedene Schreibweisen einer Berufsbezeichnung)." },
+            { "term": "Redundanz", "definition": "Mehrfache Speicherung derselben Information — die gemeinsame Wurzel aller drei Anomalien." }
+          ],
+          "examples": [
+            "Insert: Student Jared (ID 5) ohne Kurs -> Kursname bleibt '?'.",
+            "Update: 'Biology 1' -> 'Intro to Biology' muss in jeder Studentenzeile geändert werden.",
+            "Delete: Susan Johnson löschen vernichtet die Existenz des Kurses 'Medicine'."
+          ]
+        },
+        {
+          "title": "Schlüssel-Konzepte: Prime, Nonprime, Candidate & Primary Key",
+          "content": "Schlüssel sind das Herzstück der Normalisierung. Wer Abhängigkeiten korrekt einordnen will, muss die Schlüssel-Begriffe sauber trennen.\n\n- **Superkey:** jede Attributkombination, die eine Zeile eindeutig identifiziert (darf überflüssige Attribute enthalten).\n- **Candidate Key:** ein *minimaler* Superkey — eindeutig, aber ohne überflüssige Attribute. Eine Tabelle kann **mehrere** Candidate Keys haben.\n- **Primary Key (PK):** *ein* unter den Candidate Keys ausgewählter Schlüssel; das Hauptmittel zur Identifikation und zum Zugriff.\n- **Prime Attribute:** ein Attribut, das **Teil irgendeines** Candidate Keys ist.\n- **Nonprime Attribute:** ein Attribut, das zu **keinem** Candidate Key gehört. Genau diese Nonprime-Attribute stehen bei 2NF und 3NF im Fokus.\n- **Composite Key:** ein zusammengesetzter PK aus zwei oder mehr Attributen — Voraussetzung dafür, dass partielle Abhängigkeiten überhaupt entstehen können.\n- **Surrogate Key:** ein künstlicher, meist numerischer und auto-inkrementierter Schlüssel (z. B. `ASSIGN_NUM`). Vorteil: vereinfacht große Composite Keys und garantiert Eindeutigkeit auch bei beschreibenden Attributen.\n\n*Prüfungsfokus:* Die Definitionen *prime* vs. *nonprime* sind klausurrelevant — \"prime\" bedeutet nicht \"Primary Key\", sondern \"Teil eines Candidate Keys\".",
+          "keyTerms": [
+            { "term": "Candidate Key", "definition": "Minimaler Superkey: identifiziert jede Zeile eindeutig ohne überflüssige Attribute; mehrere pro Tabelle möglich." },
+            { "term": "Prime Attribute", "definition": "Attribut, das Teil mindestens eines Candidate Keys ist." },
+            { "term": "Nonprime Attribute", "definition": "Attribut, das zu keinem Candidate Key gehört." },
+            { "term": "Surrogate Key", "definition": "Künstlicher, vom DBMS automatisch vergebener (numerischer) PK, der komplexe Composite Keys ersetzt." }
+          ]
+        },
+        {
+          "title": "Funktionale Abhängigkeiten: partiell vs. transitiv",
+          "content": "Die Normalisierung baut mathematisch auf **funktionalen Abhängigkeiten** auf.\n\n**Functional Dependency (A → B):** B ist funktional abhängig von A, wenn ein Wert in A den Wert in B *eindeutig* bestimmt. A heißt **Determinant** (linke Seite des Pfeils).\n*Beispiel:* `Student_ID → Name` — kenne ich die ID, kenne ich eindeutig den Namen.\n\nFür die Normalisierung sind zwei \"schädliche\" Abhängigkeitstypen entscheidend:\n\n1. **Partial Dependency (Partielle Abhängigkeit):** Ein **Nonprime**-Attribut hängt nur von einem *Teil* eines zusammengesetzten Schlüssels ab. Voraussetzung: ein **Composite Key** existiert. -> verletzt **2NF**.\n2. **Transitive Dependency (Transitive Abhängigkeit):** Ein **Nonprime**-Attribut hängt von einem *anderen Nonprime*-Attribut ab statt direkt vom PK. Formal: `A → B` und `B → C`, also `A → C` indirekt. -> verletzt **3NF**.\n\n```diagram:Abhaengigkeiten im 1NF-Beispiel (PROJ_NUM + EMP_NUM = PK)\n  ┌───────────────── PK (composite) ─────────────────┐\n  │  PROJ_NUM        EMP_NUM                          │\n  └────┬─────────────────┬────────────────────────────┘\n       │ partial         │ partial\n       v                 v\n   PROJ_NAME        EMP_NAME, JOB_CLASS, CHG_HOUR\n                              │ transitiv\n                              v\n                          CHG_HOUR  (haengt an JOB_CLASS)\n```\n\nMerksatz für 3NF: jedes Nonprime-Attribut hängt ab *\"vom Schlüssel, vom ganzen Schlüssel und von nichts als dem Schlüssel\"*.",
+          "keyTerms": [
+            { "term": "Functional Dependency (A → B)", "definition": "Determinant A bestimmt eindeutig den Wert von B." },
+            { "term": "Partial Dependency", "definition": "Nonprime-Attribut hängt nur von einem Teil eines Composite Keys ab (verletzt 2NF)." },
+            { "term": "Transitive Dependency", "definition": "Nonprime-Attribut hängt von einem anderen Nonprime-Attribut ab (verletzt 3NF)." }
+          ],
+          "examples": [
+            "Partiell: PROJ_NUM -> PROJ_NAME (PROJ_NUM ist nur ein Teil des PK).",
+            "Transitiv: JOB_CLASS -> CHG_HOUR (beide sind Nonprime in der EMPLOYEE-Tabelle)."
+          ]
+        },
+        {
+          "title": "Die Normalformen im Überblick (Vergleichstabelle)",
+          "content": "Die Normalisierung läuft *stufenweise*: Jede Normalform baut auf der vorherigen auf. Für die meisten Geschäftsanwendungen reicht die **3NF** völlig aus.\n\nDie **gängigsten Normalformen** (Prüfungsfrage!) sind **1NF, 2NF, 3NF** und **BCNF**. 4NF und 5NF existieren, sind aber selten praxisrelevant.\n\n| NF | Regel (was gilt) | beseitigt | Beispiel-Verstoß |\n|------|------------------|-----------|------------------|\n| **1NF** | atomare Werte, keine Repeating Groups, eindeutiger PK | Mehrwertigkeit / Wiederholgruppen | mehrere Telefonnr. in einer Zelle |\n| **2NF** | 1NF + keine **partiellen** Abhängigkeiten | Abhängigkeit von Teil-Schlüssel | EMP_NAME hängt nur an EMP_NUM |\n| **3NF** | 2NF + keine **transitiven** Abhängigkeiten | Nonprime → Nonprime | JOB_CLASS → CHG_HOUR |\n| **BCNF** | 3NF + jeder **Determinant** ist Candidate Key | Anomalien bei überlappenden Keys | CLASS_CODE als Determinant |\n| **4NF** | 3NF/BCNF + keine **mehrwertigen** Abhängigkeiten | unabhängige Mehrwert-Attribute | Skill UND Sprache pro Person |\n| **5NF** | 4NF + verlustfrei nicht weiter zerlegbar | Join-Abhängigkeiten | rein akademisch |\n\n**Wichtige Aussagen zur Progression** (Kahoot-Recap):\n- Jede NF zielt darauf, Redundanz und Update-Anomalien zu reduzieren.\n- 1NF stellt atomare Werte sicher.\n- 2NF verlangt volle funktionale Abhängigkeit vom *gesamten* PK.\n- 3NF eliminiert transitive Abhängigkeiten zwischen Nonprime-Attributen.\n\nHöhere Normalformen senken Redundanz weiter, erhöhen aber die Zahl der Tabellen und damit die nötigen **JOINs** — was die Performance belasten kann.",
+          "keyTerms": [
+            { "term": "1NF", "definition": "Atomare Werte, keine Repeating Groups, jede Zeile durch PK eindeutig." },
+            { "term": "2NF", "definition": "1NF und keine partiellen Abhängigkeiten — alle Nonprime-Attribute hängen vom ganzen PK ab." },
+            { "term": "3NF", "definition": "2NF und keine transitiven Abhängigkeiten zwischen Nonprime-Attributen." }
+          ]
+        },
+        {
+          "title": "Schritt 1: Von 0NF zur 1NF (Repeating Groups entfernen)",
+          "content": "Der erste Schritt beseitigt **Repeating Groups** und stellt **Atomizität** sicher. Ein klassisch unnormalisierter Ausgangszustand (0NF/UNF) sieht so aus — eine Projekt-Tabelle mit wiederholten Mitarbeiter-Spalten:\n\n**0NF / Unnormalisiert** (Repeating Group {EMP_NUM, EMP_NAME, JOB_CLASS, CHG_HOUR, HOURS} wiederholt sich pro Projekt):\n\n| PROJ_NUM | PROJ_NAME | EMP_NUM | EMP_NAME | JOB_CLASS | CHG_HOUR | HOURS |\n|----------|-----------|---------|----------|-----------|----------|-------|\n| 15 | Evergreen | 103, 101 | News, Doe | Elec.Eng, DB Designer | 84.5, 105 | 23.8, 19.4 |\n\nDrei-Schritt-Verfahren zur 1NF:\n1. **Repeating Groups identifizieren** (hier die Mitarbeiterdetails).\n2. **In separate Zeilen auflösen** — pro Vorkommen eine eigene Zeile; gemeinsame Werte werden dupliziert.\n3. **Atomizität sicherstellen** — jede Zelle exakt ein Wert.\n\n**Ergebnis 1NF** (jede Zeile = eine Projekt-Mitarbeiter-Zuordnung). Der PK muss ein **Composite Key** sein, da PROJ_NUM allein nicht eindeutig ist:\n\n| **PROJ_NUM** | **EMP_NUM** | PROJ_NAME | EMP_NAME | JOB_CLASS | CHG_HOUR | HOURS |\n|--------------|-------------|-----------|----------|-----------|----------|-------|\n| 15 | 103 | Evergreen | June News | Elec. Eng. | 84.50 | 23.8 |\n| 15 | 101 | Evergreen | John Doe | DB Designer | 105.00 | 19.4 |\n| 18 | 103 | Amber Wave| June News | Elec. Eng. | 84.50 | 12.0 |\n\nPK = **(PROJ_NUM, EMP_NUM)**. Die Tabelle ist nun in 1NF — enthält aber noch partielle UND transitive Abhängigkeiten und damit alle drei Anomalien.",
+          "keyTerms": [
+            { "term": "Repeating Group", "definition": "Mehrere verwandte Werte/Attribute, die für ein einzelnes Tupel wiederholt auftreten (Listen in einer Zelle oder nummerierte Spalten)." },
+            { "term": "Atomic Value", "definition": "Ein einzelner, unteilbarer Wert pro Zelle — keine Liste, kein Array." }
+          ],
+          "examples": [
+            "0NF-Verstoss: 'Java, C++, Python' in einer Zelle.",
+            "0NF-Verstoss: nummerierte Spalten Class1, Class2, Class3.",
+            "1NF-PK hier: (PROJ_NUM, EMP_NUM) als Composite Key."
+          ]
+        },
+        {
+          "title": "Schritt 2: Von 1NF zur 2NF (partielle Abhängigkeiten)",
+          "content": "Eine 1NF-Tabelle mit Composite Key enthält oft **partielle Abhängigkeiten**: `PROJ_NUM → PROJ_NAME` und `EMP_NUM → EMP_NAME, JOB_CLASS, CHG_HOUR` hängen je nur an einem *Teil* des PK.\n\n**Verfahren zur 2NF:**\n1. Für jede Komponente des Composite Keys, die eine partielle Abhängigkeit verursacht, eine **neue Tabelle** mit dieser Komponente als PK anlegen.\n2. Die abhängigen Attribute aus der Originaltabelle dorthin **verschieben**; die Schlüssel-Komponenten bleiben als FK in der Verknüpfungstabelle.\n\n**Ergebnis (2NF):**\n\n| Tabelle | Schema | PK |\n|---------|--------|----|\n| PROJECT | (PROJ_NUM, PROJ_NAME) | PROJ_NUM |\n| EMPLOYEE | (EMP_NUM, EMP_NAME, JOB_CLASS, CHG_HOUR) | EMP_NUM |\n| ASSIGNMENT | (PROJ_NUM, EMP_NUM, ASSIGN_HOURS) | (PROJ_NUM, EMP_NUM) |\n\n**Regel 2NF:** Die Tabelle ist in 1NF *und* es gibt keine partiellen Abhängigkeiten — jedes Nonprime-Attribut hängt vom *gesamten* PK ab.\n\n*Wichtige Abkürzung:* Ist eine Tabelle in 1NF und hat einen **einteiligen** PK (kein Composite Key), ist sie **automatisch** in 2NF — partielle Abhängigkeiten sind dann logisch unmöglich.\n\n*Achtung:* In der EMPLOYEE-Tabelle bleibt eine **transitive** Abhängigkeit `JOB_CLASS → CHG_HOUR` bestehen. 2NF behebt das noch nicht!",
+          "keyTerms": [
+            { "term": "2NF-Bedingung", "definition": "In 1NF und ohne partielle Abhängigkeiten; jedes Nonprime-Attribut hängt vom vollständigen PK ab." },
+            { "term": "Einteiliger PK", "definition": "Besteht der PK aus nur einem Attribut, kann keine partielle Abhängigkeit existieren -> 1NF impliziert 2NF." }
+          ],
+          "examples": [
+            "Partiell: PROJ_NUM -> PROJ_NAME wird in eigene PROJECT-Tabelle ausgelagert.",
+            "PK/FK-Beziehungen entstehen: ASSIGNMENT.PROJ_NUM -> PROJECT.PROJ_NUM."
+          ]
+        },
+        {
+          "title": "Schritt 3: Von 2NF zur 3NF (transitive Abhängigkeiten)",
+          "content": "Die EMPLOYEE-Tabelle der 2NF hat noch die transitive Abhängigkeit `JOB_CLASS → CHG_HOUR` (beide Nonprime). Der Stundensatz hängt eigentlich an der Job-Klasse, nicht direkt am Mitarbeiter.\n\n**Verfahren zur 3NF** (analog zu 2NF, aber für transitive Abhängigkeiten):\n1. Für jede transitive Abhängigkeit eine **neue Tabelle** mit dem *Determinanten* (`JOB_CLASS`) als PK anlegen.\n2. Die abhängigen Attribute (`CHG_HOUR`) dorthin verschieben; der Determinant bleibt als **Foreign Key** in der Originaltabelle.\n\n**Ergebnis (3NF) — vier saubere Tabellen:**\n\n| Tabelle | Schema | PK |\n|---------|--------|----|\n| PROJECT | (PROJ_NUM, PROJ_NAME) | PROJ_NUM |\n| EMPLOYEE | (EMP_NUM, EMP_NAME, JOB_CLASS) | EMP_NUM |\n| JOB | (JOB_CLASS, CHG_HOUR) | JOB_CLASS |\n| ASSIGNMENT | (PROJ_NUM, EMP_NUM, ASSIGN_HOURS) | (PROJ_NUM, EMP_NUM) |\n\n`JOB_CLASS` ist in EMPLOYEE jetzt ein FK auf JOB. Damit sind alle Insert-, Update- und Delete-Anomalien beseitigt.\n\n**Regel 3NF:** Tabelle ist in 2NF *und* enthält keine transitiven Abhängigkeiten.\n\n```diagram:3NF-Struktur (Crow's Foot, vereinfacht)\n PROJECT ||──o{ ASSIGNMENT }o──|| EMPLOYEE }o──|| JOB\n```\n\n*Merke:* Die Lösung für partielle UND transitive Abhängigkeiten ist im Kern identisch — neue Tabelle bilden, Determinant bleibt als FK zurück.",
+          "keyTerms": [
+            { "term": "3NF-Bedingung", "definition": "In 2NF und ohne transitive Abhängigkeiten zwischen Nonprime-Attributen." },
+            { "term": "Determinant als FK", "definition": "Beim Auslagern bleibt der Determinant (z. B. JOB_CLASS) als Foreign Key in der Ursprungstabelle, um die Verknüpfung zu wahren." }
+          ],
+          "examples": [
+            "Transitiv: JOB_CLASS -> CHG_HOUR wird in eigene JOB-Tabelle ausgelagert.",
+            "EMPLOYEE behaelt JOB_CLASS als FK auf JOB(JOB_CLASS)."
+          ]
+        },
+        {
+          "title": "BCNF, 4NF & 5NF — die höheren Normalformen",
+          "content": "Für anspruchsvolle Fälle gibt es Normalformen über die 3NF hinaus.\n\n**Boyce-Codd Normal Form (BCNF):** Eine Tabelle ist in BCNF, wenn sie in 3NF ist **und jeder Determinant ein Candidate Key ist**. BCNF ist ein Spezial-/Sonderfall der 3NF mit strengeren Anforderungen. Problemfälle treten bei *überlappenden* Candidate Keys auf, bei denen ein Key-Attribut ein anderes Key-Attribut bestimmt.\n*Beispiel:* Eine CLASS-Tabelle mit zwei Candidate Keys `CLASS_CODE` und `(CRS_CODE, CLASS_SECTION)`, wobei `CLASS_CODE → CRS_CODE`. Wichtig: **Hat eine Tabelle nur einen einzigen Candidate Key, sind 3NF und BCNF gleichwertig.**\n\n**Fourth Normal Form (4NF):** in 3NF/BCNF und ohne **mehrwertige Abhängigkeiten** (Multivalued Dependencies) — wenn ein Schlüssel mehrere Werte zweier *voneinander unabhängiger* Attribute bestimmt. Beseitigt redundante Kombinationen.\n\n**Fifth Normal Form (5NF / PJNF):** in 4NF und nicht weiter **verlustfrei zerlegbar** (lossless decomposition). 5NF ist primär ein **akademisches Konzept** und in realen Business-Anwendungen selten anzutreffen.\n\n```compare\nBis 3NF (Praxis-Standard)\n- Deckt die meisten Geschäftsfälle ab\n- Beseitigt Insert/Update/Delete-Anomalien\n- Vertretbare Anzahl an JOINs\n===\nBCNF / 4NF / 5NF\n- Strengere, theoretische Kriterien\n- BCNF: jeder Determinant = Candidate Key\n- 5NF rein akademisch, kaum praxisrelevant\n```\n\n*Prüfungsfalle:* 5NF wird NICHT \"commonly in real-world business\" eingesetzt — diese Aussage ist falsch.",
+          "keyTerms": [
+            { "term": "BCNF", "definition": "3NF plus: jeder Determinant ist ein Candidate Key. Bei nur einem Candidate Key sind 3NF und BCNF identisch." },
+            { "term": "Multivalued Dependency", "definition": "Ein Schlüssel bestimmt mehrere Werte zweier voneinander unabhängiger Attribute (Thema der 4NF)." },
+            { "term": "Lossless Decomposition", "definition": "Zerlegung in kleinere Tabellen, deren Natural Join exakt die Originaldaten wiederherstellt (Thema der 5NF)." }
+          ]
+        },
+        {
+          "title": "Denormalisierung: Strategien & Trade-offs",
+          "content": "Warum sollte man eine saubere 3NF-Datenbank *bewusst* verschlechtern?\n\nHöhere Normalformen bedeuten mehr Tabellen — und Abfragen müssen sie über teure **JOIN**-Operationen wieder zusammensetzen. Bei Data Warehouses, Reporting und sehr lese-intensiven Systemen können viele JOINs zum Flaschenhals werden.\n\n**Denormalisierung** führt *absichtlich und kontrolliert* Redundanz wieder ein, um Lesezugriffe zu beschleunigen und Query-Logik zu vereinfachen.\n\n**Vorteile:** bessere Query-Performance (weniger JOINs), einfachere SQL-Logik, schnellere Datenabfrage bei Read-Heavy-Workloads.\n\n**Preis/Risiken:** Insert-, Update- und Delete-Anomalien kehren zurück; höherer Speicherbedarf durch redundante Daten; höhere Wartungskomplexität (Synchronisation aller Kopien).\n\nZwei **Strategien** (Prüfungsrelevant!):\n\n```compare\nPermanent Denormalization\n- Redundante Daten dauerhaft gespeichert\n- Akzeptiert das Anomalie-Risiko bewusst\n- Geeignet, WENN Performance kritisch ist\n===\nTemporary Denormalization\n- On-the-fly bzw. Materialized Views\n- Minimiert das Anomalie-Risiko\n- Fuer Reporting/Analyse, wenn Performance unkritisch\n```\n\n*Faustregel:* Transaktionssysteme (OLTP) bleiben strikt in 3NF; denormalisiert wird vor allem für lesende Reporting-Systeme — und stets mit klarer Dokumentation und robusten Synchronisations-Praktiken.",
+          "keyTerms": [
+            { "term": "Denormalization", "definition": "Absichtliches Einführen von Redundanz in ein normalisiertes Schema, um Query-Performance zu steigern und JOINs zu reduzieren." },
+            { "term": "Permanent Denormalization", "definition": "Redundanz wird dauerhaft gespeichert; geeignet, wenn Performance kritisch ist und Anomalie-Risiko akzeptiert wird." },
+            { "term": "Temporary Denormalization", "definition": "Redundanz on-the-fly bzw. via Materialized Views; minimiert Anomalie-Risiko, für Reporting." }
+          ],
+          "examples": [
+            "Permanent: Stadtname direkt in die Bestelltabelle kopieren, um JOIN zu sparen.",
+            "Temporary: naechtlich aufgebaute Materialized View fuer ein Dashboard."
+          ]
+        },
+        {
+          "title": "⚡ Prüfungs-Spickzettel: Normalisierung",
+          "content": "**Must-know-Fakten:**\n- **Gängigste Normalformen:** 1NF, 2NF, 3NF, BCNF. (4NF/5NF existieren, sind aber selten.)\n- **Schrittfolge:** Repeating Groups raus -> **1NF**; partielle Abhängigkeit raus -> **2NF**; transitive Abhängigkeit raus -> **3NF**.\n- **Drei Anomalien:** Insert, Update, Delete. (Plus Data Inconsistency.) -> *Keine* \"Search-Anomalie\"!\n- **1NF:** atomare Werte, keine Repeating Groups, eindeutiger PK.\n- **2NF:** 1NF + keine partielle Abhängigkeit (Nonprime hängt vom *ganzen* PK). Einteiliger PK -> automatisch 2NF.\n- **3NF:** 2NF + keine transitive Abhängigkeit (kein Nonprime → Nonprime). Merksatz: *key, whole key, nothing but the key*.\n- **BCNF:** 3NF + jeder Determinant ist Candidate Key. Bei nur 1 Candidate Key gilt 3NF = BCNF.\n- **Prime** = Teil eines Candidate Keys; **Nonprime** = gehört zu keinem Candidate Key.\n- **Partielle Abh.** braucht zwingend einen **Composite Key**.\n- **Denormalisierung** erhöht Lese-Performance (weniger JOINs), bringt aber Anomalien zurück. Strategien: **permanent** (Performance kritisch) vs. **temporary** (Views/Reporting).\n\n**Typische Fallen:**\n- Denormalisierung erhöht NICHT die Konsistenz — sie *opfert* sie für Geschwindigkeit.\n- Eine Tabelle mit Composite Key *kann* partielle Abhängigkeiten haben (wahr!).\n- 5NF ist NICHT verbreitet im echten Business.\n- 'Prime' bedeutet 'Teil eines Candidate Keys', nicht 'Primary Key'.\n\n| Verstoß | Symptom | Reparatur -> Ziel-NF |\n|---------|---------|----------------------|\n| Liste/Wiederholgruppe | nicht-atomare Zelle | aufteilen -> 1NF |\n| Nonprime an Teil-PK | Composite Key | auslagern -> 2NF |\n| Nonprime an Nonprime | indirekte Abh. | auslagern -> 3NF |\n| Determinant ≠ Cand.Key | überlappende Keys | zerlegen -> BCNF |",
+          "keyTerms": [
+            { "term": "key, whole key, nothing but the key", "definition": "Merksatz für 3NF: jedes Nonprime-Attribut hängt vom Schlüssel, dem ganzen Schlüssel und nichts als dem Schlüssel ab." }
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "type": "multiple-choice",
+          "question": "Du hast eine Tabelle `PROJEKT_ZUWEISUNG` mit dem zusammengesetzten Primary Key (`Mitarbeiter_ID`, `Projekt_ID`). Die Tabelle enthält auch das Attribut `Mitarbeiter_Name`. Der `Mitarbeiter_Name` hängt logischerweise nur von der `Mitarbeiter_ID` ab, nicht von der `Projekt_ID`. Gegen welche Normalform verstößt dieses Design, und welche Abhängigkeit liegt vor?",
+          "options": [
+            "Es verstößt gegen die 1NF, weil es eine repeating group ist.",
+            "Es verstößt gegen die 2NF, weil eine partielle Abhängigkeit (Partial Dependency) vorliegt.",
+            "Es verstößt gegen die 3NF, weil eine transitive Abhängigkeit vorliegt.",
+            "Es verstößt gegen keine Normalform."
+          ],
+          "correctAnswer": 1,
+          "explanation": "Da `Mitarbeiter_Name` (ein Non-Prime Attribut) nur von *einem Teil* des zusammengesetzten Primary Keys (nämlich der Mitarbeiter_ID) abhängig ist, ist dies eine partielle Abhängigkeit. Diese muss eliminiert werden, um die 2. Normalform (2NF) zu erreichen."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "In einer Personaldatenbank wird beim Löschen der letzten Zeile, die einen Mitarbeiter aus der Abteilung 'Forschung' enthält, unbeabsichtigt auch die gesamte Information über die Existenz der Abteilung 'Forschung' (inkl. deren Budget-Code) gelöscht, da diese Daten in derselben Tabelle standen. Wie nennt man dieses Phänomen?",
+          "options": [
+            "Delete Anomaly (Löschanomalie)",
+            "Update Anomaly",
+            "Insert Anomaly",
+            "Transitive Deletion"
+          ],
+          "correctAnswer": 0,
+          "explanation": "Eine Löschanomalie tritt auf, wenn das Entfernen eines bestimmten Datensatzes (Mitarbeiter) zum ungewollten Verlust von völlig anderen, kontextuell unabhängigen Informationen (Abteilungsdaten) führt."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Welche der folgenden Bedingungen reicht aus, um sicherzustellen, dass eine Tabelle, die sich bereits in der 1. Normalform (1NF) befindet, automatisch auch in der 2. Normalform (2NF) ist?",
+          "options": [
+            "Die Tabelle darf keine numerischen Werte enthalten.",
+            "Der Primary Key der Tabelle besteht aus nur einem einzigen Attribut (kein Composite Key).",
+            "Die Tabelle darf keine Foreign Keys aufweisen.",
+            "Die Tabelle muss zwingend denormalisiert sein."
+          ],
+          "correctAnswer": 1,
+          "explanation": "Da die 2NF ausschließlich das Entfernen von 'partiellen' Abhängigkeiten verlangt (Abhängigkeit von nur einem Teil des Schlüssels), können solche Abhängigkeiten bei einem einteiligen Schlüssel rein logisch gar nicht erst existieren."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Du speicherst in einer Kunden-Tabelle sowohl die Postleitzahl (ZIP) als auch den Städtenamen (CITY). Da die ZIP jedoch eindeutig die CITY bestimmt (ZIP -> CITY), hängt CITY von ZIP ab, welches wiederum vom Customer_ID (PK) abhängt. Welches Design-Problem liegt hier vor, und wie behebt man es?",
+          "options": [
+            "Partielle Abhängigkeit. Behebung: Umwandlung in 2NF.",
+            "Transitive Abhängigkeit. Behebung: Auslagern von ZIP und CITY in eine eigene ZIP-Tabelle, um die 3NF zu erreichen.",
+            "Repeating Groups. Behebung: Umwandlung in 1NF.",
+            "Kein Problem. Dies ist eine perfekte 3NF Struktur."
+          ],
+          "correctAnswer": 1,
+          "explanation": "Ein Non-Prime Attribut (CITY) hängt von einem anderen Non-Prime Attribut (ZIP) ab. Das ist eine transitive Abhängigkeit. Um 3NF zu erreichen, lagert man dies aus, sodass ZIP in der Kundentabelle nur noch ein Foreign Key ist."
+        },
+        {
+          "type": "true-false",
+          "question": "Das Hauptziel der Denormalisierung ist es, die Datenkonsistenz zu erhöhen und Update-Anomalien endgültig auszuschließen.",
+          "correctAnswer": false,
+          "explanation": "Falsch. Normalisierung erhöht die Konsistenz und schließt Anomalien aus. Denormalisierung führt bewusst wieder Redundanzen (und damit das Risiko von Anomalien) ein, um rein die Lese-Performance (Query Speed) durch weniger JOINs zu optimieren."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Welche Normalformen gelten als die 'gängigsten' (most common) in der Datenbankpraxis?",
+          "options": [
+            "5NF, 6NF und DKNF",
+            "Nur die 1NF",
+            "1NF, 2NF, 3NF und BCNF",
+            "ACID, BASE und CAP"
+          ],
+          "correctAnswer": 2,
+          "explanation": "Die gängigsten Normalformen sind 1NF, 2NF, 3NF und BCNF. Für die meisten Geschäftsanwendungen genügt die 3NF; 4NF und 5NF existieren, sind aber selten praxisrelevant (5NF ist primär akademisch)."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Du sollst die Schritte des Normalisierungsprozesses in die korrekte Reihenfolge bringen. Welche Zuordnung Schritt -> Ziel-Normalform ist richtig?",
+          "options": [
+            "Transitive Abhängigkeiten entfernen -> 1NF; partielle entfernen -> 2NF; Repeating Groups entfernen -> 3NF",
+            "Repeating Groups entfernen -> 1NF; partielle Abhängigkeiten entfernen -> 2NF; transitive Abhängigkeiten entfernen -> 3NF",
+            "Denormalisieren -> 1NF; JOINs entfernen -> 2NF; Indizes setzen -> 3NF",
+            "Partielle entfernen -> 1NF; Repeating Groups entfernen -> 2NF; transitive entfernen -> 3NF"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Die Reihenfolge lautet: (1) Repeating Groups entfernen und Atomizität herstellen -> 1NF, (2) partielle Abhängigkeiten entfernen -> 2NF, (3) transitive Abhängigkeiten entfernen -> 3NF. Jede Stufe setzt die vorherige voraus."
+        }
+      ]
+    },
+    {
+      "id": "module-6",
+      "title": "Basic SQL",
+      "description": "Die deklarative Standardsprache für relationale Datenbanken: Kommandogruppen (DDL/DML/DCL/TCL/DQL), Datentypen, der SELECT-Aufbau mit WHERE/ORDER BY, logische & Spezial-Operatoren, Aggregation mit GROUP BY/HAVING, Subqueries und Mengenoperatoren.",
+      "coreCompetencies": [
+        "Die SQL-Kommandogruppen DDL, DML, DCL, TCL und DQL mit ihren Befehlen unterscheiden und korrekt zuordnen",
+        "SQL-Datentypen (Character, Numeric, Date) und ihren Einfluss auf Abfragen einordnen",
+        "Strukturierte SELECT-Abfragen mit FROM, WHERE-Filtern und ORDER BY-Sortierung schreiben",
+        "Logische Operatoren (AND, OR, NOT) inklusive ihrer Auswertungsreihenfolge sowie Spezialoperatoren (BETWEEN, IN, LIKE, IS NULL) einsetzen",
+        "Aggregatfunktionen mit GROUP BY und HAVING korrekt kombinieren und WHERE von HAVING abgrenzen",
+        "Subqueries (verschachtelte Abfragen) für dynamische Filterung nutzen",
+        "Mengenoperatoren (UNION, INTERSECT, EXCEPT/MINUS) und das Konzept der Union-Kompatibilität anwenden"
+      ],
+      "sections": [
+        {
+          "title": "SQL: Eigenschaften & Geschichte",
+          "content": "**SQL (Structured Query Language)** ist die Standardsprache relationaler Datenbanken. Sie ist **deklarativ**: Man beschreibt, *was* das Ergebnis sein soll — nicht (wie in Java oder C), *wie* es Schritt für Schritt berechnet wird.\n\n**Funktionen:** Strukturen erstellen, Daten verwalten und komplexe Abfragen ausführen. **Eigenschaften:** minimaler Aufwand, einfache Syntax, gute Portabilität.\n\n**Geschichte/Standards:**\n- Ursprung: IBM-Sprache **SEQUEL** im System-R-Projekt (IBM San Jose Research Lab).\n- Umbenannt in **SQL**, standardisiert durch ANSI und ISO.\n- Wichtige Versionen: SQL-86, SQL-89, **SQL-92** (de-facto-Basis vieler Systeme), SQL:1999, SQL:2003.\n- Kommerzielle Systeme nutzen meist SQL-92 plus proprietäre Erweiterungen — daher laufen nicht alle Beispiele auf jedem System identisch.\n\n**Syntax-Grundlagen:**\n- **Reserved Words** (Schlüsselwörter, feste Bedeutung) vs. **User-defined Words** (Tabellen-/Spaltennamen).\n- Manche Dialekte verlangen einen **Statement-Terminator** (Semikolon `;`).\n- Die meisten Komponenten sind **case-insensitive** — *Ausnahme:* literale Zeichendaten müssen Zeichen für Zeichen passen (`'SMITH'` ≠ `'Smith'`).",
+          "keyTerms": [
+            { "term": "Deklarative Sprache", "definition": "Beschreibt das gewünschte Ergebnis, ohne den Kontrollfluss (Schleifen etc.) explizit zu programmieren." },
+            { "term": "Reserved Word", "definition": "Fest definiertes SQL-Schlüsselwort mit spezieller Bedeutung (z. B. SELECT, FROM, WHERE)." },
+            { "term": "Case Sensitivity", "definition": "SQL-Schlüsselwörter sind case-insensitive; literale Zeichendaten in Hochkommas müssen jedoch exakt passen." }
+          ]
+        },
+        {
+          "title": "SQL-Kommandogruppen: DDL, DML, DCL, TCL, DQL",
+          "content": "SQL-Befehle werden in fünf Gruppen klassifiziert. Diese Zuordnung ist ein **Kern-Prüfungsthema**.\n\n| Gruppe | Zweck | Befehle |\n|--------|-------|---------|\n| **DDL** (Data Definition Language) | Objekte/Struktur erstellen, ändern, löschen | `CREATE`, `ALTER`, `DROP`, `TRUNCATE` |\n| **DML** (Data Manipulation Language) | Daten manipulieren | `INSERT`, `UPDATE`, `DELETE` |\n| **DCL** (Data Control Language) | Rechte/Privilegien verwalten | `GRANT`, `REVOKE` |\n| **TCL** (Transaction Control Language) | Transaktionen steuern | `COMMIT`, `ROLLBACK`, `SAVEPOINT` |\n| **DQL** (Data Query Language) | Daten abfragen | `SELECT` |\n\n**Wichtige Detail-Abgrenzungen (häufig geprüft):**\n- `CREATE` legt ein neues Objekt an (Tabelle, View, Index), `ALTER` ändert ein bestehendes Objekt, `DROP` löscht das ganze Objekt *inkl. Struktur*.\n- `TRUNCATE` (DDL) entfernt **alle Zeilen** einer Tabelle sehr schnell, **behält aber die Tabellenstruktur**. Es loggt meist nicht jede Zeile einzeln.\n- `DELETE` (DML) löscht Zeilen **einzeln** und kann mit `WHERE` gefiltert werden.\n- `COMMIT` macht Änderungen dauerhaft; `ROLLBACK` macht alle noch nicht committeten Änderungen rückgängig; `SAVEPOINT` setzt einen Zwischenpunkt.\n\n```diagram:Mentaler Spickzettel der Kommandogruppen\n  STRUKTUR    DATEN      RECHTE   TRANSAKTION  ABFRAGE\n  ┌──────┐   ┌──────┐   ┌─────┐   ┌────────┐  ┌──────┐\n  │ DDL  │   │ DML  │   │ DCL │   │  TCL   │  │ DQL  │\n  │CREATE│   │INSERT│   │GRANT│   │ COMMIT │  │SELECT│\n  │ALTER │   │UPDATE│   │REVOK│   │ROLLBACK│  └──────┘\n  │DROP  │   │DELETE│   └─────┘   │SAVEPNT │\n  │TRUNC │   └──────┘             └────────┘\n  └──────┘\n```",
+          "keyTerms": [
+            { "term": "DDL", "definition": "Data Definition Language: CREATE, ALTER, DROP, TRUNCATE — definiert die Struktur." },
+            { "term": "DML", "definition": "Data Manipulation Language: INSERT, UPDATE, DELETE — verändert die Daten." },
+            { "term": "DCL", "definition": "Data Control Language: GRANT, REVOKE — verwaltet Privilegien." },
+            { "term": "TCL", "definition": "Transaction Control Language: COMMIT, ROLLBACK, SAVEPOINT — steuert Transaktionen." },
+            { "term": "DQL", "definition": "Data Query Language: SELECT — fragt Daten ab." }
+          ],
+          "examples": [
+            "DDL: CREATE TABLE Students (...);  -- erstellt eine neue Tabelle.",
+            "TRUNCATE TABLE Students; -- leert die Tabelle, Struktur bleibt.",
+            "DROP TABLE Students; -- loescht Tabelle inkl. Struktur."
+          ]
+        },
+        {
+          "title": "SQL-Datentypen (Character, Numeric, Date)",
+          "content": "Ein **Datentyp** legt fest, welche Art von Werten ein Attribut speichern darf. Er ist essenziell, weil **Syntax und Verhalten von Abfragen vom Typ abhängen** (z. B. müssen Zeichen- und Datumswerte in Hochkommas stehen, Zahlen nicht).\n\n**Fundamentale Typgruppen:**\n- **Character (String):** druckbare Zeichen — Buchstaben, Ziffern, Satzzeichen, Sonderzeichen.\n- **Numeric:** Ziffern mit echtem Zahlenwert (für Rechenoperationen).\n- **Date/Time:** Datums- und ggf. Zeitwerte.\n\n| Kategorie | Typische Typen | Beispielwert | Hinweise |\n|-----------|----------------|--------------|----------|\n| Character | `CHAR(n)`, `VARCHAR(n)` | `'Wien'` | in Hochkommas; CHAR fester, VARCHAR variabler Länge |\n| Numeric | `INTEGER`, `SMALLINT`, `NUMBER(p,s)`, `DECIMAL` | `1250.50` | ohne Hochkommas; p=Stellen, s=Nachkommastellen |\n| Date/Time | `DATE`, `TIMESTAMP` | `'2022-01-20'` | intern als Tagesnummer gespeichert |\n\n**Date-Arithmetik:** Datumswerte werden intern als Zahl (Tage seit einem fixen Bezugspunkt) gespeichert. Daher gilt: `Datum + 90` ergibt ein neues Datum, und `Datum1 - Datum2` ergibt die Anzahl Tage dazwischen.\n*Beispiel:* `SELECT P_CODE, P_INDATE + 90 AS EXPDATE FROM PRODUCT;`\n\n**Falle bei Strings:** Vergleiche erfolgen zeichenweise von links nach rechts über ASCII-Codes. So gilt `'5' > '44'` (weil '5' > '4' im ersten Zeichen) und `'01/01/2025' < '12/31/2024'`, wenn Datumsangaben fälschlich als Text gespeichert sind.",
+          "keyTerms": [
+            { "term": "Datentyp", "definition": "Legt die zulässige Art der Werte einer Spalte fest und beeinflusst Syntax und Verhalten von Abfragen." },
+            { "term": "Date-Arithmetik", "definition": "Datumswerte sind intern numerisch; Addieren von Tagen ergibt ein Datum, Subtrahieren zweier Daten ergibt die Tagesdifferenz." }
+          ],
+          "examples": [
+            "Character braucht Hochkommas: WHERE City = 'Wien'.",
+            "ASCII-Falle: '5' > '44' bei String-Vergleich (links nach rechts)."
+          ]
+        },
+        {
+          "title": "Die SELECT-Query: Aufbau, Aliase & berechnete Spalten",
+          "content": "`SELECT` ist das Herzstück (DQL). Die allgemeine Klauselstruktur und ihre **feste Reihenfolge**:\n```sql\nSELECT [DISTINCT | ALL] {* | spalte [AS alias]}\nFROM   tabelle [alias]\nWHERE  bedingung\nGROUP BY spaltenliste\nHAVING gruppen_bedingung\nORDER BY spaltenliste [ASC | DESC];\n```\nMinimal nötig sind nur **SELECT** (welche Spalten) und **FROM** (welche Tabelle).\n\n**Bausteine:**\n- **`*`** wählt alle Spalten: `SELECT * FROM Staff;`\n- **Spaltenliste** wählt gezielt: `SELECT P_CODE, P_DESCRIPT, P_PRICE FROM PRODUCT;`\n- **`DISTINCT`** entfernt Duplikate: `SELECT DISTINCT V_CODE FROM PRODUCT;` (NULLs gelten als ein Wert, alle NULLs gleich.)\n- **Aliase (`AS`):** benennen Spalten lesbarer um; `AS` ist optional, aber empfohlen. Aliase mit Leerzeichen brauchen Anführungszeichen: `... AS \"Unit Price\"`.\n- **Computed/Calculated Columns:** abgeleitete Werte, nur virtuell für diese Abfrage berechnet. *Beispiel:* `SELECT P_DESCRIPT, P_QOH * P_PRICE AS TOTVALUE FROM PRODUCT;`\n\n**Arithmetische Operatoren:** `+`, `-`, `*`, `/`, `^` (Potenz). **Rangfolge:** (1) Klammern, (2) Potenz, (3) Mal/Geteilt, (4) Plus/Minus.\n\n*Beispiel mit Monatsgehalt:* `SELECT staffNo, fName, salary / 12 AS monthlySalary FROM Staff;`",
+          "keyTerms": [
+            { "term": "Alias (AS)", "definition": "Temporärer alternativer Name für Spalte oder Tabelle im Ergebnis; AS ist optional, Leerzeichen erfordern Anführungszeichen." },
+            { "term": "Computed Column", "definition": "Abgeleitete Spalte, die per Formel aus anderen Attributen berechnet wird und nicht zwingend gespeichert ist." },
+            { "term": "DISTINCT", "definition": "Entfernt doppelte Zeilen aus dem Resultset; NULLs werden als ein einziger Wert behandelt." }
+          ],
+          "examples": [
+            "SELECT * FROM PRODUCT;",
+            "SELECT P_PRICE, P_PRICE * 1.20 AS Brutto FROM PRODUCT;",
+            "SELECT DISTINCT V_CODE FROM PRODUCT;"
+          ]
+        },
+        {
+          "title": "Daten filtern: WHERE, Vergleichs- & logische Operatoren",
+          "content": "Die optionale **`WHERE`**-Klausel schränkt Zeilen anhand von Bedingungen ein. Passt keine Zeile, ist das Ergebnis leer.\n\n**Vergleichsoperatoren:**\n\n| Operator | Bedeutung | Beispiel |\n|----------|-----------|----------|\n| `=` | gleich | `WHERE V_CODE = 21344` |\n| `<>` oder `!=` | ungleich | `WHERE V_CODE <> 21344` |\n| `>` `<` | größer / kleiner | `WHERE P_PRICE > 100` |\n| `>=` `<=` | größer-gleich / kleiner-gleich | `WHERE P_PRICE <= 10` |\n\n**Logische Operatoren** (Prüfungsthema!): `AND`, `OR`, `NOT` verknüpfen mehrere Bedingungen.\n\n| Operator | Wirkung | Beispiel |\n|----------|---------|----------|\n| `AND` | beide Bedingungen wahr | `WHERE P_PRICE > 100 AND P_QOH < 20` |\n| `OR` | mindestens eine wahr | `WHERE V_CODE = 21344 OR V_CODE = 24288` |\n| `NOT` | negiert eine Bedingung | `WHERE NOT (V_CODE = 21344)` |\n\n**Auswertungsreihenfolge (sehr wichtig):**\n1. Ausdrücke in **Klammern `()`** zuerst.\n2. **`NOT`** vor AND/OR.\n3. **`AND`** vor **`OR`**.\n\nDeshalb: *Klammern setzen!* `WHERE (V_CODE = 255595 OR V_CODE = 24288) AND P_PRICE > 100` liefert ein anderes Ergebnis als ohne Klammern, weil sonst AND zuerst ausgewertet würde.\n\n*Hinweis:* Die `WHERE`-Klausel lässt sich uneingeschränkt mit AND, OR und NOT kombinieren (true).",
+          "keyTerms": [
+            { "term": "Logische Operatoren", "definition": "AND, OR, NOT verknüpfen WHERE-Bedingungen. AND/OR fordern bzw. erlauben mehrere Bedingungen, NOT negiert." },
+            { "term": "Auswertungsreihenfolge", "definition": "Klammern -> NOT -> AND -> OR. Ohne Klammern wird AND vor OR ausgewertet." }
+          ],
+          "examples": [
+            "WHERE P_PRICE > 100 AND P_QOH < 20",
+            "WHERE V_CODE = 21344 OR V_CODE = 24288",
+            "WHERE (A OR B) AND C   -- Klammern aendern das Ergebnis!"
+          ]
+        },
+        {
+          "title": "Spezial-Operatoren: BETWEEN, IN, LIKE, IS NULL",
+          "content": "SQL bietet vier mächtige Spezialoperatoren für die `WHERE`-Klausel:\n\n- **`BETWEEN`** prüft einen Bereich — **inklusive** beider Grenzwerte. Untergrenze zuerst nennen! `WHERE P_PRICE BETWEEN 50 AND 100` entspricht `WHERE P_PRICE >= 50 AND P_PRICE <= 100`.\n- **`IN`** prüft Zugehörigkeit zu einer Liste — Kurzform für viele `OR`. `WHERE V_CODE IN (21344, 24288)` statt `WHERE V_CODE = 21344 OR V_CODE = 24288`. Bei Zeichendaten: `IN ('21344','24288')`. Kann auch mit Subquery kombiniert werden.\n- **`LIKE`** macht Pattern-Matching in Strings mit **Wildcards**:\n  - `%` steht für **null, ein oder beliebig viele** Zeichen.\n  - `_` steht für **genau ein** Zeichen.\n  - (MS Access nutzt stattdessen `*` und `?`.) Meist case-sensitive — mit `UPPER()` umgehbar.\n- **`IS NULL` / `IS NOT NULL`** prüft auf fehlende Werte. **Vergleichsoperatoren (`=`, `<>`) funktionieren bei NULL NICHT**, weil NULL \"unbekannt\" bedeutet. `WHERE V_CODE IS NULL`.\n\n**LIKE-Beispiele:**\n\n| Muster | Findet |\n|--------|--------|\n| `'a%'` | beginnt mit \"a\" |\n| `'%a'` | endet auf \"a\" |\n| `'%or%'` | enthält \"or\" irgendwo |\n| `'_r%'` | \"r\" an zweiter Stelle |\n| `'a__%'` | beginnt mit \"a\", mind. 3 Zeichen lang |\n| `'A_B%'` | A, dann **ein** beliebiges Zeichen, dann B, dann beliebig |",
+          "keyTerms": [
+            { "term": "BETWEEN", "definition": "Bereichsprüfung inklusive beider Grenzen; Untergrenze zuerst angeben." },
+            { "term": "IN", "definition": "Prüft, ob ein Wert in einer Liste (oder Subquery) vorkommt — Kurzform für mehrere OR." },
+            { "term": "LIKE", "definition": "Mustersuche mit Wildcards: % = beliebig viele Zeichen, _ = genau ein Zeichen." },
+            { "term": "IS NULL", "definition": "Einziger korrekter Test auf NULL; = und <> versagen, da NULL 'unbekannt' bedeutet." }
+          ],
+          "examples": [
+            "WHERE P_PRICE BETWEEN 50 AND 100",
+            "WHERE City IN ('Wien','Graz','Linz')",
+            "WHERE V_CONTACT LIKE 'Smith%'",
+            "WHERE V_CODE IS NULL"
+          ]
+        },
+        {
+          "title": "Sortieren mit ORDER BY",
+          "content": "**`ORDER BY`** sortiert das **Endergebnis** der Abfrage. Standard ist **aufsteigend (`ASC`)**; für absteigend `DESC` nach der Spalte angeben.\n```sql\nSELECT column1, column2, ...\nFROM   table_name\nORDER BY column1 [ASC | DESC];\n```\n\n**Mehrere Spalten = kaskadierende Sortierung:** zuerst nach Spalte 1, bei Gleichstand nach Spalte 2 usw.\n```sql\nSELECT EMP_LNAME, EMP_FNAME, EMP_INITIAL\nFROM   EMPLOYEE\nORDER BY EMP_LNAME, EMP_FNAME, EMP_INITIAL;\n```\n\n**Kombinierbar mit allem:** Man kann nach berechneten Spalten/Aliasen und in gemischter Richtung sortieren:\n```sql\nSELECT P_CODE, V_CODE, P_PRICE * P_QOH AS TOTAL\nFROM   PRODUCT\nORDER BY V_CODE, TOTAL DESC;\n```\n\n**NULL-Verhalten** beim Sortieren ist DBMS-abhängig — Oracle bietet `NULLS FIRST` / `NULLS LAST` zur Steuerung.\n\n*Merke:* ORDER BY ist (logisch) die *letzte* Klausel, die ausgeführt wird — nach SELECT, WHERE, GROUP BY und HAVING.",
+          "keyTerms": [
+            { "term": "ORDER BY", "definition": "Sortiert das finale Resultset; Standard ASC (aufsteigend), DESC für absteigend, kaskadierend über mehrere Spalten." },
+            { "term": "Kaskadierende Sortierung", "definition": "Sortierung nach mehreren Spalten der Reihe nach: bei Gleichheit der ersten entscheidet die nächste." }
+          ],
+          "examples": [
+            "ORDER BY P_PRICE DESC",
+            "ORDER BY EMP_LNAME, EMP_FNAME  -- erst Nachname, dann Vorname"
+          ]
+        },
+        {
+          "title": "Aggregatfunktionen, GROUP BY & HAVING",
+          "content": "**Aggregatfunktionen** verdichten viele Zeilen zu einem Wert:\n\n| Funktion | Liefert | Typen |\n|----------|---------|-------|\n| `COUNT()` | Anzahl Zeilen | numerisch & nicht-numerisch |\n| `MIN()` / `MAX()` | kleinster / größter Wert | numerisch & nicht-numerisch |\n| `SUM()` | Summe | nur numerisch |\n| `AVG()` | Durchschnitt | nur numerisch |\n\n*Regeln:* Alle außer `COUNT(*)` ignorieren NULLs. `COUNT(*)` zählt **alle** Zeilen inkl. NULLs/Duplikate. `DISTINCT` vor der Spalte entfernt Duplikate. Aggregate dürfen **nur** in der `SELECT`-Liste und in `HAVING` stehen.\n\n**`GROUP BY`** bildet Gruppen gleicher Werte. **Goldene Regel:** Jede Spalte im SELECT, die *keine* Aggregatfunktion ist, **MUSS** im `GROUP BY` stehen — sonst Syntaxfehler.\n```sql\nSELECT V_CODE, AVG(P_PRICE) AS AVGPRICE\nFROM   PRODUCT\nGROUP BY V_CODE;\n```\n\n**`HAVING` vs. `WHERE`** (zentrale Prüfungsfalle):\n- `WHERE` filtert **einzelne Zeilen**, *bevor* gruppiert wird (kann KEINE Aggregate enthalten).\n- `HAVING` filtert **fertige Gruppen**, *nachdem* GROUP BY die Aggregate berechnet hat (enthält mind. ein Aggregat).\n```sql\nSELECT Abteilung, SUM(Gehalt) AS Gesamt\nFROM   Personal\nGROUP BY Abteilung\nHAVING SUM(Gehalt) > 1000000;\n```\nDa `SUM(Gehalt)` ein Aggregat ist, existiert es erst nach der Gruppierung — daher gehört die Bedingung zwingend in `HAVING`, nicht in `WHERE`.\n\n```compare\nWHERE\n- Filtert einzelne Zeilen (Tupel)\n- Laeuft VOR GROUP BY\n- Darf KEINE Aggregatfunktion enthalten\n- Bsp: WHERE Gehalt > 5000\n===\nHAVING\n- Filtert fertige Gruppen\n- Laeuft NACH GROUP BY\n- Enthaelt mind. eine Aggregatfunktion\n- Bsp: HAVING SUM(Gehalt) > 1000000\n```",
+          "keyTerms": [
+            { "term": "Aggregatfunktion", "definition": "Verdichtet eine Spalte zu einem Wert: COUNT, SUM, AVG, MIN, MAX. Nur in SELECT-Liste und HAVING erlaubt." },
+            { "term": "GROUP BY", "definition": "Gruppiert Zeilen mit gleichen Werten; jede nicht-aggregierte SELECT-Spalte muss hier aufgelistet sein." },
+            { "term": "HAVING vs. WHERE", "definition": "WHERE filtert Einzelzeilen vor der Gruppierung; HAVING filtert aggregierte Gruppen danach." }
+          ],
+          "examples": [
+            "SELECT Land, COUNT(*) FROM Kunden GROUP BY Land;",
+            "... GROUP BY Land HAVING COUNT(*) > 5;",
+            "COUNT(*) zaehlt alle Zeilen, auch NULLs."
+          ]
+        },
+        {
+          "title": "Subqueries (verschachtelte Abfragen)",
+          "content": "Eine **Subquery** ist ein in einer anderen Abfrage geschachteltes `SELECT`. Die **Inner Query** wird zuerst ausgeführt, ihr Ergebnis fließt in die **Outer Query**. Subqueries stehen in Klammern und sind in `WHERE`, `HAVING`, `FROM` und der Attributliste einsetzbar.\n\n**Vier Rückgabearten:**\n- **Einzelwert** — für Vergleiche: `WHERE Preis > (SELECT AVG(Preis) FROM Produkte)`.\n- **Werteliste** — mit `IN`: `WHERE staffNo IN (SELECT staffNo FROM Staff WHERE branchNo = 'B005')`.\n- **Virtuelle Tabelle** — in `FROM`: `SELECT ... FROM (subquery) AS alias`.\n- **NULL** — wenn kein Treffer; kann je nach Kontext leere Menge oder Fehler ergeben.\n\n*WHERE-Beispiel — Produkte über dem Durchschnittspreis:*\n```sql\nSELECT P_CODE, P_PRICE\nFROM   PRODUCT\nWHERE  P_PRICE >= (SELECT AVG(P_PRICE) FROM PRODUCT);\n```\n*HAVING-Beispiel — Produkte über dem Durchschnitt verkaufter Menge:*\n```sql\nSELECT P_CODE, SUM(LINE_UNITS) AS TOTALUNITS\nFROM   LINE\nGROUP BY P_CODE\nHAVING SUM(LINE_UNITS) > (SELECT AVG(LINE_UNITS) FROM LINE);\n```\nMit `ALL`/`ANY` lassen sich Vergleiche gegen ganze Listen formulieren. Ohne Subquery müsste man den Durchschnitt erst manuell berechnen und hart eincodieren.",
+          "keyTerms": [
+            { "term": "Subquery", "definition": "In eine andere Abfrage geschachteltes SELECT in Klammern; Inner Query wird zuerst ausgeführt." },
+            { "term": "Inner / Outer Query", "definition": "Die innere (verschachtelte) Abfrage liefert Input für die äußere Abfrage." }
+          ],
+          "examples": [
+            "WHERE P_PRICE > (SELECT AVG(P_PRICE) FROM PRODUCT)",
+            "WHERE V_CODE IN (SELECT V_CODE FROM VENDOR WHERE V_STATE = 'FL')",
+            "FROM (SELECT ...) AS virtuelleTabelle"
+          ]
+        },
+        {
+          "title": "Mengenoperatoren: UNION, INTERSECT, EXCEPT/MINUS",
+          "content": "SQL kann komplette Ergebnismengen kombinieren. Voraussetzung ist **Union-Kompatibilität**: gleiche Anzahl Attribute *und* paarweise kompatible Datentypen.\n\n| Operator | Liefert | Duplikate |\n|----------|---------|-----------|\n| `UNION` | Zeilen aus beiden Abfragen | entfernt Duplikate |\n| `UNION ALL` | Zeilen aus beiden Abfragen | behält Duplikate |\n| `INTERSECT` | nur Zeilen in **beiden** | distinct |\n| `EXCEPT` / `MINUS` | Zeilen aus Query 1, die **nicht** in Query 2 sind | distinct |\n\n*(`MINUS` ist die Oracle-Schreibweise für `EXCEPT`.)*\n\n```sql\nSELECT CUS_LNAME, CUS_FNAME FROM CUSTOMER\nUNION\nSELECT CUS_LNAME, CUS_FNAME FROM CUSTOMER_2;\n```\n\n**Anwendungen:**\n- `UNION` — zwei Kundenlisten ohne Doppelte zusammenführen.\n- `INTERSECT` — gemeinsame Elemente finden (z. B. Kunden in Area-Code 615, die auch Käufe getätigt haben).\n- `EXCEPT/MINUS` — fehlende/nicht-übereinstimmende Datensätze ermitteln (in CUSTOMER, aber nicht in CUSTOMER_2).\n\n*Hinweis:* Manche DBMS weichen beim Umgang mit Duplikaten leicht vom Standard ab.",
+          "keyTerms": [
+            { "term": "Union-Kompatibilität", "definition": "Voraussetzung für Mengenoperatoren: gleiche Attributanzahl und kompatible Datentypen." },
+            { "term": "UNION vs. UNION ALL", "definition": "UNION entfernt Duplikate, UNION ALL behält sie." },
+            { "term": "EXCEPT / MINUS", "definition": "Liefert Zeilen der ersten Abfrage, die nicht in der zweiten vorkommen; MINUS ist die Oracle-Variante." }
+          ],
+          "examples": [
+            "UNION -> kombinierte Liste ohne Duplikate.",
+            "INTERSECT -> nur gemeinsame Zeilen.",
+            "MINUS/EXCEPT -> Differenzmenge."
+          ]
+        },
+        {
+          "title": "⚡ Prüfungs-Spickzettel: Basic SQL",
+          "content": "**Must-know-Fakten:**\n- **Kommandogruppen:** DDL (`CREATE/ALTER/DROP/TRUNCATE`), DML (`INSERT/UPDATE/DELETE`), DCL (`GRANT/REVOKE`), TCL (`COMMIT/ROLLBACK/SAVEPOINT`), DQL (`SELECT`).\n- **TRUNCATE** (DDL) leert eine Tabelle schnell, behält die Struktur; **DROP** löscht inkl. Struktur; **DELETE** (DML) löscht zeilenweise.\n- **Logische Operatoren:** `AND`, `OR`, `NOT` in der `WHERE`-Klausel. Reihenfolge: Klammern -> NOT -> AND -> OR.\n- **WHERE filtert Zeilen vor** der Gruppierung (keine Aggregate); **HAVING filtert Gruppen** danach (mit Aggregat).\n- **GROUP-BY-Regel:** jede nicht-aggregierte SELECT-Spalte MUSS im GROUP BY stehen (sonst Syntaxfehler).\n- **NULL-Test:** nur mit `IS NULL` / `IS NOT NULL` — nie mit `=` oder `<>`.\n- **LIKE-Wildcards:** `%` = beliebig viele Zeichen, `_` = genau eines.\n- **BETWEEN** ist inklusiv beider Grenzen; **IN** = Kurzform für viele OR.\n- **ORDER BY:** Standard ASC; `DESC` für absteigend; ist die letzte ausgeführte Klausel.\n- **Subquery:** Inner Query zuerst; Ergebnis geht an die Outer Query.\n- **UNION** entfernt Duplikate, **UNION ALL** behält sie; **EXCEPT = MINUS** (Oracle).\n\n**Typische Fallen:**\n- Lässt man bei `UPDATE`/`DELETE` die `WHERE`-Klausel weg, werden **ALLE Zeilen der Tabelle** verändert/gelöscht (nicht der ganzen Datenbank).\n- `WHERE Spalte = NULL` ist falsch — `IS NULL` verwenden.\n- Aggregat in `WHERE` ist illegal — gehört in `HAVING`.\n- String-Vergleich von Zahlen/Daten kann täuschen (`'5' > '44'`).\n- `CREATE TABLE Students` ist korrekt; `CREATE TABLES` ist falsch.\n\n```sql\n-- Vollstaendiges Geruest mit allen Klauseln in korrekter Reihenfolge\nSELECT   Land, COUNT(*) AS Anzahl\nFROM     Kunden\nWHERE    Aktiv = 1            -- Zeilen vorfiltern\nGROUP BY Land                -- gruppieren\nHAVING   COUNT(*) > 5         -- Gruppen filtern\nORDER BY Anzahl DESC;         -- final sortieren\n```",
+          "keyTerms": [
+            { "term": "WHERE ohne -> alle Zeilen", "definition": "Ein UPDATE oder DELETE ohne WHERE betrifft alle Zeilen der Tabelle." },
+            { "term": "Klauselreihenfolge", "definition": "Logische Ausführung: FROM -> WHERE -> GROUP BY -> HAVING -> SELECT -> ORDER BY." }
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "type": "multiple-choice",
+          "question": "Welcher der folgenden SQL-Befehle leert eine Tabelle komplett und rasant, löscht aber nicht die Tabellenstruktur selbst, und gehört zur Data Definition Language (DDL)?",
+          "options": [
+            "DELETE",
+            "DROP",
+            "TRUNCATE",
+            "REMOVE"
+          ],
+          "correctAnswer": 2,
+          "explanation": "TRUNCATE ist ein DDL-Befehl. Er entfernt alle Zeilen einer Tabelle auf einen Schlag (sehr performant, da er oft nicht jede Zeile einzeln loggt). DROP löscht die Tabelle mitsamt der Struktur. DELETE ist DML und löscht Zeile für Zeile."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Welche SQL-Syntax ist syntaktisch KORREKT, um alle Kunden zu finden, deren Nachname keinen Wert (Null) hat?",
+          "options": [
+            "WHERE Last_Name = NULL",
+            "WHERE Last_Name == NULL",
+            "WHERE Last_Name IS NULL",
+            "WHERE Last_Name EQUALS NULL"
+          ],
+          "correctAnswer": 2,
+          "explanation": "NULL bedeutet 'unbekannt'. Da man nicht prüfen kann, ob etwas Unbekanntes gleich etwas anderem Unbekannten ist, schlägt '=' fehl. Man MUSS den speziellen Operator 'IS NULL' (oder 'IS NOT NULL') verwenden."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Du schreibst eine Abfrage, um die Gesamtgehälter (SUM) aller Abteilungen (Department) anzuzeigen. Du möchtest aber nur die Abteilungen sehen, deren Gesamtgehalt größer als 1.000.000 ist. Wo musst du diese Bedingung (> 1.000.000) platzieren?",
+          "options": [
+            "In der WHERE Klausel, noch vor dem GROUP BY.",
+            "In der HAVING Klausel, zwingend nach dem GROUP BY.",
+            "Direkt im SELECT Statement.",
+            "Das ist in SQL nicht möglich, man benötigt Python dafür."
+          ],
+          "correctAnswer": 1,
+          "explanation": "Da das Gesamtgehalt (SUM) ein Aggregat ist, existiert es erst, nachdem die Zeilen gruppiert wurden. Die WHERE-Klausel läuft vorher. Daher muss man zwingend die HAVING-Klausel nutzen, um aggregierte Gruppen zu filtern."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Was liefert der Ausdruck `WHERE Produkt_Code LIKE 'A_B%'` ?",
+          "options": [
+            "Alle Codes, die mit A_B anfangen.",
+            "Alle Codes, die mit A anfangen, danach exakt ein beliebiges Zeichen haben, gefolgt von einem B, und danach beliebig viele oder gar keine Zeichen.",
+            "Alle Codes, die ein A und irgendwo danach ein B enthalten.",
+            "Alle Codes, die exakt 3 Zeichen lang sind."
+          ],
+          "correctAnswer": 1,
+          "explanation": "Der Unterstrich `_` ist ein Wildcard für EXAKT EIN Zeichen. Das Prozent `%` ist ein Wildcard für null bis unendlich viele Zeichen. 'A_B%' matcht also z.B. 'A9B', 'AXB123', aber NICHT 'AB' oder 'A12B'."
+        },
+        {
+          "type": "true-false",
+          "question": "Bei der Verwendung der GROUP BY Klausel gilt die strikte Regel: Jede Spalte, die im SELECT auftaucht und keine Aggregatfunktion (wie SUM oder COUNT) ist, MUSS auch im GROUP BY aufgelistet werden.",
+          "correctAnswer": true,
+          "explanation": "Korrekt. Das RDBMS muss wissen, wie es die normalen Spalten (wie 'Land', 'Stadt') zusammenfassen soll, wenn es gleichzeitig aggregierte Metriken (wie SUM) für diese Spalten berechnet. Fehlt die Spalte im GROUP BY, wirft SQL einen Syntax Error."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Welche der folgenden Befehlsgruppen ist korrekt der Data Control Language (DCL) bzw. der Transaction Control Language (TCL) zugeordnet?",
+          "options": [
+            "DCL: INSERT, UPDATE, DELETE — TCL: SELECT",
+            "DCL: GRANT, REVOKE — TCL: COMMIT, ROLLBACK, SAVEPOINT",
+            "DCL: CREATE, ALTER, DROP — TCL: GRANT, REVOKE",
+            "DCL: SELECT — TCL: TRUNCATE"
+          ],
+          "correctAnswer": 1,
+          "explanation": "DCL (Data Control Language) verwaltet Privilegien mit GRANT und REVOKE. TCL (Transaction Control Language) steuert Transaktionen mit COMMIT (dauerhaft speichern), ROLLBACK (rückgängig) und SAVEPOINT. CREATE/ALTER/DROP sind DDL, INSERT/UPDATE/DELETE sind DML, SELECT ist DQL."
+        },
+        {
+          "type": "true-false",
+          "question": "Die WHERE-Klausel kann mit den logischen Operatoren AND, OR und NOT kombiniert werden, wobei NOT vor AND und AND vor OR ausgewertet wird (sofern keine Klammern gesetzt sind).",
+          "correctAnswer": true,
+          "explanation": "Korrekt. AND, OR und NOT sind die gängigen logischen Operatoren in der WHERE-Klausel. Die Auswertungsreihenfolge ist: zuerst Ausdrücke in Klammern, dann NOT, dann AND, zuletzt OR. Deshalb werden Klammern empfohlen, um die gewünschte Logik eindeutig festzulegen."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Du führst `UPDATE Kunden SET Status = 'inaktiv';` ohne WHERE-Klausel aus. Was passiert?",
+          "options": [
+            "Nichts, da die WHERE-Klausel fehlt.",
+            "Nur die erste Zeile der Tabelle wird aktualisiert.",
+            "Alle Zeilen der Tabelle Kunden erhalten den Status 'inaktiv'.",
+            "Alle Tabellen der gesamten Datenbank werden aktualisiert."
+          ],
+          "correctAnswer": 2,
+          "explanation": "Ohne WHERE-Klausel gibt es keine Einschränkung der betroffenen Zeilen. Daher werden ALLE Zeilen der angesprochenen Tabelle aktualisiert (nicht der gesamten Datenbank). Genau deshalb ist die WHERE-Klausel bei UPDATE und DELETE so kritisch."
+        }
+      ]
+    }
+  ]
+}

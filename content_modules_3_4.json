@@ -1,0 +1,506 @@
+{
+  "modules": [
+    {
+      "id": "module-3",
+      "title": "Relational Data Model",
+      "description": "Logische Struktur des relationalen Modells: Tabellen, Schlüssel, Integritätsregeln, Data Dictionary/System Catalog, Beziehungen und relationale Algebra.",
+      "coreCompetencies": [
+        "Die logische Struktur und mathematische Grundlage (Codd 1970) des relationalen Modells erklären",
+        "Eigenschaften und Komponenten einer relationalen Tabelle (Relation) im Detail beschreiben",
+        "Schlüsseltypen (Super-, Candidate-, Primary-, Foreign-, Secondary-, Surrogate-, Composite-Key) sicher unterscheiden",
+        "Entitäts- und referentielle Integrität sowie Constraints (NOT NULL, UNIQUE) anwenden",
+        "Den Unterschied und Zweck von Data Dictionary und System Catalog (systemerzeugte Metadaten) erklären",
+        "1:1-, 1:M- und M:N-Beziehungen im relationalen Schema mit korrekter FK-Platzierung umsetzen",
+        "Die acht Operatoren der relationalen Algebra (SELECT, PROJECT, JOIN, UNION, INTERSECT, DIFFERENCE, PRODUCT, DIVIDE) beherrschen",
+        "Indizes als Zugriffsoptimierung verstehen"
+      ],
+      "sections": [
+        {
+          "title": "Grundlagen des Relationalen Modells",
+          "content": "Das relationale Modell wurde **1970 von E. F. Codd (IBM)** eingeführt und revolutionierte die Datenverwaltung. Es ruht auf zwei mathematischen Säulen:\n\n- **Prädikatenlogik** (predicate logic): bestimmt, ob Aussagen wahr oder falsch sind.\n- **Mengenlehre** (set theory): bildet die Grundlage für die Datenmanipulation.\n\nDrei Kernkomponenten kennzeichnen das Modell:\n\n1. **Logische Datenstruktur:** Daten werden als **Relationen** (Tabellen) dargestellt.\n2. **Integritätsregeln** (Integrity Rules): sichern die Konsistenz der Daten über die Zeit.\n3. **Operationen** (relationale Algebra): definieren, wie Daten manipuliert werden.\n\nDer große Vorteil ist die **Abstraktion**: Das relationale Modell verbirgt die enorme physische Komplexität (Blöcke, Zylinder, Pointer) komplett vor Entwickler und Endnutzer. Man arbeitet rein auf der **logischen Sicht** – vergleichbar mit einem Automatikgetriebe im Auto, bei dem die Mechanik versteckt bleibt. Das ergibt **Datenunabhängigkeit** und **strukturelle Unabhängigkeit**. Das **RDBMS** (Relational Database Management System) übersetzt logische SQL-Anfragen in physische Operationen.",
+          "keyTerms": [
+            { "term": "Relation", "definition": "Formaler Begriff für eine Tabelle. Streng genommen sind die Daten die 'Relation', die Variable, die sie hält, ist die 'Relvar' (relation variable) mit Heading (Attributnamen) und Body (Daten)." },
+            { "term": "Tuple (Tupel)", "definition": "Formaler Begriff für eine Zeile (Row). Repräsentiert eine einzelne Entitäts-Instanz, z. B. einen konkreten Studenten." },
+            { "term": "Attribute (Attribut)", "definition": "Formaler Begriff für eine Spalte (Column). Repräsentiert eine Eigenschaft der Entität, z. B. den Nachnamen." }
+          ],
+          "examples": [
+            "Codds Paper 'A Relational Model of Data for Large Shared Data Banks' (1970) ist die Geburtsstunde der relationalen DB.",
+            "Eine STUDENT-Tabelle ist eine Relation; eine konkrete Zeile 'Max Mustermann' ist ein Tupel."
+          ]
+        },
+        {
+          "title": "Eigenschaften einer Relationalen Tabelle",
+          "content": "Eine Tabelle wird als zweidimensionale Struktur aus Zeilen und Spalten wahrgenommen. Um als **echte Relation** zu gelten, müssen strikte Eigenschaften erfüllt sein:\n\n1. **Atomic Values:** Jeder Schnittpunkt von Zeile und Spalte enthält genau **einen** unteilbaren Wert. Listen/Arrays sind verboten.\n2. **Gleicher Datentyp je Spalte:** Alle Werte einer Spalte haben denselben Datentyp und dasselbe Format (numeric, character, date, logical).\n3. **Distinkte Spaltennamen:** Jede Spalte hat einen eindeutigen Namen.\n4. **Domain (Wertebereich):** Jede Spalte besitzt eine definierte Domain – die Menge erlaubter Werte (z. B. GPA 0.0–4.0).\n5. **Eindeutige Zeilen:** Jede Tabelle braucht einen Primary Key; es darf **keine zwei exakt identischen Zeilen** geben.\n6. **Order Immateriality:** Die Reihenfolge der Zeilen und Spalten ist für das DBMS logisch irrelevant.\n\nMerksatz für die Kahoot-/Prüfungsfrage: **'A relation is represented as a table' = RICHTIG.**",
+          "keyTerms": [
+            { "term": "Domain", "definition": "Zulässiger Wertebereich eines Attributs (z. B. GPA 0.0–4.0 oder Geschlecht ['M','F','D']). Sichert Datenintegrität." },
+            { "term": "Atomic Value", "definition": "Ein unteilbarer Einzelwert. Kommagetrennte Listen in einer Zelle verletzen die relationale Struktur." },
+            { "term": "Order Immateriality", "definition": "Die physische Reihenfolge von Zeilen und Spalten beeinflusst die Interpretation der Daten nicht." }
+          ],
+          "examples": [
+            "STUDENT-Tabelle: Zeile = ein Student, Spalte = ein Attribut (z. B. name), Domain für gpa = 1.0–4.0, geeigneter PK = student_id.",
+            "Falsch wäre: Spalte 'Telefon' mit Wert '0664/123, 0676/456' – das verletzt Atomic Values."
+          ]
+        },
+        {
+          "title": "Datenbankschlüssel (Keys) im Detail",
+          "content": "Schlüssel sichern **Eindeutigkeit**, etablieren **Beziehungen** und wahren die **Datenintegrität**. Ein Key besteht aus einem oder mehreren Attributen, die andere Attribute **funktional bestimmen**.\n\n- **Superkey:** Attribut(kombination), die eine Zeile eindeutig identifiziert – darf **überflüssige (extraneous)** Attribute enthalten (z. B. StuID + Vorname).\n- **Candidate Key:** Ein **minimaler** Superkey (keine überflüssigen Attribute mehr entfernbar). Basiert auf **voller funktionaler Abhängigkeit**. Potenzieller Primary Key.\n- **Primary Key (PK):** Der vom Designer gewählte Candidate Key. Sichert **Entity Integrity**. Pro Tabelle **genau einer**.\n- **Foreign Key (FK):** Der PK einer Tabelle, eingefügt in eine andere Tabelle. Schafft das gemeinsame Attribut und sichert **Referential Integrity**.\n- **Secondary Key:** Nur für **Datenabruf/Suche** gedacht, nicht zwingend eindeutig (z. B. Nachname mit Index).\n- **Surrogate Key:** Künstlich erfundener Schlüssel ohne reale Bedeutung (z. B. Auto-Increment 'Address_ID'). Stabil, ändert sich nie.\n- **Composite Key:** Schlüssel aus **mehr als einem** Attribut.\n- **Natural Key:** Aus der realen Welt stammend (z. B. Sozialversicherungsnummer).",
+          "keyTerms": [
+            { "term": "Funktionale Abhängigkeit", "definition": "Attribut B ist von A funktional abhängig, wenn jeder Wert von A genau einen Wert von B bestimmt. Grundlage der Schlüsseldefinition." },
+            { "term": "Composite Key", "definition": "Schlüssel aus mehreren Attributen, z. B. CRS_CODE + CLASS_SECTION." },
+            { "term": "Natural vs. Surrogate", "definition": "Natural Key existiert bereits real (SSN); Surrogate Key wird vom System erzeugt (Customer ID), kein Realwelt-Bezug, DB kontrolliert das Format." }
+          ],
+          "examples": [
+            "STUDENT: STU_NUM ist PK. (STU_NUM + STU_LNAME) wäre ein Superkey, aber kein Candidate Key (STU_LNAME ist überflüssig).",
+            "CLASS: PK = CLASS_CODE; (CRS_CODE + CLASS_SECTION) ist ein zusätzlicher Candidate Key (Composite)."
+          ]
+        },
+        {
+          "title": "Schlüssel-Übersicht & Key-Vergleich",
+          "content": "Die Hierarchie der Schlüssel ist Prüfungsstoff: **Jeder Candidate Key ist ein Superkey, aber nicht jeder Superkey ein Candidate Key.** Der Primary Key ist ein ausgewählter Candidate Key.\n\n```diagram:Schlüssel-Hierarchie\n   ┌──────────────────────────────────┐\n   │            SUPERKEY                │  identifiziert eindeutig\n   │   (darf überflüssige Attribute     │  (ggf. mit Ballast)\n   │    enthalten)                      │\n   │   ┌──────────────────────────┐    │\n   │   │      CANDIDATE KEY        │    │  minimaler Superkey\n   │   │   ┌──────────────────┐    │    │\n   │   │   │  PRIMARY KEY      │    │    │  ← vom Designer gewählt\n   │   │   └──────────────────┘    │    │\n   │   └──────────────────────────┘    │\n   └──────────────────────────────────┘\n```\n\nVergleich der wichtigsten Schlüsseltypen:\n\n| Eigenschaft            | Primary Key | Unique Key      | Foreign Key            |\n|------------------------|:-----------:|:---------------:|:----------------------:|\n| Anzahl pro Tabelle     | genau 1     | 0, 1 oder viele | 1 oder viele           |\n| Index automatisch      | ja          | ja              | nein (sollte aber)     |\n| Mehrere Spalten möglich| ja          | ja              | ja                     |\n| Duplikate erlaubt      | nein        | nein            | **ja**                 |\n| NULL erlaubt           | **nein**    | ja              | **ja**                 |\n| Identifiziert Zeile    | ja          | (ja)            | nicht immer            |",
+          "keyTerms": [
+            { "term": "Primary vs. Unique", "definition": "Ein PK ist immer NOT NULL und genau einmal pro Tabelle; ein UNIQUE Key darf NULL enthalten und mehrfach vorkommen." }
+          ],
+          "examples": [
+            "Kahoot: 'How many primary keys can a table have?' → genau EINER (one).",
+            "Kahoot: 'Which are properties of a primary key?' → Unique UND Not NULL (nicht optional, keine Wiederholung)."
+          ]
+        },
+        {
+          "title": "Integritätsregeln (Integrity Rules)",
+          "content": "Integritätsregeln zwingen das DBMS, fehlerhafte Daten abzulehnen, und garantieren eine konsistente Datenbank.\n\n- **Entity Integrity (Entitätsintegrität):** Jede Tabelle muss einen Primary Key haben, und **kein Teil** des PK darf jemals **NULL** sein. So bleibt jede Zeile eindeutig identifizierbar.\n- **Referential Integrity (Referentielle Integrität):** Ein Foreign Key muss entweder auf einen **existierenden** Primary Key verweisen **oder komplett NULL** sein (falls optional). Verhindert 'verwaiste' (orphaned) Datensätze.\n- **NOT NULL Constraint:** Erzwingt, dass eine Spalte zwingend einen Wert haben muss.\n- **UNIQUE Constraint:** Stellt sicher, dass keine doppelten Werte in einer Spalte vorkommen.\n\n**Wichtig zu NULL:** NULL bedeutet *Abwesenheit eines Werts* (unbekannt, fehlend, nicht anwendbar) – **NICHT null/Zahl 0 und nicht Leerstring!** (Kahoot: 'NULL means zero' = FALSCH).\n\n```diagram:Referential Integrity — Parent/Child\n  PARENT: DEPARTMENT            CHILD: EMPLOYEE\n  ┌────────────────┐           ┌──────────────────────┐\n  │ DEPT_ID (PK)    │◄──────────│ DEPT_ID (FK)          │\n  │ DEPT_NAME       │   muss    │ EMP_ID (PK)           │\n  └────────────────┘ existieren │ NAME                  │\n                     oder NULL  └──────────────────────┘\n  INSERT EMPLOYEE mit DEPT_ID=999 (nicht vorhanden) → DBMS lehnt ab\n```",
+          "keyTerms": [
+            { "term": "Entity Integrity", "definition": "Kein Teil eines Primärschlüssels darf NULL sein → jede Zeile bleibt eindeutig identifizierbar." },
+            { "term": "Referential Integrity", "definition": "Jeder FK verweist auf einen existierenden PK oder ist NULL; sonst lehnt die DB INSERT/UPDATE/DELETE ab." },
+            { "term": "NULL", "definition": "Abwesenheit eines Werts (unbekannt/fehlend/n.a.). Nicht erlaubt im PK. Nicht gleich 0 oder Leerstring." }
+          ],
+          "examples": [
+            "Entity Integrity verletzt: PK STU_NUM = NULL → INSERT abgelehnt.",
+            "Referential Integrity verletzt: EMPLOYEE.DEPT_ID = 999, aber kein DEPARTMENT 999 → INSERT abgelehnt."
+          ]
+        },
+        {
+          "title": "Data Dictionary — Metadaten verstehen (Exam Q21)",
+          "content": "Das **Data Dictionary** ist eine **detaillierte Beschreibung aller Tabellen** einer Datenbank. Es liefert **Metadaten** – also **'Daten über Daten'**.\n\n**Inhalt (was das Data Dictionary bereitstellt):**\n- Entitäts-/Tabellennamen und Attribut-/Spaltennamen\n- Datentypen und Charakteristika der Attribute\n- Beziehungen (relationships) zwischen Tabellen\n- Integritäts-Constraints\n\n**Zweck:** Es sichert **Konsistenz** in Namen und Eigenschaften zwischen Design- und Implementierungs-Teams. Es repräsentiert die **menschliche Sicht** auf Entitäten, Attribute und Beziehungen und wird daher oft **'the database designer's database'** genannt, weil es Design-Entscheidungen über Tabellen und Strukturen festhält.\n\nEs hilft, **Homonyme** und **Synonyme** zu vermeiden:\n- **Homonym:** derselbe Name für unterschiedliche Attribute (z. B. 'C_NAME' für Kunden- *und* Beraternamen).\n- **Synonym:** verschiedene Namen für dasselbe Objekt (z. B. 'car' und 'auto').\n\n**Exam Q21:** *Was stellt das Data Dictionary bereit?* → **Metadaten**: Beschreibungen von Tabellen, Attributen, Datentypen, Beziehungen und Constraints.",
+          "keyTerms": [
+            { "term": "Metadaten", "definition": "'Daten über Daten' – beschreiben Struktur und Eigenschaften der eigentlichen Nutzdaten (Tabellen-, Spaltennamen, Typen, Beziehungen, Constraints)." },
+            { "term": "Homonym", "definition": "Ein Name, der für unterschiedliche Attribute genutzt wird (zu vermeiden)." },
+            { "term": "Synonym", "definition": "Verschiedene Namen für dasselbe Objekt/Attribut (zu vermeiden)." }
+          ],
+          "examples": [
+            "Data Dictionary-Eintrag: STUDENT.STU_GPA, Typ NUMBER(3,2), Domain 0–4, NOT NULL.",
+            "Designer prüft via Data Dictionary, dass 'C_NAME' nicht doppeldeutig (Homonym) verwendet wird."
+          ]
+        },
+        {
+          "title": "System Catalog — systemerzeugtes Dictionary (Exam Q20)",
+          "content": "Der **System Catalog** ist ein **detailliertes, SYSTEM-erzeugtes Data Dictionary**, das **alle Objekte** der Datenbank beschreibt. Genau das ist die Kernaussage von **Exam Q20: Spezifisch für den System Catalog ist, dass er ein vom System (DBMS) erstelltes Data Dictionary ist.**\n\n**Metadaten im System Catalog:**\n- Tabellennamen, **Ersteller (creator)** und **Erstellungsdatum**\n- Spaltendetails und Datentypen\n- Index-Informationen\n- **autorisierte Nutzer und Zugriffsrechte (access privileges)**\n\n**Besonderheiten:**\n- Wird oft **synonym** mit dem Data Dictionary verwendet, da er alle dessen Infos enthält.\n- **Automatische Dokumentation:** erzeugt selbsttätig DB-Doku und hilft, Homonyme/Synonyme zu finden und zu eliminieren.\n- Speichert die DB-Charakteristika in **system-created tables** (vom System erzeugten Tabellen).\n- Diese System-Tabellen lassen sich wie normale User-Tabellen **mit SQL abfragen**.\n\n```compare\nData Dictionary\n- Menschliche / Designer-Sicht\n- Beschreibt Tabellen, Attribute, Typen, Beziehungen\n- 'Designer's database' – Design-Entscheidungen\n- Kann manuell/tool-gestützt gepflegt sein\n===\nSystem Catalog\n- System-/DBMS-erzeugt (automatisch)\n- Zusätzlich: Ersteller, Datum, Rechte, Indizes\n- In system-created tables gespeichert\n- Per SQL abfragbar wie User-Tabellen\n```",
+          "keyTerms": [
+            { "term": "System Catalog", "definition": "Vom DBMS automatisch erzeugtes, detailliertes Data Dictionary über alle DB-Objekte; in System-Tabellen gespeichert und per SQL abfragbar." },
+            { "term": "Systemerzeugt", "definition": "Das DBMS erstellt und pflegt den Katalog selbst – das unterscheidet ihn vom rein 'menschlich' gepflegten Data Dictionary." }
+          ],
+          "examples": [
+            "Oracle: SELECT * FROM USER_TABLES; – Abfrage des System Catalogs.",
+            "Der Katalog kennt Ersteller, Erstellungsdatum und Zugriffsrechte jeder Tabelle – Infos, die das reine Data Dictionary nicht zwingend enthält."
+          ]
+        },
+        {
+          "title": "Beziehungen im relationalen Modell (1:1, 1:M, M:N)",
+          "content": "Beziehungen werden über **Foreign Keys** realisiert. Die FK-Platzierung hängt vom Beziehungstyp ab.\n\n- **1:M (One-to-Many):** Der **Normalfall** und das **Ideal** im relationalen Design. Der FK steht auf der **'Many'-Seite** und referenziert den PK der 'One'-Seite. *Beispiel:* Ein Kunde hat viele Bestellungen → Order trägt Customer_ID als FK.\n- **1:1 (One-to-One):** Sollte **selten** sein. Der FK kann in **eine der beiden** Tabellen. Häufige 1:1 deuten oft darauf hin, dass die Entitäten besser **zusammengeführt** würden.\n- **M:N (Many-to-Many):** Kann im relationalen Modell **nicht direkt** umgesetzt werden, weil ein FK in einer Zeile nur **einen** Wert referenzieren kann. Lösung: Auflösung in **zwei 1:M** über eine **Junction Table** (z. B. ENROLL zwischen STUDENT und CLASS).\n\n```diagram:1:M COURSE → CLASS (relationales Schema)\n COURSE                          CLASS\n ┌───────────────────┐          ┌────────────────────────┐\n │ CRS_CODE (PK)      │◄─────────│ CLASS_CODE (PK)         │\n │ CRS_TITLE          │  1     M │ CRS_CODE (FK)           │\n │ CRS_CREDIT         │          │ CLASS_SECTION           │\n └───────────────────┘          │ CLASS_TIME, PROF_NUM    │\n                                └────────────────────────┘\n  FK CRS_CODE steht auf der MANY-Seite (CLASS)\n```\n\nKahoot: erlaubte Beziehungstypen sind **1:1, 1:M, M:N** – 'Zero-to-Zero' existiert nicht.",
+          "keyTerms": [
+            { "term": "FK-Platzierung 1:M", "definition": "Foreign Key liegt immer auf der 'Many'-Seite und zeigt auf den PK der 'One'-Seite." },
+            { "term": "Junction Table", "definition": "Zwischentabelle, die eine M:N-Beziehung in zwei 1:M-Beziehungen auflöst (enthält die FKs beider Seiten)." }
+          ],
+          "examples": [
+            "1:M: PAINTER 1 — M PAINTING; FK PAINTER_NUM steht in PAINTING.",
+            "M:N: STUDENT M — N CLASS → ENROLL(STU_NUM, CLASS_CODE) als Brücke."
+          ]
+        },
+        {
+          "title": "Relationale Algebra — die acht Operatoren",
+          "content": "Die relationale Algebra ist die mathematische Basis von SQL. **Relationale Vollständigkeit** verlangt mindestens **SELECT, PROJECT und JOIN**. Es gibt acht Hauptoperatoren:\n\n- **SELECT / RESTRICT [σ]:** unärer Operator; filtert **Zeilen** (horizontaler Subset) nach einem Prädikat. Entspricht WHERE. `σ(price>100)(PRODUCT)`.\n- **PROJECT [π]:** unärer Operator; wählt **Spalten** (vertikaler Subset) und **entfernt automatisch Duplikate** (Mengenlehre!). `π(P_CODE,PRICE)(PRODUCT)`.\n- **UNION [∪]:** alle Zeilen beider Tabellen, **ohne Duplikate**. Erfordert **union-compatible** Tabellen.\n- **INTERSECT [∩]:** nur Zeilen, die in **beiden** Tabellen vorkommen. Union-compatible nötig.\n- **DIFFERENCE [−]:** Zeilen aus A, die **nicht** in B sind. Union-compatible nötig.\n- **PRODUCT [×]:** **kartesisches Produkt** – jede Zeile aus A mit jeder aus B (A=10, B=5 → 50 Zeilen).\n- **JOIN [⋈]:** verbindet Tabellen über gemeinsame Attribute (siehe nächste Sektion).\n- **DIVIDE [÷]:** selten; findet Werte, die mit **allen** Werten einer zweiten Menge verknüpft sind (z. B. Kunden, die *alle* gesuchten Produkte gekauft haben).\n\nKahoot-Falle: **UPDATE und DELETE sind KEINE** relationalen Algebra-Operatoren – PROJECT und JOIN schon.",
+          "keyTerms": [
+            { "term": "Union-compatible", "definition": "Zwei Tabellen mit gleicher Spaltenanzahl und kompatiblen (gleichen) Domains/Datentypen je Spalte. Voraussetzung für UNION/INTERSECT/DIFFERENCE." },
+            { "term": "PROJECT entfernt Duplikate", "definition": "Da das Ergebnis eine Menge ist, eliminiert PROJECT automatisch identische Tupel – anders als SQL SELECT ohne DISTINCT." },
+            { "term": "DIVIDE", "definition": "Liefert Werte des nicht-geteilten Attributs, die mit JEDEM Wert der Divisor-Tabelle assoziiert sind." }
+          ],
+          "examples": [
+            "PRODUCT(×): CUSTOMER(10 Zeilen) × AGENT(5) = 50 Zeilen.",
+            "DIVIDE: 'Welche Kunden kauften ALLE Produkte 123456, 234567, 567890?'"
+          ]
+        },
+        {
+          "title": "JOIN-Typen im Detail",
+          "content": "Der JOIN ist die **eigentliche Stärke** relationaler Datenbanken: unabhängige Tabellen über gemeinsame Attribute verknüpfen.\n\n- **Natural Join [⋈]:** dreistufiger Prozess: 1) **PRODUCT** (kartesisches Produkt), 2) **SELECT** (nur Zeilen mit gleichen Werten im gemeinsamen Attribut), 3) **PROJECT** (doppelte Spalte entfernen). Ergebnis enthält die Join-Spalte **nur einmal**.\n- **Equijoin:** verbindet über eine explizite **Gleichheitsbedingung (=)**; entfernt die doppelte Spalte **nicht**. Entspricht Schritt 2 des Natural Join.\n- **Theta Join [⋈θ]:** Verallgemeinerung mit beliebigem Vergleichsoperator; Equijoin ist ein Spezialfall.\n- **Inner Join:** nur gematchte Zeilen.\n- **Outer Join:** behält gematchte Paare **und** ungematchte Zeilen einer Seite mit **NULL** aufgefüllt.\n  - **Left Outer Join [⟕]:** alle Zeilen der linken Tabelle.\n  - **Right Outer Join [⟖]:** alle Zeilen der rechten Tabelle.\n\nOuter Joins sind nützlich, um **referentielle Integritätsprobleme** zu finden (FK-Werte ohne passenden PK).\n\n| JOIN-Typ      | gemeinsame Spalte | unmatched Zeilen     |\n|---------------|:-----------------:|:--------------------:|\n| Natural Join  | einmal            | verworfen            |\n| Equijoin      | doppelt           | verworfen            |\n| Inner Join    | je nach Bedingung | verworfen            |\n| Left Outer    | je nach Bedingung | links bleiben (NULL) |\n| Right Outer   | je nach Bedingung | rechts bleiben (NULL)|",
+          "keyTerms": [
+            { "term": "Natural Join", "definition": "PRODUCT → SELECT (Gleichheit im gemeinsamen Attribut) → PROJECT (Duplikatspalte entfernen). Gemeinsame Spalte erscheint einmal." },
+            { "term": "Equijoin", "definition": "Join mit expliziter =-Bedingung; behält doppelte Spalte; entspricht Schritt 2 des Natural Join." },
+            { "term": "Outer Join", "definition": "Behält unmatched Zeilen einer Seite mit NULL-Auffüllung; nützlich zur Aufdeckung von Integritätsproblemen." }
+          ],
+          "examples": [
+            "CUSTOMER ⋈ AGENT über agent_code: nur Kunden mit passendem Agenten.",
+            "LEFT OUTER JOIN: alle Kunden, auch jene ohne zugeordneten Agenten (AGENT-Spalten = NULL)."
+          ]
+        },
+        {
+          "title": "Indizes & Datenredundanz",
+          "content": "**Indizes** sind Werkzeuge für **effizienten Datenzugriff** – vergleichbar mit einem **Bibliothekskatalog**, der das Auffinden beschleunigt.\n\n- **Index Key:** Referenzpunkt/Suchwert im Index.\n- **Pointer:** verweisen auf den physischen Speicherort des Datensatzes.\n- Auf **Primary Keys** legt das DBMS **automatisch einen Unique Index** an.\n- Ein Index kann aus **einem oder mehreren** Attributen bestehen; eine Tabelle kann **mehrere Indizes** haben.\n- Indizes ermöglichen **geordneten Abruf** (ordered retrieval).\n\n**Umgang mit Datenredundanz:** Kontrollierte Redundanz (z. B. ein FK, der in mehreren Child-Zeilen denselben PK referenziert) ist normal und gewollt. **Unkontrollierte** Redundanz (dieselben Sachdaten mehrfach gespeichert) führt zu **Update-, Insert- und Delete-Anomalien** – diese vermeidet man durch korrektes Design (z. B. Auflösung von M:N, Normalisierung).\n\n```diagram:Index als Zugriffspfad\n  Index (auf STU_LNAME)        Daten-Tabelle\n  ┌──────────────┬────────┐    ┌─────┬───────────┐\n  │ 'Maier'      │  ──────┼───▶│ 102 │ Maier ...  │\n  │ 'Mustermann' │  ──────┼───▶│ 005 │ Muster...  │\n  └──────────────┴────────┘    └─────┴───────────┘\n      Index Key      Pointer        physische Zeile\n```",
+          "keyTerms": [
+            { "term": "Index", "definition": "Geordnete Struktur aus Index Key + Pointer für schnellen Datenzugriff. PKs erhalten automatisch einen Unique Index." },
+            { "term": "Update-/Insert-/Delete-Anomalie", "definition": "Inkonsistenzen durch unkontrollierte Redundanz; verhindert durch sauberes Design/Normalisierung." }
+          ],
+          "examples": [
+            "Index auf CUS_LNAME beschleunigt 'WHERE CUS_LNAME = ...'.",
+            "M:N falsch implementiert → redundante Daten in STUDENT und CLASS → Anomalien."
+          ]
+        },
+        {
+          "title": "⚡ Prüfungs-Spickzettel — Relational Model",
+          "content": "**Must-know-Fakten & typische Fallen:**\n\n- **Codd 1970**, Basis: **Prädikatenlogik + Mengenlehre**. Modell = logische Struktur + Integritätsregeln + Operationen.\n- **Schlüssel-Hierarchie:** Superkey ⊇ Candidate Key ⊇ Primary Key. *Jeder Candidate Key ist ein Superkey, nicht umgekehrt.*\n- **PK:** genau einer pro Tabelle, **Unique + NOT NULL**. **FK:** darf Duplikate und NULL enthalten.\n- **Surrogate Key:** künstlich, systemerzeugt, bedeutungslos, stabil (z. B. Auto-Increment).\n- **Entity Integrity:** kein PK-Teil NULL. **Referential Integrity:** FK → existierender PK oder NULL.\n- **NULL ≠ 0** und ≠ Leerstring (häufige Falle!).\n- **EXAM Q21 – Data Dictionary:** liefert **Metadaten** (Tabellen, Attribute, Typen, Beziehungen, Constraints); 'designer's database'; vermeidet Homonyme/Synonyme.\n- **EXAM Q20 – System Catalog:** **SYSTEM-erzeugtes** Data Dictionary; zusätzlich Ersteller, Datum, Rechte, Indizes; in **system-created tables**; per **SQL abfragbar**.\n- **Beziehungen:** 1:M ist Ideal (FK auf Many-Seite); 1:1 selten; M:N nur über Junction Table (zwei 1:M).\n- **Relationale Algebra (8):** SELECT, PROJECT, JOIN, UNION, INTERSECT, DIFFERENCE, PRODUCT, DIVIDE. **Minimum: SELECT+PROJECT+JOIN.** UPDATE/DELETE gehören NICHT dazu.\n- **PROJECT entfernt Duplikate automatisch** (SQL ohne DISTINCT nicht).\n- **PRODUCT** = kartesisch (m×n Zeilen).\n- **UNION/INTERSECT/DIFFERENCE** brauchen **union-compatible** Tabellen.\n- **PK bekommt automatisch einen Unique Index.**",
+          "keyTerms": [
+            { "term": "Relationale Vollständigkeit", "definition": "Ein DBMS ist minimal relational vollständig, wenn es SELECT, PROJECT und JOIN unterstützt." }
+          ],
+          "examples": [
+            "Falle: 'Welche sind relationale Algebra-Operatoren?' → PROJECT, JOIN (nicht UPDATE/DELETE).",
+            "Falle: System Catalog vs. Data Dictionary → der Katalog ist der SYSTEM-erzeugte, abfragbare."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "type": "multiple-choice",
+          "question": "Du hast eine Tabelle `EMPLOYEE` mit den Spalten `Emp_ID` (Primary Key), `Name`, `Department_ID` (Foreign Key). Wenn du versuchst, einen neuen Mitarbeiter mit der `Department_ID` '999' einzufügen, obwohl das Department '999' in der Tabelle `DEPARTMENT` nicht existiert, lehnt das DBMS das INSERT ab. Welche Regel greift hier?",
+          "options": [
+            "Entity Integrity",
+            "Referential Integrity",
+            "Domain Integrity",
+            "Data Dependence"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Referential Integrity stellt sicher, dass ein Foreign Key nur auf existierende Primary Keys verweisen darf. Wenn Department 999 nicht existiert, verhindert das DBMS die Erstellung eines 'verwaisten' (orphaned) Datensatzes."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Was beschreibt ein 'Surrogate Key' am besten?",
+          "options": [
+            "Ein Schlüssel, der aus der realen Welt stammt, wie z.B. eine Steuernummer.",
+            "Ein künstlich generierter, system-interner Schlüssel (oft numerisch fortlaufend), der keine eigene semantische Bedeutung hat.",
+            "Ein Fremdschlüssel, der auf eine andere Datenbank verweist.",
+            "Ein Schlüssel, der aus mehr als vier Attributen zusammengesetzt ist."
+          ],
+          "correctAnswer": 1,
+          "explanation": "Surrogate Keys (wie Auto-Increment IDs in MySQL oder Identity in SQL Server) werden künstlich erzeugt. Sie sind stabil, ändern sich nie und vereinfachen komplexe Composite Keys."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "In der relationalen Algebra: Welcher Operator liefert als Ergebnis alle möglichen Kombinationen von Zeilen aus Tabelle A mit jeder einzelnen Zeile aus Tabelle B?",
+          "options": [
+            "Natural Join",
+            "INTERSECT",
+            "PRODUCT (Cartesian Product)",
+            "UNION"
+          ],
+          "correctAnswer": 2,
+          "explanation": "Das Produkt (Cartesian Product) multipliziert die Zeilen. Wenn Tabelle A 10 Zeilen hat und Tabelle B 5 Zeilen, hat das Ergebnis 50 Zeilen (10 * 5)."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Du extrahierst aus einer großen Kundentabelle nur die Spalten 'Land' und 'Stadt'. In der relationalen Algebra würde der PROJECT Operator (π) nun etwas automatisch tun, was SQL (ohne DISTINCT) nicht tut. Was ist das?",
+          "options": [
+            "Er sortiert das Ergebnis alphabetisch.",
+            "Er entfernt alle Null-Werte.",
+            "Er entfernt automatisch alle identischen Duplikate aus der Ergebnis-Menge.",
+            "Er erzwingt einen Equijoin."
+          ],
+          "correctAnswer": 2,
+          "explanation": "Da das relationale Modell auf der mathematischen Mengenlehre basiert, kann eine Menge keine echten Duplikate enthalten. Der PROJECT Operator entfernt nach dem Abschneiden der Spalten automatisch alle doppelten Tuples."
+        },
+        {
+          "type": "true-false",
+          "question": "Jeder 'Candidate Key' ist immer auch ein 'Superkey', aber nicht jeder 'Superkey' ist auch ein 'Candidate Key'.",
+          "correctAnswer": true,
+          "explanation": "Korrekt! Ein Superkey identifiziert eine Zeile eindeutig, kann aber unnötige Attribute enthalten (A,B,C). Ein Candidate Key ist ein Superkey, der minimal ist (z.B. nur A), man kann also nichts mehr weglassen."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Was ist die charakteristische Eigenschaft des System Catalog, die ihn vom (allgemeinen) Data Dictionary abgrenzt?",
+          "options": [
+            "Er speichert die eigentlichen Nutzdaten der Anwendung.",
+            "Er ist ein vom System (DBMS) automatisch erzeugtes Data Dictionary, das alle DB-Objekte beschreibt und per SQL abfragbar ist.",
+            "Er kann ausschließlich vom Administrator manuell auf Papier gepflegt werden.",
+            "Er ist nur in NoSQL-Datenbanken vorhanden."
+          ],
+          "correctAnswer": 1,
+          "explanation": "Der System Catalog ist ein SYSTEM-erzeugtes (system-created) detailliertes Data Dictionary. Er hält Metadaten wie Tabellennamen, Ersteller, Erstellungsdatum, Spalten, Indizes und Zugriffsrechte in system-created tables, die wie normale Tabellen per SQL abgefragt werden können."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Was stellt ein Data Dictionary in einer Datenbank bereit?",
+          "options": [
+            "Die schnellste physische Speicheradresse jeder Zeile.",
+            "Verschlüsselte Backups der Nutzdaten.",
+            "Metadaten: Beschreibungen von Tabellen, Attributen, Datentypen, Beziehungen und Integritäts-Constraints.",
+            "Die Netzwerkkonfiguration des Datenbankservers."
+          ],
+          "correctAnswer": 2,
+          "explanation": "Das Data Dictionary liefert Metadaten ('Daten über Daten') – also Entitäts-/Attributnamen, Datentypen, Beziehungen und Constraints. Es ist die 'designer's database' und sichert Konsistenz sowie die Vermeidung von Homonymen und Synonymen."
+        }
+      ]
+    },
+    {
+      "id": "module-4",
+      "title": "Entity Relationship Modeling",
+      "description": "Konzeptuelle Datenmodellierung mit ERDs: Entitäten, Attributtypen, Beziehungen, Kardinalität/Konnektivität, schwache Entitäten und Notationen (Chen vs. Crow's Foot).",
+      "coreCompetencies": [
+        "Entity-Relationship-Komponenten (Entity, Attribut, Relationship) definieren und im ERD korrekt einsetzen",
+        "Attributtypen unterscheiden: simple/composite, single-/multivalued, derived, Identifier",
+        "Domains als Menge erlaubter Werte eines Attributs verstehen und anwenden",
+        "Konnektivität (1:1/1:N/M:N) und Kardinalität (min,max) sowie Participation präzise abgrenzen",
+        "Relationship Strength (strong/weak) und Existenzabhängigkeit sowie schwache Entitäten erkennen",
+        "M:N-Beziehungen über assoziative (Bridge-)Entitäten in zwei 1:M auflösen",
+        "Chen- und Crow's-Foot-Notation lesen, unterscheiden und Beziehungsgrade (unär/binär/ternär) einordnen"
+      ],
+      "sections": [
+        {
+          "title": "ER-Modell — konzeptueller Bauplan",
+          "content": "**Entity Relationship Modeling (ERM)** ist die Grundlage des **Entity Relationship Diagram (ERD)** und bildet das **konzeptuelle** Datenmodell – die Brücke zwischen realer Welt und der späteren Computer-Implementierung.\n\n- **Konzeptuell & unabhängig:** Das ER-Modell ist **unabhängig vom Datenbanktyp**. Es dient dem Verstehen und Entwerfen der Datenanforderungen, bevor konkrete Tabellen entstehen.\n- **Komponenten:** ERDs zeigen drei Bausteine – **Entities** (Objekte), **Attributes** (Eigenschaften) und **Relationships** (Beziehungen).\n- **Historie:** Eingeführt von **Peter Chen 1976**, populär parallel zum relationalen Modell. Die visuelle Einfachheit machte das ERM zum dominierenden Design-Werkzeug.\n\nDas ER-Modell **ergänzt** das relationale Modell: Entities werden später zu Tabellen, Attribute zu Spalten, Beziehungen zu Foreign Keys. Database Design ist dabei ein **iterativer** Prozess: Narrativ erstellen → Business Rules ableiten → Entities/Relationships identifizieren → initiales ERD → Attribute & Keys → Review und Revision wiederholen.",
+          "keyTerms": [
+            { "term": "Entity", "definition": "Objekt von Interesse für den Endnutzer; im ERD als Rechteck mit Namen in GROSSBUCHSTABEN (Singular)." },
+            { "term": "Entity Set", "definition": "Sammlung gleichartiger Entitäten; entspricht später der Tabelle im RDBMS." },
+            { "term": "Entity Instance/Occurrence", "definition": "Ein einzelnes Vorkommen (eine Zeile/Row) in der späteren Tabelle." }
+          ],
+          "examples": [
+            "Entitäten: STUDENT, COURSE, CLASS, PROFESSOR.",
+            "Beziehungen werden mit Verben benannt: 'a STUDENT takes a CLASS', 'a PROFESSOR teaches a CLASS'."
+          ]
+        },
+        {
+          "title": "ER-Notationen: Chen vs. Crow's Foot (Exam Q15)",
+          "content": "Drei Notationen sind verbreitet; für die Prüfung musst du **Chen** und **Crow's Foot** am Bild **erkennen** (Exam Q15).\n\n- **Chen-Notation (1976):** **konzeptuell** orientiert. Entitäten = **Rechtecke**, Beziehungen = **Rauten/Diamonds** (Name in der Raute), Attribute = **Ovale**, mit Linien verbunden. Konnektivitäten als Text (1, M, N) neben den Entitäten.\n- **Crow's Foot:** **implementierungs**orientiert und Industrie-Standard. Entitäten = Rechtecke mit **Attributbox** darunter. Beziehungen = Linien; **Symbole an den Enden** zeigen Konnektivität/Participation (Strich = 1, Krähenfuß = Many, Kreis = optional/0).\n- **UML:** für konzeptuelle UND Implementierungs-Modellierung (1..1, 1..*).\n\n```diagram:CHEN-Notation — STUDENT takes CLASS\n   (STU_LNAME)   (STU_FNAME)\n         \\          /\n      ┌───────────────┐        ◇            ┌───────────────┐\n      │    STUDENT     │──1───< TAKES >──M──│     CLASS      │\n      └───────────────┘        ◇            └───────────────┘\n   Rechteck=Entity   Raute=Relationship   Oval=Attribute\n```\n\n```diagram:CROW'S-FOOT — STUDENT takes CLASS\n  ┌──────────────┐                       ┌──────────────┐\n  │ STUDENT      │                       │ CLASS        │\n  │──────────────│ ||────────────o{      │──────────────│\n  │ STU_NUM (PK) │   one      zero/many  │ CLASS_CODE PK│\n  │ STU_LNAME    │                       │ CRS_CODE FK  │\n  └──────────────┘                       └──────────────┘\n   || = one and only one   o{ = zero or many   |{ = one or many\n```",
+          "keyTerms": [
+            { "term": "Chen-Notation", "definition": "Entity=Rechteck, Relationship=Raute, Attribut=Oval; konzeptuell; Konnektivität als Zahl/Buchstabe neben der Entität." },
+            { "term": "Crow's Foot", "definition": "Entity=Rechteck mit Attributbox; Beziehung=Linie mit Endsymbolen (Strich=1, Krähenfuß=Many, Kreis=optional); implementierungsnah." }
+          ],
+          "examples": [
+            "Raute mit 'TEACHES' zwischen PROFESSOR und CLASS → Chen-Notation.",
+            "||——o{ am Linienende → Crow's-Foot (one-to-zero-or-many)."
+          ]
+        },
+        {
+          "title": "Attributtypen — simple, composite, single-/multivalued",
+          "content": "Attribute beschreiben Eigenschaften einer Entität. In **Chen** hängen sie als **Ovale** an der Entität, in **Crow's Foot** stehen sie in der **Attributbox**.\n\n- **Required vs. Optional Attribute:** Required muss einen Wert haben (z. B. STU_LNAME), Optional darf leer sein (z. B. middle name).\n- **Simple Attribute:** nicht weiter sinnvoll teilbar (z. B. age, sex, marital status).\n- **Composite Attribute:** in Teilattribute zerlegbar (z. B. ADDRESS → street, city, state, zip; PHONE → area code + number). Beim Design **in Einzelspalten zerlegen**, um detaillierte Queries zu ermöglichen.\n- **Single-valued Attribute:** genau ein Wert (z. B. Sozialversicherungsnummer, Seriennummer). *Achtung:* kann trotzdem **composite** sein (Seriennummer SE-08-02-189935 = Region/Werk/Schicht/Nr.).\n- **Multivalued Attribute:** mehrere Werte möglich (z. B. mehrere Telefonnummern, Auto mit mehreren Farben). In Chen durch **doppelte Linie** dargestellt; Crow's Foot kennzeichnet sie **nicht** explizit.\n\n```diagram:Attributtypen (Chen-Ovale)\n        ┌────────┐                ╔════════╗\n        │ simple │   ┌──────────┐  ║ multi  ║  (Doppellinie\n        └───┬────┘   │ composite│  ╚═══╦════╝   = mehrwertig)\n            │        └────┬─────┘      ║\n         [ ENTITY ]───────┴────────────╨───────\n            │\n        ┌---┴---┐  (gestrichelt = derived)\n        : age   :\n        └-------┘\n```",
+          "keyTerms": [
+            { "term": "Composite Attribute", "definition": "In Teilattribute zerlegbar (ADDRESS → street/city/zip). Beim Design dekomponieren." },
+            { "term": "Multivalued Attribute", "definition": "Kann mehrere Werte annehmen; in Chen Doppellinie; im RDBMS nicht direkt erlaubt (eine Zelle = ein Wert)." },
+            { "term": "Single-valued", "definition": "Genau ein Wert pro Instanz; kann dennoch composite sein (z. B. strukturierte Seriennummer)." }
+          ],
+          "examples": [
+            "Composite: ADDRESS → STREET, CITY, STATE, ZIP.",
+            "Multivalued: CAR_COLOR (Dach-, Karosserie-, Zierfarbe) für ein CAR."
+          ]
+        },
+        {
+          "title": "Identifiers, Composite Keys & relationales Schema",
+          "content": "**Identifiers** sind Attribute, die jede Entitäts-Instanz **eindeutig** identifizieren. Beim Mapping zur Tabelle wird der Identifier zum **Primary Key**. Im ERD werden PKs **unterstrichen**.\n\n- **Relationales Schema (Shorthand):** `TABLE (KEY_ATTRIBUT, ATTRIBUT2, ATTRIBUT3, ...)`, Schlüssel unterstrichen. Beispiel: `CAR (CAR_VIN, MOD_CODE, CAR_YEAR, CAR_COLOR)`.\n- **Single-Attribute PK:** ideal, z. B. `CLASS_CODE`.\n- **Composite Identifier / Composite PK:** PK aus mehreren Attributen. Bei CLASS könnte `(CRS_CODE, CLASS_SECTION)` jede Zeile eindeutig identifizieren – ein **Candidate Key**. Entfernt man CLASS_CODE, wird dieser Composite zum PK.\n\n```diagram:Relationales Schema mit PK/FK\n COURSE (CRS_CODE, DEPT_CODE, CRS_TITLE, CRS_CREDIT)\n         ▔▔▔▔▔▔▔▔  ← PK (unterstrichen)\n CLASS  (CLASS_CODE, CRS_CODE, CLASS_SECTION, CLASS_TIME, PROF_NUM)\n         ▔▔▔▔▔▔▔▔▔   *FK*\n  CLASS_CODE = PK,  CRS_CODE = FK → COURSE\n```\n\nCandidate/Composite Keys müssen **NOT NULL** und **UNIQUE** erzwingen – per SQL DDL.",
+          "keyTerms": [
+            { "term": "Identifier", "definition": "Attribut, das eine Entitäts-Instanz eindeutig identifiziert; wird zum Primary Key der Tabelle, im ERD unterstrichen." },
+            { "term": "Composite Primary Key", "definition": "Primärschlüssel aus mehreren Attributen, z. B. (CRS_CODE, CLASS_SECTION)." },
+            { "term": "Relationales Schema", "definition": "Kurzschreibweise TABLE(PK, attr, ...) mit unterstrichenem Schlüssel; zeigt Struktur und Beziehungen." }
+          ],
+          "examples": [
+            "CAR (CAR_VIN, MOD_CODE, CAR_YEAR, CAR_COLOR) – CAR_VIN ist PK.",
+            "CLASS (CRS_CODE, CLASS_SECTION, CLASS_TIME, ...) mit Composite-PK statt CLASS_CODE."
+          ]
+        },
+        {
+          "title": "Domains — Wertebereich eines Attributs (Exam Q13)",
+          "content": "Eine **Domain** ist die **Menge aller erlaubten (möglichen) Werte** für ein bestimmtes Attribut. Genau das ist die Kernantwort von **Exam Q13: Was repräsentieren Domains? → die Menge zulässiger Werte eines Attributs.**\n\n**Beispiele für Domains:**\n- GPA: Domain `(0,4)`, weil Noten von 0 bis 4 reichen.\n- Gender: Domain `{M, F, D}` (nur diese Werte erlaubt).\n- Date: Domain von Firmengründung bis heutiges Datum.\n\n**Shared Domain:** Mehrere Attribute können **dieselbe Domain teilen** – z. B. nutzen Studenten- und Professoren-Adresse die Domain 'alle möglichen Adressen'.\n\nDomains sind ein **Integritätswerkzeug**: Werte außerhalb der Domain werden abgelehnt. Sie verbinden das ER-Modell mit dem relationalen Modell, wo jede Spalte ebenfalls eine Domain besitzt.\n\n| Attribut   | Domain (erlaubte Werte)       | Beispiel-Wert |\n|------------|-------------------------------|:-------------:|\n| GPA        | reelle Zahl 0.0 – 4.0         | 3.7           |\n| GENDER     | {M, F, D}                     | F             |\n| HIRE_DATE  | Startdatum … heute            | 2026-01-15    |\n| AGE        | Ganzzahl 0 – 120              | 21            |",
+          "keyTerms": [
+            { "term": "Domain", "definition": "Menge der für ein Attribut zulässigen Werte. Sichert Datenintegrität; Werte außerhalb werden abgelehnt." },
+            { "term": "Shared Domain", "definition": "Zwei oder mehr Attribute verwenden denselben Wertebereich (z. B. alle Adressen)." }
+          ],
+          "examples": [
+            "Domain GPA = 0.0–4.0; ein Eintrag 5.0 wäre ungültig.",
+            "Gender-Domain {M, F, D}: jeder andere Wert verletzt die Integrität."
+          ]
+        },
+        {
+          "title": "Derived Attributes — berechnet statt gespeichert (Exam Q14)",
+          "content": "Ein **Derived Attribute** (abgeleitetes/computed attribute) ist ein Attribut, dessen Wert per **Algorithmus aus anderen Attributen berechnet** wird. Kernaussagen für **Exam Q14**:\n\n- **Wird typischerweise NICHT physisch gespeichert**, sondern **bei Bedarf berechnet** (on-the-fly).\n- Es kann eine einfache Rechnung oder eine **Aggregation** über mehrere Zeilen/Tabellen sein.\n- **Darstellung:** In **Chen** durch eine **gestrichelte Linie** zwischen Attribut und Entität. **Crow's Foot** hat **keine** spezielle Markierung für derived attributes.\n\n**Warum nicht speichern?** Ein gespeichertes berechnetes Feld würde bei jeder Änderung der Basiswerte zu **Update-Anomalien** und Inkonsistenzen führen. Berechnet man es dynamisch, ist es immer aktuell.\n\n**Beispiele:**\n- **Alter** aus Geburtsdatum: Oracle `TRUNC((SYSDATE - EMP_DOB)/365, 0)`.\n- **Gesamtkosten** einer Bestellung = `Menge * Stückpreis`.\n- **Gesamtgehalt** = Grundgehalt + Bonus.\n\nMerke: 'Ein derived attribute MUSS als Spalte angelegt werden' = **FALSCH** – es wird berechnet, nicht gespeichert.",
+          "keyTerms": [
+            { "term": "Derived Attribute", "definition": "Aus anderen Attributen berechnetes Feld; meist nicht gespeichert, sondern bei Bedarf ermittelt. In Chen gestrichelt." },
+            { "term": "Computed Attribute", "definition": "Synonym für derived attribute; kann auch Aggregationen über mehrere Zeilen umfassen." }
+          ],
+          "examples": [
+            "Alter = TRUNC((SYSDATE - EMP_DOB)/365, 0) – nicht gespeichert.",
+            "Order Total = SUM(qty * unit_price) – on-the-fly berechnet."
+          ]
+        },
+        {
+          "title": "Konnektivität & Kardinalität (Exam Q12)",
+          "content": "Diese beiden Begriffe sind die häufigste Prüfungsfalle (**Exam Q12**):\n\n- **Connectivity (Konnektivität):** die **grobe** Klassifikation der Beziehung – **1:1, 1:M oder M:N**. Sie entspricht der **maximalen** Kardinalität ('one' oder 'many').\n- **Cardinality (Kardinalität):** drückt die **exakte minimale und maximale Anzahl** an Entitäts-Vorkommen aus, die mit **einem** Vorkommen der anderen Entität verknüpft sind. Format im ERD: **(min, max)**.\n- **Participation (Teilnahme):** entspricht der **minimalen** Kardinalität.\n  - **Mandatory (zwingend):** min ≥ 1. In Crow's Foot ein **Querstrich**.\n  - **Optional:** min = 0. In Crow's Foot ein **kleiner Kreis (O)** auf der Seite der optionalen Entität.\n\n**Beispiel (Professor unterrichtet Kurse):** 'Ein Professor unterrichtet 1 bis 4 Kurse, ein Kurs genau 1 Professor.' → Kardinalität am Kurs-Ende **(1,4)**, am Professor-Ende **(1,1)**. Wäre es **(1,N)**, gäbe es keine obere Grenze.\n\n**Wichtig:** Die **DBMS kann spezifische Zahlen-Kardinalitäten wie '5 Spieler pro Team' NICHT erzwingen** – das übernimmt **Anwendungslogik / Trigger / Stored Procedures**. Sehr wohl erzwingen kann das DBMS aber **Participation und Connectivity** über NOT NULL und FK-Platzierung.\n\n```diagram:Kardinalität (Chen, beidseitig)\n  ┌─────────────┐   (1,1)            (1,4)   ┌──────────┐\n  │  PROFESSOR  │────────< TEACHES >─────────│  CLASS   │\n  └─────────────┘                            └──────────┘\n   (min,max) steht NEBEN der jeweils GEGENÜBERliegenden Entität\n```",
+          "keyTerms": [
+            { "term": "Connectivity", "definition": "Grobe Beziehungsart 1:1 / 1:M / M:N; entspricht der maximalen Kardinalität ('one' oder 'many')." },
+            { "term": "Cardinality (min,max)", "definition": "Exakte Mindest- und Höchstzahl assoziierter Vorkommen; im ERD als (x,y) notiert." },
+            { "term": "Participation", "definition": "Minimale Kardinalität: mandatory (≥1, Strich) oder optional (0, Kreis)." }
+          ],
+          "examples": [
+            "(1,4): jeder Professor unterrichtet 1 bis 4 Klassen.",
+            "Optional: ein EMPLOYEE braucht nicht zwingend einen PARKING SPOT → min = 0."
+          ]
+        },
+        {
+          "title": "Relationship Strength & Existenzabhängigkeit",
+          "content": "Die **Relationship Strength** hängt davon ab, **wie der PK der Child-Entität definiert** ist.\n\n- **Weak (Non-Identifying) Relationship:** Der PK des Child enthält **keinen** PK-Bestandteil des Parent. Der Parent-PK liegt nur als normaler **FK** im Child. In Crow's Foot: **gestrichelte** Linie. Beispiel: COURSE(CRS_CODE) → CLASS(CLASS_CODE, CRS_CODE) – CLASS erbt CRS_CODE nur als FK, nicht in den PK.\n- **Strong (Identifying) Relationship:** Der PK des Child **beinhaltet** den PK des Parent (als Composite-PK-Teil). In Crow's Foot: **durchgezogene** Linie. Beispiel: CLASS-PK = (CRS_CODE, CLASS_SECTION) mit CRS_CODE vom Parent geerbt.\n\n**Existenzabhängigkeit:**\n- **Existence-dependent:** kann nur existieren, wenn mit einer Parent-Entität verknüpft; hat eine **mandatory FK** (nicht NULL). Beispiel: DEPENDENT existiert nur zu einem EMPLOYEE.\n- **Existence-independent (strong/regular entity):** existiert eigenständig. Beispiel: PART kann auch ohne VENDOR existieren (Eigenfertigung).",
+          "keyTerms": [
+            { "term": "Weak (Non-Identifying) Relationship", "definition": "Child-PK enthält keinen Parent-PK-Teil; Parent-PK nur als FK; gestrichelte Linie." },
+            { "term": "Strong (Identifying) Relationship", "definition": "Child-PK enthält den Parent-PK als Komponente; durchgezogene Linie." },
+            { "term": "Existence Dependence", "definition": "Entität kann nur existieren, wenn sie mit einer bestimmten Parent-Entität verknüpft ist (mandatory FK)." }
+          ],
+          "examples": [
+            "Weak Rel.: COURSE → CLASS (CLASS-PK = CLASS_CODE, CRS_CODE nur FK).",
+            "Strong Rel.: EMPLOYEE → DEPENDENT (DEPENDENT-PK enthält EMP_NUM)."
+          ]
+        },
+        {
+          "title": "Schwache Entitäten (Weak Entities)",
+          "content": "Eine **Weak Entity** erfüllt **zwei** Bedingungen gleichzeitig:\n\n1. Sie ist **existenzabhängig** (existence-dependent) – kann ohne den Parent nicht existieren.\n2. Ihr **Primary Key ist ganz oder teilweise vom Parent abgeleitet** (erbt den Parent-PK).\n\n**Darstellung:**\n- **Chen:** doppelt umrandetes (**double-walled**) Entity-Rechteck.\n- **Crow's Foot:** eine **strong (identifying) relationship**-Linie plus PK/FK-Kennzeichnung signalisiert, dass die verbundene Entität schwach ist.\n\nDie Entscheidung 'weak oder nicht' beruht auf den **Business Rules** des Designers.\n\n```diagram:Weak Entity (Chen) — EMPLOYEE claims DEPENDENT\n  ┌──────────────┐        ◇          ╔══════════════════╗\n  │  EMPLOYEE     │──1───< CLAIMS >─M─║   DEPENDENT       ║\n  │  EMP_NUM (PK) │        ◇          ║ EMP_NUM (PK,FK)   ║\n  └──────────────┘                   ║ DEP_NUM (PK)      ║\n                                      ╚══════════════════╝\n   doppelte Wände = schwache Entität; PK erbt EMP_NUM\n```\n\nKontrast: **LINE_ITEM** (Rechnungsposition) ist schwach gegenüber **INVOICE**, weil es ohne Rechnung sinnlos ist und sein PK (INV_NUM + LINE_NUM) den Rechnungs-PK enthält.",
+          "keyTerms": [
+            { "term": "Weak Entity", "definition": "Entität, die (1) existenzabhängig ist UND (2) ihren PK vom Parent ableitet. In Chen doppelt umrandet." },
+            { "term": "Strong/Regular Entity", "definition": "Existenzunabhängige Entität mit eigenem, nicht abgeleitetem PK." }
+          ],
+          "examples": [
+            "DEPENDENT ist weak zu EMPLOYEE (PK enthält EMP_NUM).",
+            "LINE_ITEM ist weak zu INVOICE (PK = INV_NUM + LINE_NUM)."
+          ]
+        },
+        {
+          "title": "Beziehungsgrad & rekursive Beziehungen",
+          "content": "Der **Degree** (Grad) gibt an, wie viele Entitäten an einer Beziehung beteiligt sind:\n\n- **Unär (recursive):** Beziehung **innerhalb einer** Entität. Beispiele: 'EMPLOYEE manages EMPLOYEE' (1:M), 'EMPLOYEE married to EMPLOYEE' (1:1), 'COURSE is prerequisite of COURSE' (M:N).\n- **Binär:** **zwei** Entitäten – der häufigste Fall, z. B. 'PROFESSOR teaches CLASS'.\n- **Ternär:** **drei** Entitäten über eine Beziehung, z. B. 'DOCTOR writes PRESCRIPTION for PATIENT with DRUG' (DOCTOR, PATIENT, DRUG).\n- **Higher-Order:** mehr als drei Entitäten – selten, aber möglich.\n\n```diagram:Beziehungsgrade\n UNÄR:    [ EMPLOYEE ]──< MANAGES >─┐\n             ▲────────────────────────┘   (auf sich selbst)\n\n BINÄR:   [ PROFESSOR ]──< TEACHES >──[ CLASS ]\n\n TERNÄR:  [ DOCTOR ]──┐\n          [ PATIENT ]─┼──< PRESCRIPTION >──[ DRUG ]\n```\n\nRekursive Beziehungen treten in allen Konnektivitäten auf (1:1, 1:M, M:N) und werden über einen FK auf dieselbe Tabelle (bzw. eine Junction Table bei M:N) implementiert.",
+          "keyTerms": [
+            { "term": "Unäre/rekursive Beziehung", "definition": "Beziehung einer Entität auf sich selbst (z. B. EMPLOYEE manages EMPLOYEE)." },
+            { "term": "Ternäre Beziehung", "definition": "Beziehung zwischen drei Entitäten gleichzeitig (DOCTOR/PATIENT/DRUG)." }
+          ],
+          "examples": [
+            "1:M rekursiv: 'an EMPLOYEE may manage many EMPLOYEEs'.",
+            "M:N rekursiv: 'a COURSE may be prerequisite to many COURSEs'."
+          ]
+        },
+        {
+          "title": "M:N auflösen — Assoziative (Bridge) Entitäten",
+          "content": "**M:N-Beziehungen** (z. B. STUDENT belegt CLASS) sind real häufig, lassen sich aber **nicht direkt** im relationalen Modell umsetzen: Implementiert man sie naiv, entstehen **Redundanz** und **Anomalien** (insert/update/delete) sowie komplexe, fehleranfällige Joins.\n\n**Lösung:** Einführung einer **Associative Entity** (auch **composite / bridge / junction / linking entity**). Sie steht zwischen den Parents und hat mit **jedem Parent eine 1:M-Beziehung** – aus einer M:N werden **zwei 1:M**.\n\nDie assoziative Entität ist **existenzabhängig** von beiden Parents und enthält deren **PKs als FKs**. Für ihren eigenen PK gibt es zwei Optionen:\n1. **Composite PK** aus beiden FKs (z. B. STU_NUM + CLASS_CODE).\n2. **Neuer Surrogate-PK** (z. B. ENROLL_LINE, AutoNumber) – plus eindeutige Constraint auf die FK-Kombi.\n\nZusätzlich kann sie **eigene Attribute** der Beziehung tragen (z. B. ENROLL_GRADE).\n\n```diagram:M:N → zwei 1:M über ENROLL\n  STUDENT          ENROLL (Bridge)            CLASS\n ┌──────────┐     ┌──────────────────┐     ┌──────────┐\n │STU_NUM PK│1   M│STU_NUM (PK,FK)    │M   1│CLASS_CODE│\n │..        │─────│CLASS_CODE (PK,FK) │─────│ PK       │\n └──────────┘     │ENROLL_GRADE       │     └──────────┘\n                  └──────────────────┘\n```\n\n```compare\nM:N direkt (FALSCH)\n- Redundanz in beiden Tabellen\n- Insert-/Update-/Delete-Anomalien\n- komplexe, fehleranfällige Queries\n- FK kann nur 1 Wert referenzieren\n===\nMit Associative Entity (RICHTIG)\n- zwei saubere 1:M-Beziehungen\n- Composite-PK oder Surrogate-PK\n- normalisiert, redundanzarm\n- Zusatzattribute der Beziehung möglich\n```",
+          "keyTerms": [
+            { "term": "Associative (Bridge) Entity", "definition": "Verbindungstabelle, die eine M:N in zwei 1:M auflöst; enthält die PKs beider Parents als FKs; existenzabhängig von beiden." },
+            { "term": "Composite vs. Surrogate PK der Brücke", "definition": "Brücken-PK = entweder Kombination der beiden FKs oder ein neuer Single-Attribute-Key (AutoNumber)." }
+          ],
+          "examples": [
+            "STUDENT M:N CLASS → ENROLL(STU_NUM, CLASS_CODE).",
+            "Zusatzattribut in der Brücke: ENROLL_GRADE (Note der Einschreibung)."
+          ]
+        },
+        {
+          "title": "⚡ Prüfungs-Spickzettel — ER Modeling",
+          "content": "**Must-know-Fakten & typische Fallen:**\n\n- **ERM = konzeptuelles Modell** (Chen 1976), unabhängig vom DB-Typ; Bausteine: **Entity, Attribute, Relationship**.\n- **EXAM Q15 – Notationen:** *Chen* = Rechteck/**Raute**/Oval; *Crow's Foot* = Rechteck + Attributbox, Symbole (||=one, Krähenfuß=many, O=optional). Raute im Bild ⇒ Chen.\n- **EXAM Q13 – Domain:** **Menge der erlaubten Werte** eines Attributs (GPA 0–4, Gender {M,F,D}). Attribute können Domains teilen.\n- **EXAM Q14 – Derived Attribute:** **berechnet, nicht gespeichert**; Chen = **gestrichelte Linie**; Crow's Foot kennzeichnet es nicht. (Speichern wäre falsch → Anomalien.)\n- **EXAM Q12 – Connectivity vs. Cardinality:** *Connectivity* = grob 1:1/1:M/M:N (= max). *Cardinality* = exakt **(min,max)**. *Participation* = min: **mandatory (≥1, Strich)** oder **optional (0, Kreis)**.\n- **DBMS** kann Participation/Connectivity erzwingen (NOT NULL, FK), **nicht** aber konkrete Zahlen wie '5 Spieler' (→ App-Logik/Trigger).\n- **Attributtypen:** simple vs. composite; single- vs. multivalued (Chen: Doppellinie); identifier (unterstrichen).\n- **Multivalued Attribut** im RDBMS → **neue Entität (1:M)** auslagern (bevorzugt), nicht als Liste/mehrere Spalten.\n- **Relationship Strength:** *strong/identifying* (Child-PK erbt Parent-PK, durchgezogen) vs. *weak/non-identifying* (nur FK, gestrichelt).\n- **Weak Entity:** existenzabhängig **UND** PK vom Parent abgeleitet (Chen: doppelte Wände). Beispiel LINE_ITEM, DEPENDENT.\n- **Degree:** unär/rekursiv, binär (häufigste), ternär (DOCTOR/PATIENT/DRUG).\n- **M:N nie direkt** → **Associative/Bridge Entity** = zwei 1:M; PK = Composite der FKs oder Surrogate.",
+          "keyTerms": [
+            { "term": "Connectivity vs. Cardinality (Kurzform)", "definition": "Connectivity = ungefähr 'one/many' (max). Cardinality = exakte (min,max)-Zahlen. Participation = min (mandatory/optional)." }
+          ],
+          "examples": [
+            "Falle: Raute → Chen, Krähenfuß → Crow's Foot.",
+            "Falle: derived attribute NICHT speichern – on-the-fly berechnen."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "type": "multiple-choice",
+          "question": "Wie sollte ein 'Multivalued Attribute' (z.B. ein Student, der drei verschiedene Telefonnummern hat) im relationalen Datenbankdesign optimal modelliert werden?",
+          "options": [
+            "Man legt drei Spalten an: Phone1, Phone2, Phone3.",
+            "Man speichert alle Nummern als kommagetrennten Text in einer Spalte.",
+            "Man lagert das Attribut in eine neue, eigene Entität (Tabelle) aus, die über eine 1:M Beziehung mit dem Studenten verknüpft wird.",
+            "Man wählt nur die wichtigste Nummer und ignoriert den Rest."
+          ],
+          "correctAnswer": 2,
+          "explanation": "Um die 1. Normalform (Atomic Values) nicht zu verletzen und flexible Abfragen zu ermöglichen, müssen mehrwertige Attribute in eine Child-Tabelle (1:M) ausgelagert werden."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Du hast eine Tabelle `INVOICE` (Rechnung) und eine Tabelle `LINE_ITEM` (Rechnungsposition). Ein `LINE_ITEM` macht ohne eine `INVOICE` absolut keinen Sinn. Der Primary Key von `LINE_ITEM` setzt sich aus der `INV_NUM` (von INVOICE) und einer `LINE_NUM` zusammen. Was trifft auf `LINE_ITEM` zu?",
+          "options": [
+            "Es ist eine Strong Entity mit einer Non-Identifying Relationship.",
+            "Es ist eine Associative Entity zur Auflösung einer M:N Beziehung.",
+            "Es ist eine Weak Entity (Existenzabhängig) mit einer Strong/Identifying Relationship.",
+            "Es ist ein Derived Attribute."
+          ],
+          "correctAnswer": 2,
+          "explanation": "LINE_ITEM ist existenzabhängig (Weak Entity) von INVOICE. Da sein Primary Key den PK von INVOICE (`INV_NUM`) enthält, ist die Beziehung identifizierend (Strong Relationship)."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Was beschreibt der Begriff 'Optional Participation' in einem ERD?",
+          "options": [
+            "Die Entität darf in der Datenbank gelöscht werden.",
+            "Die minimale Kardinalität auf dieser Seite der Beziehung ist 0, was bedeutet, dass kein Gegenstück zwingend existieren muss.",
+            "Die maximale Kardinalität ist unendlich (N).",
+            "Der Primary Key darf NULL sein."
+          ],
+          "correctAnswer": 1,
+          "explanation": "Optional Participation bedeutet, dass ein Datensatz auch ohne eine Verknüpfung zur anderen Entität existieren darf (z.B. Ein Angestellter (Employee) MUSS nicht zwingend einem Parkplatz (Parking Spot) zugeordnet sein -> Parking Spot ist optional)."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Warum müssen M:N (Many-to-Many) Beziehungen durch eine Associative Entity (Junction Table) aufgelöst werden?",
+          "options": [
+            "Weil SQL den Operator 'JOIN MANY' nicht unterstützt.",
+            "Weil relationale Datenbanken physisch keine Tabellen mit mehr als 255 Spalten unterstützen.",
+            "Weil M:N Beziehungen im relationalen Modell direkte Datenredundanz erzeugen und Foreign Keys technisch immer nur einen Wert referenzieren können (1:M).",
+            "Weil Crow's Foot Diagramme keine M:N Beziehungen zeichnen können."
+          ],
+          "correctAnswer": 2,
+          "explanation": "Ein Foreign Key in einer Zeile kann nur exakt *einen* Primary Key der Gegenseite speichern. Um 'Viele' speichern zu können, bräuchte man Arrays (was verboten ist) oder viele Spalten (was ineffizient ist). Eine Zwischentabelle löst dies elegant in zwei 1:M Beziehungen auf."
+        },
+        {
+          "type": "true-false",
+          "question": "Ein 'Derived Attribute' (abgeleitetes Attribut) wie das Gesamtgehalt (Grundgehalt + Bonus) muss immer als physische Spalte in der Tabelle angelegt werden, um es berechnen zu können.",
+          "correctAnswer": false,
+          "explanation": "Falsch. Ein abgeleitetes Attribut sollte im Normalfall NICHT physisch gespeichert werden, um Update-Anomalien zu vermeiden. Es wird stattdessen 'on-the-fly' mittels SQL-Funktionen berechnet, wenn es abgefragt wird."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Was ist korrekt bezüglich Kardinalität (cardinality) und Konnektivität (connectivity) in einem ER-Modell?",
+          "options": [
+            "Konnektivität gibt die exakte Zahl (min, max) an, Kardinalität nur 'one' oder 'many'.",
+            "Konnektivität beschreibt die grobe Beziehungsart (1:1, 1:N, M:N), während Kardinalität die exakte minimale und maximale Anzahl (min, max) assoziierter Vorkommen ausdrückt.",
+            "Beide Begriffe sind identisch und beschreiben nur die maximale Anzahl.",
+            "Kardinalität legt fest, welche Tabelle den Foreign Key erhält."
+          ],
+          "correctAnswer": 1,
+          "explanation": "Connectivity klassifiziert die Beziehung grob (1:1, 1:N, M:N) und entspricht der maximalen Kardinalität. Cardinality gibt die genauen (min, max)-Werte an; die minimale Kardinalität (Participation) ist 0 = optional bzw. >=1 = mandatory."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Du siehst ein ER-Diagramm, in dem Entitäten als Rechtecke dargestellt sind, Beziehungen als Rauten (Diamonds) mit dem Beziehungsnamen darin und Attribute als Ovale, die per Linie an den Entitäten hängen. Um welche Notation handelt es sich?",
+          "options": [
+            "Crow's Foot Notation",
+            "UML Class Diagram",
+            "Chen Notation",
+            "Backus-Naur-Form"
+          ],
+          "correctAnswer": 2,
+          "explanation": "Die Chen-Notation (1976) stellt Entitäten als Rechtecke, Beziehungen als Rauten (Diamonds) und Attribute als Ovale dar. Crow's Foot würde stattdessen Attributboxen unter den Entitäten und Krähenfuß-/Strich-/Kreis-Symbole an den Linienenden verwenden."
+        },
+        {
+          "type": "multiple-choice",
+          "question": "Was repräsentiert eine 'Domain' im Datenbankdesign?",
+          "options": [
+            "Die physische Festplattenpartition, auf der die Tabelle liegt.",
+            "Die Menge aller zulässigen (möglichen) Werte für ein bestimmtes Attribut.",
+            "Der Name der Datenbank im Netzwerk.",
+            "Eine Beziehung zwischen zwei Entitäten."
+          ],
+          "correctAnswer": 1,
+          "explanation": "Eine Domain ist der Wertebereich eines Attributs – die Menge aller erlaubten Werte (z.B. GPA 0.0–4.0 oder Gender {M, F, D}). Sie sichert die Datenintegrität, und mehrere Attribute können sich eine Domain teilen."
+        }
+      ]
+    }
+  ]
+}
