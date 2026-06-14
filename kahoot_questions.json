@@ -121,7 +121,7 @@
       "questions": [
         {
           "type": "multiple-choice",
-          "question": "Welche Bedingung muss für die 2. Normalform (2NF) erfüllt sein?",
+          "question": "Welche Bedingung muss für die 2. Normalform (2NF) erfuellt sein?",
           "options": [
             "Alle atomaren Werte müssen in Strings umgewandelt werden.",
             "Die Tabelle muss in 1NF sein und alle nicht-Schlüsselattribute müssen vom gesamten Primärschlüssel abhängen (keine partiellen Abhängigkeiten).",
