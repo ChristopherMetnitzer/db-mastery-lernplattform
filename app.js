@@ -948,6 +948,13 @@
         const readiness = Math.round((overallPct * 0.4 + avgQuiz * 0.6));
         dom.readinessFill.style.width = readiness + '%';
 
+        // Moodle/Kahoot recap completion
+        const recapEl = document.getElementById('recapProgress');
+        if (recapEl) {
+            const { totalRecaps, doneRecaps } = recapStats();
+            recapEl.textContent = `🎮 Moodle-Recaps abgeschlossen: ${doneRecaps} / ${totalRecaps}`;
+        }
+
         if (readiness >= 85) {
             dom.readinessTip.textContent = '🎯 Du bist prüfungsbereit! Mache eine letzte Prüfungssimulation zur Bestätigung.';
         } else if (readiness >= 60) {

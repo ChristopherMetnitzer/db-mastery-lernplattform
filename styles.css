@@ -1989,3 +1989,25 @@ body {
     color: var(--text-primary);
     letter-spacing: 0.01em;
 }
+
+/* Recap progress + recap select buttons */
+.readiness-recap {
+    margin-top: var(--space-sm);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--accent-pink);
+}
+
+.quiz-module-btn .recap-status {
+    display: inline-block;
+    margin-right: 0.4rem;
+    font-weight: 700;
+    color: var(--text-tertiary);
+}
+.quiz-module-btn.recap-done {
+    border-color: var(--accent-green);
+    background: var(--accent-green-soft);
+}
+.quiz-module-btn.recap-done .recap-status {
+    color: var(--accent-green);
+}
